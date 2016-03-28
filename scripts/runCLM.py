@@ -180,6 +180,12 @@ parser.add_option("--trans2", dest="trans2", default=False, action="store_true",
                   help = 'Tranisnent phase 2 (1901-2010) - CRUNCEP only')
 parser.add_option("--spinup_vars", dest="spinup_vars", default=False, \
                   help = 'Limit output vars in spinup runs', action="store_true")
+parser.add_option("--startyear_experiment", dest="startyear_experiment", default=2014, \
+                  help = 'Starting year for experimental manipulation')
+parser.add_option("--endyear_experiment", dest="endyear_experiment", default=2030, \
+                  help = 'Ending year for experimental manipulation')
+parser.add_option("--add_temperature", dest="add_temperature", default=0, \
+                  help = 'Temperature to add during manipulation')
 
 (options, args) = parser.parse_args()
 
@@ -240,12 +246,12 @@ if (compset == 'I20TRCLM45CN' or compset == 'I20TRCN'):
       print('Spinup options not available for transient compset.')
       sys.exit()
     #finidat is required for transient compset
-    if (options.finidat_case == ''):
+    if (options.finidat_case == '' and options.finidat == ''):
         print('Error:  must provide initial data file for I20TR compsets')
         sys.exit()
 
 #get full path of finidat file
-finidat=''
+finidat=options.finidat
 finidat_year=int(options.finidat_year)
 
 if (options.exit_spinup):
@@ -420,24 +426,25 @@ if (options.compset == 'ICLM45CN'):
     mysimyr=2000
 
 #parameter (pft-phys) modifications if desired
-os.system('cp '+options.ccsm_input+'/lnd/clm2/pftdata/pft-physiology.'+pftphys_stamp+'.nc ' \
-              +options.ccsm_input+'/lnd/clm2/pftdata/pft-physiology.'+pftphys_stamp+'.'+ \
-              casename+'.nc')
-os.system('chmod u+w ' +options.ccsm_input+'/lnd/clm2/pftdata/pft-physiology.'+pftphys_stamp+'.'+ \
-              casename+'.nc')
-if (options.parm_file != ''):
-    pftfile = NetCDF.NetCDFFile(options.ccsm_input+'/lnd/clm2/pftdata/' \
-                                +'pft-physiology.'+pftphys_stamp+'.'+casename+'.nc',"a")
-    input   = open(os.path.abspath(options.parm_file))
-    for s in input:
-        if s[0:1] != '#':
-            values = s.split()
-            temp = pftfile.variables[values[0]]
-            temp_data = temp.getValue()
-            temp_data[int(values[1])] = float(values[2])
-            temp.assignValue(temp_data)
-    input.close()
-    pftfile.close()
+#os.system('cp '+options.ccsm_input+'/lnd/clm2/pftdata/pft-physiology.'+pftphys_stamp+'.nc ' \
+#              +options.ccsm_input+'/lnd/clm2/pftdata/pft-physiology.'+pftphys_stamp+'.'+ \
+#              casename+'.nc')
+#os.system('chmod u+w ' +options.ccsm_input+'/lnd/clm2/pftdata/pft-physiology.'+pftphys_stamp+'.'+ \
+#              casename+'.nc')
+
+#if (options.parm_file != ''):
+#    pftfile = NetCDF.NetCDFFile(options.ccsm_input+'/lnd/clm2/pftdata/' \
+#                                +'pft-physiology.'+pftphys_stamp+'.'+casename+'.nc',"a")
+#    input   = open(os.path.abspath(options.parm_file))
+#    for s in input:
+#        if s[0:1] != '#':
+#            values = s.split()
+#            temp = pftfile.variables[values[0]]
+#            temp_data = temp.getValue()
+#            temp_data[int(values[1])] = float(values[2])
+#            temp.assignValue(temp_data)
+#    input.close()
+#    pftfile.close()
 
 #set number of run years for ad, exit spinup cases
 if (options.ny_ad != options.run_n and options.ad_spinup):
@@ -561,11 +568,11 @@ if (options.refcase == 'none'):
                       +'RUN_REFDATE -val '+finidat_yst+'-01-01')
         os.system('./xmlchange -file env_run.xml -id ' \
                       +'RUN_REFCASE -val '+options.finidat_case)
-    else:
-        if (options.compset[-2:] =='CN' and options.ad_spinup == False and \
-                options.coldstart==False):
-            os.system('./xmlchange -file env_run.xml -id RUN_REFDATE -val ' \
-                          +finidat_yst+'-01-01')
+#    else:
+#        if (options.compset[-2:] =='CN' and options.ad_spinup == False and \
+#                options.coldstart==False):
+#            os.system('./xmlchange -file env_run.xml -id RUN_REFDATE -val ' \
+#                          +finidat_yst+'-01-01')
 
      #adds capability to run with transient CO2
         if (compset == 'I20TRCLM45CN' or compset == 'I20TRCN'):
@@ -631,7 +638,11 @@ if (options.refcase == 'none'):
                 output = open("user_nl_clm_0"+str(i),'w')
         output.write('&clm_inparm\n')
 
-        #history file options
+        #experimental manipulation
+        output.write(" startyear_experiment = "+str(options.startyear_experiment)+"\n")
+        output.write(" endyear_experiment = "+str(options.endyear_experiment)+"\n")
+        output.write(" add_temperature = "+str(options.add_temperature)+"\n")
+	#history file options
         if (options.hist_mfilt != -1):
             output.write(" hist_mfilt = "+ str(options.hist_mfilt)+"\n")
         if (options.hist_nhtfrq != -999):
@@ -667,9 +678,11 @@ if (options.refcase == 'none'):
                  "/lnd/clm2/"+surfdir+"/surfdata.pftdyn_"+str(numxpts)+'x' \
                  +str(numypts)+"pt_"+casename+".nc'\n")
         #pft-physiology file
+        #output.write(" fpftcon = '"+options.ccsm_input+ \
+        #             "/lnd/clm2/pftdata/pft-physiology."+pftphys_stamp+"."+ \
+        #             casename+".nc'\n")
         output.write(" fpftcon = '"+options.ccsm_input+ \
-                     "/lnd/clm2/pftdata/pft-physiology."+pftphys_stamp+"."+ \
-                     casename+".nc'\n")
+                      "/lnd/clm2/paramdata/clm_params_spruce_calveg.nc'\n")
         #nitrogen deposition file
         if (options.compset[-2:] == 'CN'):
             output.write( " stream_fldfilename_ndep = '"+options.ccsm_input+ \
