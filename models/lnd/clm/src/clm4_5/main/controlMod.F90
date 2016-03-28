@@ -27,7 +27,8 @@ module controlMod
                             create_glacier_mec_landunit, glc_dyntopo, glc_smb, &
                             glc_topomax, glc_grid, subgridflag, &
                             use_c13, use_c14, irrigate, &
-                            spinup_state, override_bgc_restart_mismatch_dump
+                            spinup_state, override_bgc_restart_mismatch_dump, &
+                            startyear_experiment, endyear_experiment, add_temperature
   use CanopyFluxesMod , only : perchroot, perchroot_alt
 #if (defined LCH4) && (defined CN)
   use clm_varctl   , only : anoxia
@@ -266,6 +267,9 @@ contains
 #endif
 
     ! BGC info
+
+    namelist /clm_inparm/ &
+         add_temperature, startyear_experiment, endyear_experiment
 
 #if (defined CN)
     namelist /clm_inparm/  &
@@ -529,6 +533,11 @@ contains
 
     call mpi_bcast(create_crop_landunit, 1, MPI_LOGICAL, 0, mpicom, ier)
     call mpi_bcast(allocate_all_vegpfts, 1, MPI_LOGICAL, 0, mpicom, ier)
+
+    ! Experimental manipulation
+    call mpi_bcast (endyear_experiment,         1, MPI_INTEGER,  0, mpicom, ier)
+    call mpi_bcast (startyear_experiment,       1, MPI_INTEGER,  0, mpicom, ier)
+    call mpi_bcast (add_temperature,            1, MPI_INTEGER,  0, mpicom, ier)
 
     ! BGC
 

@@ -434,6 +434,7 @@ contains
     use decompMod       ,only : get_proc_bounds
     use abortutils      ,only : endrun
     use clm_varctl      ,only : iulog, create_glacier_mec_landunit 
+    use clm_varctl      ,only : startyear_experiment, endyear_experiment, add_temperature
     use clm_varorb      ,only : eccen, obliqr, lambm0, mvelpp
     use shr_file_mod    ,only : shr_file_setLogUnit, shr_file_setLogLevel, &
                                 shr_file_getLogUnit, shr_file_getLogLevel
@@ -931,6 +932,7 @@ contains
     use shr_kind_mod    , only: r8 => shr_kind_r8
     use clm_atmlnd      , only: atm2lnd_type
     use clm_varctl      , only: co2_type, co2_ppmv, iulog, use_c13
+    use clm_varctl      , only: startyear_experiment, endyear_experiment, add_temperature
     use clm_varcon      , only: rair, o2_molar_const
     use clm_varcon      , only: c13ratio
     use shr_const_mod   , only: SHR_CONST_TKFRZ
@@ -1042,28 +1044,28 @@ contains
         a2l%volr(g)   = 0._r8 
 
         ! Determine required receive fields
- 	
-	!placeholder to read point-level fire data directly (these do not yet exist)
+     
+        !placeholder to read point-level fire data directly (these do not yet exist)
 
- 	!Get meteorological data (assuming default point level datset, must be concatenated to include whole record)
-	!Note we only do this at the first timestep and keep the whole forcing dataset in the memory
-	!This does NOT yet have restart capability.
+        !Get meteorological data (assuming default point level datset, must be concatenated to include whole record)
+        !Note we only do this at the first timestep and keep the whole forcing dataset in the memory
+        !This does NOT yet have restart capability.
         nph = 3600._r8 / get_step_size()
      
   !-----------------------------------Meteorological forcing  NOTE:  ASSUMES HOURLY INPUT--------------
 
         call get_curr_date( yr, mon, day, tod )	
-	thiscalday = get_curr_calday()
+        thiscalday = get_curr_calday()
 
-	if (nstep .eq. 0) then
-	  starti(1:3) = 1	  
+        if (nstep .eq. 0) then
+          starti(1:3) = 1  
           counti(1:2) = 1
           !meteorological forcing
 ierr = nf90_open('/home/y9s/models/ccsm_inputdata/atm/datm7/CLM1PT_data/2x1pt_US-SPR/all_hourly.nc', NF90_NOWRITE, ncid)
-	  ierr = nf90_inq_dimid(ncid, 'time', dimid)
-	  ierr = nf90_Inquire_Dimension(ncid, dimid, len = a2l%timelen)
-	  counti(3) = a2l%timelen
-	  ierr = nf90_inq_varid(ncid, 'TBOT', varid)
+          ierr = nf90_inq_dimid(ncid, 'time', dimid)
+          ierr = nf90_Inquire_Dimension(ncid, dimid, len = a2l%timelen)
+          counti(3) = a2l%timelen
+          ierr = nf90_inq_varid(ncid, 'TBOT', varid)
           ierr = nf90_get_var(ncid, varid, a2l%atm_input(1,1:1,1:1,1:a2l%timelen), starti, counti)
           ierr = nf90_inq_varid(ncid, 'PSRF', varid)
           ierr = nf90_get_var(ncid, varid, a2l%atm_input(2,1:1,1:1,1:a2l%timelen), starti, counti)
@@ -1098,28 +1100,34 @@ ierr = nf90_open('/home/y9s/models/ccsm_inputdata/atm/datm7/CLM1PT_data/2x1pt_US
           end if
 
           tindex(1) = 17520 !87600+8760 !52560  !a2l%timelen   !Correct starting hour figured out from python script
-	  tindex(2) = tindex(1) + 1
-	  if (tindex(2) .lt. 1) tindex(2) = a2l%timelen
-	  if (tindex(2) .gt. a2l%timelen) tindex(2) = 1
+          tindex(2) = tindex(1) + 1
+          if (tindex(2) .lt. 1) tindex(2) = a2l%timelen
+          if (tindex(2) .gt. a2l%timelen) tindex(2) = 1
         else
           tindex(1) = mod(((nstep-1)+(17520)*int(nph))/int(nph),a2l%timelen)+1
-	  tindex(2) = tindex(1) + 1
-	  if (tindex(2) .lt. 1) tindex(2) = a2l%timelen
-	  if (tindex(2) .gt. a2l%timelen) tindex(2) = 1
-	end if
+          tindex(2) = tindex(1) + 1
+          if (tindex(2) .lt. 1) tindex(2) = a2l%timelen
+          if (tindex(2) .gt. a2l%timelen) tindex(2) = 1
+        end if
         
-	!get weights for interpolation (assumes hourly input)
-	if (nph .gt. 1) then
-	   wt1 = 1._r8 - mod(nstep,int(nph))*1._r8/nph 
-	   wt2 = 1._r8 - wt1
-	else
-	   wt1 = 1._r8
+        !get weights for interpolation (assumes hourly input)
+        if (nph .gt. 1) then
+           wt1 = 1._r8 - mod(nstep,int(nph))*1._r8/nph 
+           wt2 = 1._r8 - wt1
+        else
+           wt1 = 1._r8
            wt2 = 0._r8
         end if
 
-        a2l%forc_t(g)       = a2l%atm_input(1,1,1,tindex(1))*wt1 + a2l%atm_input(1,1,1,tindex(2))*wt2  +0.                                               ! forc_txy  Atm state K
-	a2l%forc_th(g)      = a2l%atm_input(1,1,1,tindex(1))*wt1 + a2l%atm_input(1,1,1,tindex(2))*wt2 +0.
-	tbot                = a2l%atm_input(1,1,1,tindex(1))*wt1 + a2l%atm_input(1,1,1,tindex(2))*wt2
+        a2l%forc_t(g)       = a2l%atm_input(1,1,1,tindex(1))*wt1 + a2l%atm_input(1,1,1,tindex(2))*wt2                                                 ! forc_txy  Atm state K
+        a2l%forc_th(g)      = a2l%atm_input(1,1,1,tindex(1))*wt1 + a2l%atm_input(1,1,1,tindex(2))*wt2
+        tbot                = a2l%atm_input(1,1,1,tindex(1))*wt1 + a2l%atm_input(1,1,1,tindex(2))*wt2
+        if (yr .ge. startyear_experiment .and. yr .le. endyear_experiment) then
+          a2l%forc_t(g) = a2l%forc_t(g) + add_temperature
+          a2l%forc_th(g) = a2l%forc_th(g) + add_temperature
+          tbot = tbot + add_temperature
+        end if
+
         a2l%forc_pbot(g)    = a2l%atm_input(2,1,1,tindex(1))*wt1 + a2l%atm_input(2,1,1,tindex(2))*wt2        
 !	if (a2l%forc_t(g) .gt. 273.15) then 
 !  	  e                 =(a2l%atm_input(3,1,1,tindex(1))*wt1 + a2l%atm_input(3,1,1,tindex(2))*wt2) &
