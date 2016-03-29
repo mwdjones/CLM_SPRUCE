@@ -1330,7 +1330,7 @@ ierr = nf90_open('/home/y9s/models/ccsm_inputdata/atm/datm7/CO2/fco2_datm_1765-2
           ierr = nf90_get_var(ncid, varid, a2l%c13o2_input)
 	  ierr = nf90_close(ncid)
         end if
-
+ 
 	!get weights/indices for interpolation (assume values represent annual averages)
 	nindex(1) = min(max(yr,1765),2009)-1764
 	if (thiscalday .le. 182.5) then 
@@ -1347,7 +1347,7 @@ ierr = nf90_open('/home/y9s/models/ccsm_inputdata/atm/datm7/CO2/fco2_datm_1765-2
                a2l%c13o2_input(1,1,nindex(2))*wt2) * 1.e-6_r8 * a2l%forc_pbot(g)
         end if
 	!TEST (FACE-like experiment begins in 2010)
-	if (yr .ge. 2040) a2l%co2_input = 550.
+	!if (yr .ge. 2040) a2l%co2_input = 550.
 #else
            !co2_ppmv_val = co2_ppmv_diag 
            !if (use_c13) then
@@ -1361,6 +1361,7 @@ ierr = nf90_open('/home/y9s/models/ccsm_inputdata/atm/datm7/CO2/fco2_datm_1765-2
 !           end if
 !        end if
         a2l%forc_pco2(g)   = co2_ppmv_val * 1.e-6_r8 * a2l%forc_pbot(g) 
+        !if (day == 1 .and. mon == 1) print*, yr, a2l%forc_pco2(g)
      end do
 
    end subroutine lnd_import_mct

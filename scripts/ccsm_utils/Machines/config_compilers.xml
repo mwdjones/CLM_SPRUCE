@@ -444,6 +444,13 @@ for mct, etc.
   <LIB_NETCDF>/home/zdr/netcdf-4.0_gfortran/lib</LIB_NETCDF>
 </compiler>
 
+<compiler MACH="oic5" COMPILER="gnu">
+  <NETCDF_PATH>/home/zdr/netcdf-4.0_gfortran</NETCDF_PATH>
+  <ADD_SLIBS> -L/user/lib64 -llapack -lblas -L/home/zdr/netcdf-4.0_gfortran/lib -lnetcdf </ADD_SLIBS>
+  <INC_NETCDF>/home/zdr/netcdf-4.0_gfortran/include</INC_NETCDF>
+  <LIB_NETCDF>/home/zdr/netcdf-4.0_gfortran/lib</LIB_NETCDF>
+</compiler>
+
 <compiler MACH="yellowstone">
   <PIO_CONFIG_OPTS> --enable-filesystem-hints=gpfs </PIO_CONFIG_OPTS>
   <NETCDF_PATH>$(NETCDF)</NETCDF_PATH>

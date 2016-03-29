@@ -39,6 +39,8 @@ parser.add_option("--cpl_bypass", dest="cpl_bypass", default=False, \
                    help = "Bypass coupler (point CLM only)", action = "store_true")
 parser.add_option("--runroot", dest="runroot", default="../run", \
                   help="Directory where the run would be created")
+parser.add_option("--exeroot_case", dest="exeroot_case", default='', \
+                   help = "Root for executable (do not rebuild)")
 parser.add_option("--site", dest="site", default='', \
                   help = '6-character FLUXNET code to run (required)')
 parser.add_option("--sitegroup", dest="sitegroup", default="AmeriFlux", \
@@ -471,8 +473,10 @@ if (options.refcase == 'none'):
     os.chdir(casedir)
 
 #------------------ env_build.xml modifications ------------------------
-    #if (options.runroot != ''):
-    #    os.system('./xmlchange -file env_build.xml -id EXEROOT -val '+runroot+'/'+casename)
+    if (options.exeroot_case != ''):
+        os.system('./xmlchange -file env_build.xml -id EXEROOT -val '+ \
+	  runroot+'/'+options.exeroot_case+'/bld')
+        options.no_build=True
 
     #turn off ROF module
     os.system('./xmlchange -file env_build.xml -id RTM_MODE -val NULL')
@@ -575,11 +579,11 @@ if (options.refcase == 'none'):
 #                          +finidat_yst+'-01-01')
 
      #adds capability to run with transient CO2
-        if (compset == 'I20TRCLM45CN' or compset == 'I20TRCN'):
-            os.system('./xmlchange -file env_run.xml -id ' \
-                          +'CCSM_BGC -val CO2A')
-            os.system('./xmlchange -file env_run.xml -id ' \
-                          +'CLM_CO2_TYPE -val diagnostic')
+    if (compset == 'I20TRCLM45CN' or compset == 'I20TRCN'):
+        os.system('./xmlchange -file env_run.xml -id ' \
+                      +'CCSM_BGC -val CO2A')
+        os.system('./xmlchange -file env_run.xml -id ' \
+                      +'CLM_CO2_TYPE -val diagnostic')
 
     #if number of land instances > 1
     os.system('./xmlchange -file env_mach_pes.xml -id NTASKS_ATM -val 1')
@@ -644,9 +648,18 @@ if (options.refcase == 'none'):
         output.write(" add_temperature = "+str(options.add_temperature)+"\n")
 	#history file options
         if (options.hist_mfilt != -1):
-            output.write(" hist_mfilt = "+ str(options.hist_mfilt)+"\n")
+            if ('20TR' in compset):
+              output.write(" hist_mfilt = "+ str(options.hist_mfilt)+','+str(options.hist_mfilt)+'\n')
+              output.write(' hist_dov2xy = .true., .false.\n')
+              output.write(" hist_fincl2 = 'GPP', 'NPP', 'AR', 'MR', 'GR', 'TLAI', 'DEADSTEMC', 'LIVESTEMC', 'FROOTC', 'DEADCROOTC', 'LIVECROOTC', 'LEAFC', \
+                                  'QVEGT', 'QVEGE', 'BTRAN', 'FPSN', 'FPG'\n")
+            else:
+              output.write(" hist_mfilt = "+ str(options.hist_mfilt)+"\n")
         if (options.hist_nhtfrq != -999):
-            output.write(" hist_nhtfrq = "+ str(options.hist_nhtfrq)+"\n")
+            if ('20TR' in compset):
+              output.write(" hist_nhtfrq = "+ str(options.hist_nhtfrq)+','+ str(options.hist_nhtfrq)+"\n")
+            else:
+              output.write(" hist_nhtfrq = "+ str(options.hist_nhtfrq)+"\n")
         if (options.hist_vars != ''):
             output.write(" hist_empty_htapes = .true.\n")
             #read hist_vars file
@@ -900,261 +913,13 @@ if (options.refcase == 'none'):
             #        in transient run
             os.system('cp -f co2_streams.txt ./Buildconf/datmconf/datm.global1val.streams.co2.txt')
             os.system('cp -f co2_streams.txt '+rundir+'/datm.global1val.streams.co2.txt')
+    else: 
+        #Assume build is complete
+        os.system('./xmlchange BUILD_COMPLETE=TRUE')
     if (options.caseroot == './'):
         os.chdir(csmdir+"/scripts/"+casename)
     else:
         os.chdir(casedir) 
-
-
-else:  
-
-#----------------------------Reference case set ------------------------------------------
-    
-    os.chdir('../run')
-    incasename  = options.refcase+'_'+options.compset
-    if (options.cruncep and (options.compset == 'I20TRCN' or options.compset == 'I20TRCLM45CN')):
-        if (options.trans2):
-            incasename = incasename + '_phase2'
-        else:
-            incasename = incasename + '_phase1'
-    if (options.ad_spinup):
-        incasename = incasename + '_ad_spinup'
-    if (options.exit_spinup):
-        incasename = incasename + '_exit_spinup'
-    os.system('mkdir -p '+casename+'/run')
-    os.chdir(casename+'/run')
-    os.system('pwd')
-           
-    print 'Copying files from '+incasename+' to '+casename
-    os.system('cp '+csmdir+'/run/'+incasename+'/run/*_in* .')
-    os.system('cp '+csmdir+'/run/'+incasename+'/bld/cesm.exe .')
-    os.system('cp '+csmdir+'/run/'+incasename+'/run/*.nml .')
-    os.system('cp '+csmdir+'/run/'+incasename+'/run/*eam* .')
-    os.system('cp '+csmdir+'/run/'+incasename+'/run/*.rc .')
-
-   #Change generic site/case name to actual site/case name in namelst files
-    os.system('chmod u+w *')
-    os.system('sed -e s/'+incasename+'/'+casename+'/ig  lnd_in > lnd_in_tmp')
-    os.system('mv lnd_in_tmp lnd_in')
-    os.system('sed -e s/REFCASE/'+options.site+'/ig  lnd_in > lnd_in_tmp')
-    os.system('mv lnd_in_tmp lnd_in')
-    ptstr = str(numxpts)+'x'+str(numypts)+'pt'
-    os.system('sed -e s/1x1pt/'+ptstr+'/ig  lnd_in > lnd_in_tmp')
-    os.system('mv lnd_in_tmp lnd_in')
-    #os.system('sed -e s/'+incasename+'/'+casename+'/ig  datm_atm_in > datm_atm_in_tmp')
-    #os.system('mv datm_atm_in_tmp datm_atm_in')
-    #os.system('sed -e s/REFCASE/'+options.site+'/ig  datm_atm_in > datm_atm_in_tmp')
-    #os.system('mv datm_atm_in_tmp datm_atm_in')
-    os.system('sed -e s/1x1pt_REFCASE/'+ptstr+'_'+options.site+'/ig  datm_atm_in > datm_atm_in_tmp')
-    os.system('mv datm_atm_in_tmp datm_atm_in')
-    #os.system('sed -e s/CLM_USRDAT/1x1pt_'+options.site+'/ig  datm_atm_in > datm_atm_in_tmp')
-    #os.system('mv datm_atm_in_tmp datm_atm_in')
-    #os.system('mv clm1PT.CLM_USRDAT.stream.txt clm1PT.1x1pt_REFCASE.stream.txt')
-    if (options.cruncep):
-        os.system('sed -e s/1x1pt_REFCASE/'+ptstr+'_'+options.site+'/ig datm.streams.txt.CLMCRUNCEP.Precip > ' \
-                      +'datm.streams.txt.CLMCRUNCEP.Precip.tmp')
-        os.system('sed -e s/1x1pt_REFCASE/'+ptstr+'_'+options.site+'/ig datm.streams.txt.CLMCRUNCEP.Solar > ' \
-                      +'datm.streams.txt.CLMCRUNCEP.Solar.tmp')
-        os.system('sed -e s/1x1pt_REFCASE/'+ptstr+'_'+options.site+'/ig datm.streams.txt.CLMCRUNCEP.TPQW > ' \
-                      +'datm.streams.txt.CLMCRUNCEP.TPQW.tmp')
-    else:
-        os.system('sed -e s/1x1pt_REFCASE/'+ptstr+'_'+options.site+'/ig datm.streams.txt.CLM1PT.CLM_USRDAT > ' \
-                      +'datm.streams.txt.CLM1PT.CLM_USRDAT.tmp')
-    #os.system('rm *REFCASE*')
-    os.system('sed -e s/'+incasename+'/'+casename+'/ig  drv_in > drv_in_tmp')
-    os.system('mv drv_in_tmp drv_in')
-    os.system('sed -e s/REFCASE/'+options.site+'/ig  drv_in > drv_in_tmp')
-    os.system('mv drv_in_tmp drv_in')
-    
-    #modify met stream file for correct years
-    if (options.cruncep):
-        types = ['CRUNCEP.Precip', 'CRUNCEP.Solar', 'CRUNCEP.TPQW']
-    else:
-        types = ['1PT.CLM_USRDAT']
-    for t in types:                  
-        if (options.cruncep):
-            if (t == 'CRUNCEP.Precip'):
-                prefix = 'clmforc.cruncep.c2010.0.5d.Prec.'
-            elif (t == 'CRUNCEP.Solar'):
-                prefix = 'clmforc.cruncep.c2010.0.5d.Solr.'
-            elif (t == 'CRUNCEP.TPQW'):
-                prefix = 'clmforc.cruncep.c2010.0.5d.TPQWL.'          
-        else:
-            prefix = ''
-        myinput  = open('datm.streams.txt.CLM'+t+'.tmp', 'r')
-        myoutput = open('datm.streams.txt.CLM'+t,'w')
-        if (options.cruncep and not options.trans2):
-            firstfile = '1901-01.nc'
-        elif (options.cruncep):
-            firstfile = '1921-01.nc'
-        else:
-            firstfile = '2000-01.nc'
-        fieldinfo=False
-        for s in myinput:
-            if ('fieldInfo' in s):
-                fieldinfo = True
-                myoutput.write(s)
-            elif (firstfile in s):
-                print 'TIME INFO', startyear, endyear
-                for y in range(startyear,endyear+1):
-                    for m in range(1,13):
-                        if (m < 10):
-                            myoutput.write('            '+prefix+str(y)+'-0'+str(m)+'.nc\n')
-                        else:
-                            myoutput.write('            '+prefix+str(y)+'-'+str(m)+'.nc\n')
-            elif (fieldinfo and '.nc' in s):
-                pass
-            else:
-                myoutput.write(s)
-        myinput.close()
-        myoutput.close()
-        os.system('rm datm.streams.txt.CLM'+t+'.tmp')
-
-    #modify presearo stream file to change to 1850-2000 file
-    if ('20TR' not in compset):
-        myinput  = open('datm.streams.txt.presaero.clim_1850')
-        myoutput = open('datm.streams.txt.presaero.clim_1850.tmp','w')
-        for s in myinput:
-            if ('aerosoldep_monthly' in s):
-                myoutput.write('            aerosoldep_monthly_1849-2006_1.9x2.5_c090803.nc\n')
-            else:
-                myoutput.write(s)
-        myinput.close()
-        myoutput.close()
-        os.system('mv datm.streams.txt.presaero.clim_1850.tmp datm.streams.txt.presaero.clim_1850')
-
-    #modify datm_atm_in for correct years
-    myinput  = open('datm_atm_in')
-    myoutput = open('datm_atm_in_tmp','w')
-    for s in myinput:
-        if ('streams =' in s):
-            myalign_year = 1 #startyear
-            if (options.align_year != -999):
-                myalign_year = options.align_year
-            if ('I20TR' in compset):
-                mypresaero = '"datm.streams.txt.presaero.trans_1850-2000 1850 1850 2000"'
-                myco2      = ', "datm.global1val.streams.co2.txt 1766 1766 2010"'
-            else:
-                mypresaero = '"datm.streams.txt.presaero.clim_1850 1 1850 1850"'
-                myco2=''
-            if (options.cruncep):
-                myoutput.write(' streams = "datm.streams.txt.CLMCRUNCEP.Solar '+str(myalign_year)+ \
-                                   ' '+str(startyear)+' '+str(endyear)+'  ", '+ \
-                                   '"datm.streams.txt.CLMCRUNCEP.Precip '+str(myalign_year)+ \
-                                   ' '+str(startyear)+' '+str(endyear)+'  ", '+ \
-                                   '"datm.streams.txt.CLMCRUNCEP.TPQW '+str(myalign_year)+ \
-                                   ' '+str(startyear)+' '+str(endyear)+'  ", '+mypresaero+myco2+'\n')
-            else:
-                 myoutput.write(' streams = "datm.streams.txt.CLM1PT.CLM_USRDAT '+str(myalign_year)+ \
-                                   ' '+str(startyear)+' '+str(endyear)+'  ", '+mypresaero+myco2+'\n')
-        elif ('streams' in s):
-            continue  #do nothing
-        elif ('taxmode =' in s):
-            if (options.cruncep):
-                taxst = "taxmode = 'cycle', 'cycle', 'cycle', 'extend'"
-            else:
-                taxst = "taxmode = 'cycle', 'extend'"
-            if ('I20TR' in compset):
-                taxst = taxst+", 'extend'"
-            myoutput.write(taxst+'\n')
-        else:
-            myoutput.write(s)
-    myinput.close()
-    myoutput.close()
-    os.system('mv datm_atm_in_tmp datm_atm_in')
-
-    #modify component .nml files
-    nmlfiles=['atm','cpl','glc','ice','lnd','ocn','rof','wav']
-    for mynml in nmlfiles:
-        outfile = open(mynml+'_modelio.nml','w')
-        outfile.write('&modelio\n')
-        outfile.write('   diri    = "'+os.path.abspath('../..')+'/'+incasename+'/'+ \
-                          mynml+'   "\n')
-        outfile.write('   diro    = "./"\n') #'+os.path.abspath('.')+'   "\n')
-        outfile.write('   logfile = "'+mynml+'.log   "\n')
-        outfile.write('/\n')
-        outfile.write('&pio_inparm\n')
-        outfile.write(' pio_numiotasks = -99\n')
-        outfile.write(' pio_root = -99\n')
-        outfile.write(' pio_stride = -99\n')
-        outfile.write(" pio_typename = 'nothing'\n")
-        outfile.write(" /\n")
-        outfile.close()
-          
-    #make drv_in namelist modifications (run length for final spin/tranisent case)
-    myinput  = open('drv_in')
-    myoutput = open('drv_in_tmp','w')
-    for s in myinput:
-        if (s[0:7] == ' stop_n'):
-            myoutput.write(" stop_n = "+str(options.run_n)+'\n')                               
-        elif (s[0:10] == ' restart_n'):
-            myoutput.write(" restart_n = "+str(options.run_n)+'\n')
-        elif (s[0:9] == ' stop_ymd'):
-            myoutput.write(" stop_ymd       = -999\n")
-        elif (s[0:12] == ' restart_ymd'):
-            myoutput.write(" restart_ymd    = -999\n")
-        elif (s[0:11] == ' atm_cpl_dt'):
-            myoutput.write(" atm_cpl_dt = "+str(int(float(options.tstep)*3600.0))+'\n')
-        elif (s[0:11] == ' lnd_cpl_dt'):
-            myoutput.write(" lnd_cpl_dt = "+str(int(float(options.tstep)*3600.0))+'\n')
-        elif (s[0:11] == ' ice_cpl_dt'):
-            myoutput.write(" atm_cpl_dt = "+str(int(float(options.tstep)*3600.0))+'\n')
-        elif (s[0:10] == ' start_ymd'):
-            myoutput.write(s)
-        else:
-            myoutput.write(s)
-    myinput.close()
-    myoutput.close()
-    os.system('mv drv_in_tmp drv_in')
-            
-    #make lnd_in namelist modification for finidat file in transient case for correct year
-    myinput  = open('lnd_in')
-    myoutput = open('lnd_in_tmp','w')
-   
-    for s in myinput:
-        if (s[0:8] == ' hist_mf'):
-            if (compset == 'I20TRCLM45CN' or compset == 'I20TRCN'):
-                myoutput.write(' hist_mfilt = 12, 8760, 365\n')
-            else: 
-                myoutput.write(' hist_mfilt = 1\n')
-        elif (s[0:8] == ' hist_nh'):
-            if (compset == 'I20TRCLM45CN' or compset == 'I20TRCN'):
-                myoutput.write(' hist_nhtfrq = 0, -1, -24\n')
-                myoutput.write(" hist_fincl2 = 'NEE', 'GPP', 'NPP', 'ER', 'AR', 'MR', 'GR', 'SR', 'EFLX_LH_TOT', 'FSH', 'FPSN', 'BTRAN', 'FPG', 'FPI', 'CPOOL', 'NPOOL', 'TV', 'FSA', 'FIRA', 'FCTR', 'FCEV', 'FGEV', 'TBOT', 'FLDS', 'FSDS', 'RAIN', 'SNOW', 'WIND', 'PBOT', 'QBOT'\n")
-                myoutput.write(" hist_fincl3 = 'NEE', 'GPP', 'NPP', 'AGNPP', 'BGNPP', 'ER', 'AR', 'MR', 'GR', 'HR', 'SR', 'EFLX_LH_TOT', 'FSH', 'FPSN', 'BTRAN', 'FPG', 'FPI', 'TBOT', 'FLDS', 'FSDS', 'RAIN', 'SNOW', 'WIND', 'PBOT', 'QBOT', 'PFT_FIRE_CLOSS', 'LITFALL', 'TLAI', 'LEAFC' ,'FROOTC', 'LIVESTEMC', 'DEADSTEMC', 'LIVECROOTC', 'DEADCROOTC', 'TOTVEGC', 'TOTSOMC', 'TOTLITC', 'CWDC', 'TOTECOSYSC', 'TOTCOLC', 'TOTSOMN', 'TOTECOSYSN', 'SMINN', 'QOVER', 'QDRAI', 'QRGWL', 'QRUNOFF' \n")
-            else:
-                myoutput.write(' hist_nhtfrq = -8760\n')
-        elif (s[0:8] == ' finidat' and options.ad_spinup == False):
-            myoutput.write(" finidat = '"+finidat+"'\n")
-        elif (s[0:7] == ' nrevsn'):
-            myoutput.write(" nrevsn = '"+finidat+"'\n")
-        elif (s[0:6] == ' dtime'):
-            myoutput.write(" dtime = "+str(int(float(options.tstep)*3600.0))+'\n')
-        else:
-            myoutput.write(s)
-    myinput.close()
-    myoutput.close()
-    os.system('mv lnd_in_tmp lnd_in')
-
-    #write a basic PBS script
-    output = open(casename+'.run','w')
-    output.write('#PBS -S /bin/bash\n')
-    output.write('#PBS -V\n')
-    output.write('#PBS -m ae\n')
-    output.write('#PBS -N '+casename+'\n')
-    output.write('#PBS -q esd08q\n')
-    output.write("#PBS -l nodes="+str((int(options.np)-1)/8+1)+ \
-                     ":ppn="+str(min(int(options.np),8))+"\n")  
-    output.write('#PBS -l walltime=48:00:00\n')
-    output.write("cd "+csmdir+'/run/'+casename+"/run\n")
-    if (options.np == 1):
-        output.write("./cesm.exe > cesm_log.txt\n")
-    else:
-        output.write("mpirun -np "+options.np+" --hostfile $PBS_NODEFILE ./cesm.exe\n")
-    output.close()
-
-#---------------------------end of refcase ------------------------------------------------
-
 
 
 #copy rpointers and restart files to current run directory

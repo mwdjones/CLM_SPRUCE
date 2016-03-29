@@ -165,8 +165,8 @@ contains
   !DMR - variables added for CPL_BYPASS option 
   allocate(a2l%atm_input(8,1,1,200000))
   allocate(a2l%timelen)
-  allocate(a2l%co2_input(1,1,245))
-  allocate(a2l%c13o2_input(1,1,245))
+  allocate(a2l%co2_input(1,1,247))
+  allocate(a2l%c13o2_input(1,1,247))
   allocate(a2l%ndep_input(1,1,158))
   allocate(a2l%aero_input(14,1,1,1896))
   !end DMR additions 

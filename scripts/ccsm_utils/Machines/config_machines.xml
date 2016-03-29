@@ -359,11 +359,11 @@
          <OS>LINUX</OS>
          <COMPILERS>pgi,gnu</COMPILERS>
          <MPILIBS>mpich,mpi-serial,openmpi</MPILIBS>
-         <RUNDIR>/home/$CCSMUSER/models/clm45microbe_spruce_2015Jan15/run/$CASE/run</RUNDIR>
-         <EXEROOT>/home/$CCSMUSER/models/clm45microbe_spruce_2015Jan15/run/$CASE/bld</EXEROOT>
+         <RUNDIR>/home/$CCSMUSER/models/CLM_SPRUCE/run/$CASE/run</RUNDIR>
+         <EXEROOT>/home/$CCSMUSER/models/CLM_SPRUCE/run/$CASE/bld</EXEROOT>
          <DIN_LOC_ROOT>/home/$CCSMUSER/ccsm_inputdata</DIN_LOC_ROOT>
          <DIN_LOC_ROOT_CLMFORC>/home/y9s/ccsm_inputdata/atm/datm7</DIN_LOC_ROOT_CLMFORC>
-         <DOUT_S_ROOT>/home/$CCSMUSER/models/clm45microbe_spruce_2015Jan15/archive/$CASE</DOUT_S_ROOT>
+         <DOUT_S_ROOT>/home/$CCSMUSER/models/CLM_SPRUCE/archive/$CASE</DOUT_S_ROOT>
          <DOUT_L_MSROOT>UNSET</DOUT_L_MSROOT>
          <BATCHQUERY>qstat</BATCHQUERY>
          <BATCHSUBMIT>qsub</BATCHSUBMIT>
@@ -375,11 +375,11 @@
          <OS>LINUX</OS>
          <COMPILERS>pgi,gnu</COMPILERS>
          <MPILIBS>mpich,mpi-serial,openmpi</MPILIBS>
-         <RUNDIR>/home/$CCSMUSER/models/clm4_5_06/run/$CASE/run</RUNDIR>
-         <EXEROOT>/home/$CCSMUSER/models/clm4_5_06/run/$CASE/bld</EXEROOT>
+         <RUNDIR>/home/$CCSMUSER/models/CLM_SPRUCE/run/$CASE/run</RUNDIR>
+         <EXEROOT>/home/$CCSMUSER/models/CLM_SPRUCE/run/$CASE/bld</EXEROOT>
          <DIN_LOC_ROOT>/home/$CCSMUSER/models/ccsm_inputdata</DIN_LOC_ROOT>
          <DIN_LOC_ROOT_CLMFORC>/home/$CCSMUSER/models/ccsm_inputdata/atm/datm7</DIN_LOC_ROOT_CLMFORC>
-         <DOUT_S_ROOT>/home/$CCSMUSER/models/clm4_5_06/run/archive/$CASE</DOUT_S_ROOT>
+         <DOUT_S_ROOT>/home/$CCSMUSER/models/CLM_SPRUCE/run/archive/$CASE</DOUT_S_ROOT>
          <DOUT_L_MSROOT>UNSET</DOUT_L_MSROOT>
          <BATCHQUERY>qstat</BATCHQUERY>
          <BATCHSUBMIT>qsub</BATCHSUBMIT>
