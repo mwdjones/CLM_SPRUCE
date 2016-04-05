@@ -1,9 +1,9 @@
 #!/bin/csh -f
 
 #PBS -N psens_run_live
-#PBS -q esd13q
+#PBS -q esd08q
 #PBS -M ricciutodm@ornl.gov
-#PBS -l nodes=8:ppn=32
+#PBS -l nodes=16:ppn=8
 #PBS -l walltime=3:00:00
 #PBS -j oe
 #PBS -S /bin/csh -V

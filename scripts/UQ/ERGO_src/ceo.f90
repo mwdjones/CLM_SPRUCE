@@ -63,7 +63,7 @@ MODULE ceo
     Integer(i4b), parameter :: refresh = 2 ! Iterations between progress chks
     Integer(i4b) :: n_x                      ! Number of variables
     Integer(i4b), parameter :: mu = 15  !15       ! Number of parents
-    Integer(i4b), parameter :: lambda = 256   ! Number of individuals in 
+    Integer(i4b), parameter :: lambda = 64   ! Number of individuals in 
                                              !   the population
     Real(dp) :: alpha                        ! ISRES randomization range 
                                              !   (originally 0.2)
@@ -258,7 +258,7 @@ SUBROUTINE sres(max_total_iter, time_limit, xout, sigma_out, initial_pop, &
     !writE(*,'(14(g13.6,1x))'), xpr(:,:,2)
     !end if
 
-    fbest = 100000000.0d0
+    fbest = 10000000000000000.0d0
     xbest = 0.0d0
 !  Overwrite the first population member and best values with starting dist.
 !    if (present(initial_pop)) then

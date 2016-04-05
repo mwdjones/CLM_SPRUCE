@@ -85,9 +85,10 @@ lnum=0
 #get parameter names and PFT information
 for s in myinput:
     if (lnum == 0):
-        casename=s[:-1]
+        casename=s.strip()
     else:
-        pdata = s.split(" ")
+        pdata = s.split()
+        print pdata
         parm_names.append(pdata[0])
         parm_indices.append(int(pdata[1]))
     lnum = lnum+1
@@ -103,9 +104,10 @@ n_parameters = len(parm_names)
 gst=str(100000+int(options.ensnum))
 
 #create ensemble directory from original case 
-orig_dir = os.path.abspath(options.runroot)+'/'+casename+'/run'
+orig_dir = str(os.path.abspath(options.runroot)+'/'+casename+'/run')
 ens_dir  = os.path.abspath(options.runroot)+'/UQ/'+casename+'/g'+gst[1:]
-os.system('mkdir -p '+options.runroot+'/UQ/'+casename+'/g'+gst[1:])
+
+os.system('mkdir -p '+options.runroot+'/UQ/'+casename+'/g'+gst[1:]+'/timing/checkpoints')
 os.system('cp '+orig_dir+'/*_in* '+ens_dir)
 os.system('cp '+orig_dir+'/*nml '+ens_dir)
 os.system('cp '+orig_dir+'/*stream* '+ens_dir)
@@ -114,6 +116,10 @@ os.system('cp '+orig_dir+'/*.rc '+ens_dir)
 os.system('cp '+orig_dir+'/*para*.nc '+ens_dir)
 os.system('cp '+orig_dir+'/*initial* '+ens_dir)
 os.system('cp '+orig_dir+'/*pftdyn* '+ens_dir)
+os.system('cp '+ens_dir+'/microbepar_in '+ens_dir+'/microbepar_in_orig')
+os.system('cp /home/zdr/models/ccsm_inputdata/lnd/clm2/paramdata/'+ \
+               'clm_params_spruce_calveg.nc '+ens_dir+'/clm_params_'+ \
+               gst[1:]+".nc")	
 
 #loop through all filenames, change directories in namelists, change parameter values
 for f in os.listdir(ens_dir):
@@ -124,22 +130,35 @@ for f in os.listdir(ens_dir):
             if ('fpftcon' in s):
                 est = str(100000+int(options.ensnum))
                 myoutput.write(" fpftcon = './clm_params_"+est[1:]+".nc'\n")
-                os.system('cp '+ens_dir+'/clmmicrobe.para.nc '+ens_dir+'/clm_params_'+est[1:]+".nc")
+                #Hard-coded parameter file
                 pftfile = ens_dir+'/clm_params_'+est[1:]+'.nc'
+                microbefile = ens_dir+'/microbepar_in'
                 pnum = 0
                 for p in parm_names:
-                    param = getvar(pftfile, p)
-                    if (parm_indices[pnum] > 0):
-                        param[parm_indices[pnum]-1] = parm_values[pnum]
-                    elif (parm_indices[pnum] == 0):
-                        param = parm_values[pnum]
+                    if ('m_' in p):   #Assume this is a microbe_par parameter
+                        moutput = open(microbefile,'w')
+                        minput = open(microbefile+'_orig','r')
+                        for s2 in minput:
+                            if (p.lower() in s2.lower()):
+                                moutput.write(p+'   '+str(parm_values[pnum]) \
+                                                  +'\n')
+                            else:
+                                moutput.write(s2)
+                        minput.close()
+                        moutput.close()
+                        os.system('cp '+microbefile+' '+microbefile+'_orig')
                     else:
-                        param[:] = parm_values[pnum]
-                    ierr = putvar(pftfile, p, param)
+                        param = getvar(pftfile, p)
+                        if (parm_indices[pnum] > 0):
+                            param[parm_indices[pnum]-1] = parm_values[pnum]
+                        elif (parm_indices[pnum] == 0):
+                            param = parm_values[pnum]
+                        else:
+                            param[:] = parm_values[pnum]
+                        ierr = putvar(pftfile, p, param)
                     pnum = pnum+1
             #elif ('logfile =' in s):
             #    myoutput.write(s.replace('`date +%y%m%d-%H%M%S`',timestr))
-            #------------- deal with microbepar_in files ------------
             else:
                 myoutput.write(s.replace(orig_dir,ens_dir))
         myoutput.close()
@@ -176,20 +195,23 @@ for filename in os.listdir(options.constraints):
                         #  if specified, use h1 file (PFT-specific)
             doy=-1      #default:  annual average
             month=-1    #default:  don't use monthly data
+            depth=-1
             unc = -999
             for h in header:
-                if (h == 'year'):
+                if (h.lower() == 'year'):
                     year_last = year
                     year = int(s.split()[hnum])
-                if (h == 'doy'):
+                if (h.lower() == 'doy'):
                     doy = int(s.split()[hnum])
-                if (h == 'month'):
+                if (h.lower() == 'month'):
                     month = int(s.split()[hnum])
-                if (h == 'PFT'):
+                if (h.lower() == 'pft'):
                     PFT = int(s.split()[hnum])
-                if (h == 'value'):
+                if (h.lower() == 'value'):
                     value = float(s.split()[hnum])
-                if ('unc' in h):
+                if (h.lower() == 'depth'):
+                    depth = float(s.split()[hnum])
+                if ('unc' in h.lower()):
                     unc   = float(s.split()[hnum])
                 hnum = hnum+1
             #get the relevant variable/dataset
@@ -220,9 +242,21 @@ for filename in os.listdir(options.constraints):
                     else:
                         #use hummock+hollow
                         model_val = myvals[doy,PFT-1]*0.25*0.75 + myvals[doy,PFT+16]*0.25*0.25
+                    if (unc < 0):
+    	              unc = value*0.25 #default uncertainty set to 25%
                     sse = sse + ((model_val-value) /unc)**2
                     myoutput.write(str(myvarname)+' '+str(year)+' '+str(doy)+' '+str(PFT)+' '+ \
                                        str(model_val)+' '+str(value)+' '+str(unc)+' '+str(sse)+'\n')
+                elif (depth > 0):
+                    #depth-specific constraint (relative to hollow)
+                    layers = [0,1.8,4.5,9.1,16.6,28.9,49.3,82.9,138.3,229.6,343.3]
+                    for l in range(0,10):
+                        if (depth >= layers[l] and depth < layers[l+1]):
+                            thislayer = l
+                            model_val = myvals[doy,thislayer,1]   #Holow 
+                            sse = sse + ((model_val-value) / unc )**2        
+                            myoutput.write(str(myvarname)+' '+str(year)+' '+str(doy)+' '+str(depth)+' '+ \
+                                               str(model_val)+' '+str(value)+' '+str(unc)+' '+str(sse)+'\n')
                 else:
                     #Column-level constraint (daily)
                     #Water table, column-level (no PFT info), use hummock only

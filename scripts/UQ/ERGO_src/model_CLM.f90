@@ -38,6 +38,7 @@ MODULE model
     integer(i4b) :: nop
     real(DP), dimension(:), allocatable :: x_lower, x_upper
     real(DP) :: DE_pen_val
+    logical, dimension(:), allocatable :: islog
 
 CONTAINS
 !---------------------------------------------------------------------------
@@ -196,7 +197,17 @@ SUBROUTINE model_init(eval_index, prereq_in)
   open(unit=8, file=fname)
   read(8,*) dummy
   do i=1,nop
+     islog(i) = .false.
      read(8,*) dummy, useparm(i), x_lower(i), x_upper(i)
+     if (x_lower(i) .gt. 0 .and. x_upper(i) .gt. 0) then 
+       if (log10(x_upper(i)) - log10(x_lower(i)) .gt. 2) then 
+         !if range spans more than two orders of magnitude and is
+         !postive/nonzero, use log distribution
+         x_lower(i) = log10(x_lower(i))
+         x_upper(i) = log10(x_upper(i))
+         islog(i) = .true.
+       end if
+     end if
   end do
   close(8)
 
@@ -246,10 +257,13 @@ SUBROUTINE model_objf(x,f,g)
     nfe = 1
    
     !write parameters to parm_list file (specific for each proc)
-    !--------------fill in this code-----------------
     open(unit=9, file='./parm_data_files/parm_data_' // grouptag(2:6))
     do i=1,nop
-       write(9,*) x(i)
+      if (islog(i)) then 
+         write(9,*) 10**(x(i))
+      else
+         write(9,*) x(i)
+      end if
     end do
     close(9)
 
@@ -257,8 +271,7 @@ SUBROUTINE model_objf(x,f,g)
     call system('python UQ_runens.py --ens_num ' // grouptag(2:6) // &
          ' --parm_list ' // 'parm_list --parm_data ./parm_data_files/' // &
          'parm_data_' // grouptag(2:6) // ' --constraints ' // &
-         '/home/zdr/models/clm45microbe_spruce_2015Jan15/scripts/UQ' // &
-         '/constraints')
+         '/home/zdr/models/CLM_SPRUCE/scripts/UQ/constraints')
 
     !get the sum of squared errors
     open(unit=9, file='./ssedata/mysse_' // grouptag(2:6) // '.txt')
@@ -367,6 +380,9 @@ SUBROUTINE model_allocate(n_bounds)
     astat = 0
     allocate(x_lower(n_bounds), STAT=astat)
     if (astat > 0) call error_msg(1,"x_lower")
+    astat = 0
+    allocate(islog(n_bounds), STAT=astat)
+    if (astat > 0) call error_msg(1,"islog") 
 
     RETURN
 
@@ -391,6 +407,9 @@ SUBROUTINE model_finalize()
     astat = 0
     deallocate(x_lower, STAT=astat)
     if (astat > 0) call error_msg(2,"x_lower")
+    astat = 0
+    deallocate(islog, STAT=astat)
+    if (astat > 0) call error_msg(2,"islog")
 
     RETURN
 
