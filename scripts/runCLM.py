@@ -908,14 +908,14 @@ if (options.refcase == 'none'):
     #compile cesm
     if (options.no_build == False):
         os.system('./'+casename+'.build')
+    else:	
+        #Assume build is complete
+        os.system('./xmlchange BUILD_COMPLETE=TRUE')
     if (compset == "I20TRCLM45CN" or compset == "I20TRCN"):
         #note:  *.build will sweep everything under Buildconf, but we need 'co2streams.txt'
         #        in transient run
         os.system('cp -f co2_streams.txt ./Buildconf/datmconf/datm.global1val.streams.co2.txt')
         os.system('cp -f co2_streams.txt '+rundir+'/datm.global1val.streams.co2.txt')
-    else: 
-        #Assume build is complete
-        os.system('./xmlchange BUILD_COMPLETE=TRUE')
     if (options.caseroot == './'):
         os.chdir(csmdir+"/scripts/"+casename)
     else:
