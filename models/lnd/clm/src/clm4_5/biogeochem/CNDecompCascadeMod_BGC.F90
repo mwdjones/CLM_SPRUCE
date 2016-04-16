@@ -989,6 +989,7 @@ subroutine decomp_rate_constants(lbc, ubc, num_soilc, filter_soilc)
    use clmtype
    use clm_time_manager    , only : get_step_size
    use clm_varcon, only: secspday
+   use microbevarcon, ONLY: k_dom, k_bacteria, k_fungi
 
    !
 ! !ARGUMENTS:
@@ -1053,9 +1054,9 @@ subroutine decomp_rate_constants(lbc, ubc, num_soilc, filter_soilc)
    real(r8):: cwdc_loss    ! fragmentation rate for CWD carbon (gC/m2/s)
    real(r8):: cwdn_loss    ! fragmentation rate for CWD nitrogen (gN/m2/s)
 #ifdef MICROBE
-   real(r8):: k_dom         ! decomposition rate constant dissolved organic matter
-   real(r8):: k_bacteria        ! decomposition rate constant biomass of bacteria
-   real(r8):: k_fungi         ! decomposition rate constant fungi biomass
+!   real(r8):: k_dom         ! decomposition rate constant dissolved organic matter, revised to read in from parameter file on April 16, 2016
+!   real(r8):: k_bacteria        ! decomposition rate constant biomass of bacteria, revised to read in from parameter file on April 16, 2016
+!   real(r8):: k_fungi         ! decomposition rate constant fungi biomass, revised to read in from parameter file on April 16, 2016
    real(r8):: ck_dom        ! corrected decomposition rate constant dissolved organic matter
    real(r8):: ck_bacteria        ! corrected decomposition rate constant bacteria biomass
    real(r8):: ck_fungi        ! corrected decomposition rate constant fungi biomass
@@ -1119,9 +1120,9 @@ subroutine decomp_rate_constants(lbc, ubc, num_soilc, filter_soilc)
    k_s4 = -log(1.0_r8-0.0001_r8)
    k_frag = -log(1.0_r8-0.001_r8)
 #ifdef MICROBE
-   k_dom = -log(1.0_r8-0.042_r8)
-   k_bacteria = -log(1.0_r8-0.56_r8)
-   k_fungi = -log(1.0_r8-0.56_r8)
+   k_dom = -log(1.0_r8-k_dom)
+   k_bacteria = -log(1.0_r8-k_bacteria)
+   k_fungi = -log(1.0_r8-k_fungi)
 #endif
    ! calculate the new discrete-time decay rate for model timestep
    k_l1 = 1.0_r8-exp(-k_l1*dtd)
