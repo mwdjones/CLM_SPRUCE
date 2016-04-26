@@ -1099,12 +1099,37 @@ ierr = nf90_open('/home/y9s/models/ccsm_inputdata/atm/datm7/CLM1PT_data/2x1pt_US
           a2l%timelen = a2l%timelen/nint(1/nph)
           end if
 
-          tindex(1) = 17520 !87600+8760 !52560  !a2l%timelen   !Correct starting hour figured out from python script
+          !Input data - IF YEARS CHANGED, THIS MUST BE CHANGED
+          !Align spinups and transient simulations
+          !figure out which year to start with (assuming spinups always use
+          !integer multiple of met cycles)
+          mystart = 2000
+          nyears_spinup = 14
+          do while (mystart > 1850)
+             mystart = mystart - nyears_spinup
+          end do
+ 
+          if (yr .lt. 1850) then
+            atm2lnd_vars%tindex(g,v,1) = (mod(yr-1,nyears_spinup) + &
+               (1850-mystart)) * 365 * nint(24./atm2lnd_vars%timeres(v))
+            !print*, 'Start year: ', (mod(yr-1,nyears_spinup) +
+            !(1850-mystart))+atm2lnd_vars%startyear_met
+          else 
+            atm2lnd_vars%tindex(g,v,1) = (mod(yr-1850,nyears_spinup) + &
+                (1850-mystart)) * 365 * nint(24./atm2lnd_vars%timeres(v))
+          end if
+
+          !if we start in 1974, tindex(1) = 17520
+          if (yr == 1974) start_tindex = 17520
+          !if we start in 1850, tindex(1) = 35040
+          if (yr == 1850) start_tindex = 35040   
+
+          tindex(1) = start_tindex
           tindex(2) = tindex(1) + 1
           if (tindex(2) .lt. 1) tindex(2) = a2l%timelen
           if (tindex(2) .gt. a2l%timelen) tindex(2) = 1
         else
-          tindex(1) = mod(((nstep-1)+(17520)*int(nph))/int(nph),a2l%timelen)+1
+          tindex(1) = mod(((nstep-1)+(start_tindex)*int(nph))/int(nph),a2l%timelen)+1
           tindex(2) = tindex(1) + 1
           if (tindex(2) .lt. 1) tindex(2) = a2l%timelen
           if (tindex(2) .gt. a2l%timelen) tindex(2) = 1
