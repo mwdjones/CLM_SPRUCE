@@ -1120,16 +1120,23 @@ contains
           tindex(2) = tindex(1) + 1
           if (tindex(2) .lt. 1) tindex(2) = a2l%timelen
           if (tindex(2) .gt. a2l%timelen) tindex(2) = 1
-          print*, tindex(1)
         else
           tindex(1) = mod(((nstep-1)+(a2l%start_tindex)*int(nph))/int(nph),a2l%timelen)+1
           tindex(2) = tindex(1) + 1
-          print*, tindex(1)
           if (tindex(2) .lt. 1) tindex(2) = a2l%timelen
           if (tindex(2) .gt. a2l%timelen) tindex(2) = 1
         end if
         
         !get weights for interpolation (assumes hourly input)
+        if (nph .gt. 1) then
+           wt1 = 1._r8 - mod(nstep,int(nph))*1._r8/nph 
+           wt2 = 1._r8 - wt1
+        else
+           wt1 = 1._r8
+           wt2 = 0._r8
+        end if
+
+        a2l%forc_t(g)       = a2l%atm_input(1,1,1,tindex(1))*wt1 + a2l%atm_input(1,1,1,tindex(2))*wt2      
         a2l%forc_th(g)      = a2l%atm_input(1,1,1,tindex(1))*wt1 + a2l%atm_input(1,1,1,tindex(2))*wt2
         tbot                = a2l%atm_input(1,1,1,tindex(1))*wt1 + a2l%atm_input(1,1,1,tindex(2))*wt2
         if (yr .ge. startyear_experiment .and. yr .le. endyear_experiment) then
@@ -1173,7 +1180,6 @@ contains
         a2l%forc_u = (a2l%atm_input(7,1,1,tindex(1))*wt1 + a2l%atm_input(7,1,1,tindex(2))*wt2)/ sqrt(2.0_R8)
         a2l%forc_v = (a2l%atm_input(7,1,1,tindex(1))*wt1 + a2l%atm_input(7,1,1,tindex(2))*wt2)/ sqrt(2.0_R8)          
         a2l%forc_hgt(g)     = (a2l%atm_input(8,1,1,tindex(1))*wt1 + a2l%atm_input(8,1,1,tindex(2))*wt2)                            ! zgcmxy  Atm state 
-        !write(*,'(8f13.6,1x)') tbot, q, a2l%forc_pbot(g), a2l%forc_solad(g,1), a2l%forc_u(g)
 
    !------------------------------------Nitrogen deposition----------------------------------------------
         if (nstep .eq. 0) then 

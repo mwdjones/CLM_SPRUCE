@@ -693,6 +693,12 @@ if (options.refcase == 'none'):
         if (options.compset[-2:] == 'CN'):
             output.write( " stream_fldfilename_ndep = '"+options.ccsm_input+ \
       "/lnd/clm2/ndepdata/fndep_clm_hist_simyr1849-2006_2x1pt_US-SPR.nc'\n")
+        #site-specific fire stream files
+        output.write(" stream_fldfilename_popdens = '/home/zdr/models/CLM_SPRUCE/inputdata/lnd/clm2/firedata/clmforc.Li_" \
+                      +"2012_hdm_1x1pt_US-SPR_AVHRR_simyr1850-2010_c130401.nc'\n")
+        output.write(" stream_fldfilename_lightng = '/home/zdr/models/CLM_SPRUCE/inputdata/atm/datm7/NASA_LIS/clmforc.Li_" \
+                      +"2012_climo1995-2011.1x1pt_US-SPR.lnfm_c130327.nc'\n")
+
         if (options.C13):
             output.write(" use_c13 = .true.\n")
     #ad spinup option (CLM45 only)
@@ -729,7 +735,7 @@ if (options.refcase == 'none'):
                                      '/'+tout[i]+'6Hrly\n')
                 else:
                     output.write(s)
-                lne = line+1
+                line = line+1
             input.close()
             output.close()
     if ('1850' in compset):
