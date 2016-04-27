@@ -180,6 +180,7 @@ for p in parm_names:
         myoutput.write(str(parm_names[myind])+' '+str(parm_indices[myind])+' '+str(parm_values[myind])+'\n')
 	myind = myind+1
 for filename in os.listdir(options.constraints):
+  if (not os.path.isdir(filename)):
     myinput = open(options.constraints+'/'+filename,'r')
     myvarname = filename.split('.')[0]  #model variable is filename
     #code to deal with special variables and/or aggregation

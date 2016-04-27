@@ -1,9 +1,9 @@
 #!/bin/csh -f
 
 #PBS -N ERGO_CLM
-#PBS -q esd08q
+#PBS -q esd13q
 #PBS -M ricciutodm@ornl.gov
-#PBS -l nodes=8:ppn=8
+#PBS -l nodes=2:ppn=32
 #PBS -l walltime=144:00:00
 #PBS -j oe
 #PBS -S /bin/csh -V

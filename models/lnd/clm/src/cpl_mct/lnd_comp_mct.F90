@@ -973,6 +973,7 @@ contains
     real(r8) :: nph, timetemp(2)
     integer ::  ierr, ncid, varid, dimid, yr, mon, day, tod, nindex(2), caldaym(13)
     integer ::  aindex(2), tindex(2), starti(3), counti(3)
+    integer :: mystart, nyears_spinup 
     real(r8) :: tbot, tempndep(1,1,158), thiscalday, wt1, wt2, temp(1,1,1,200000)
     character(len=32), parameter :: sub = 'lnd_import_mct'
     integer :: av, v, n
@@ -1061,7 +1062,7 @@ contains
           starti(1:3) = 1  
           counti(1:2) = 1
           !meteorological forcing
-ierr = nf90_open('/home/y9s/models/ccsm_inputdata/atm/datm7/CLM1PT_data/2x1pt_US-SPR/all_hourly.nc', NF90_NOWRITE, ncid)
+#THISSITEFILE#
           ierr = nf90_inq_dimid(ncid, 'time', dimid)
           ierr = nf90_Inquire_Dimension(ncid, dimid, len = a2l%timelen)
           counti(3) = a2l%timelen
@@ -1099,12 +1100,28 @@ ierr = nf90_open('/home/y9s/models/ccsm_inputdata/atm/datm7/CLM1PT_data/2x1pt_US
           a2l%timelen = a2l%timelen/nint(1/nph)
           end if
 
-          tindex(1) = 17520 !87600+8760 !52560  !a2l%timelen   !Correct starting hour figured out from python script
+          !Input data - IF YEARS CHANGED, THIS MUST BE CHANGED
+          !Align spinups and transient simulations
+          !figure out which year to start with (assuming spinups always use
+          !integer multiple of met cycles)
+          mystart = 2000
+          nyears_spinup = 14
+          do while (mystart > 1850)
+             mystart = mystart - nyears_spinup
+          end do
+ 
+          if (yr .lt. 1850) then
+            a2l%start_tindex = mod(mod(yr-1,nyears_spinup) + (1850-mystart), nyears_spinup) * 8760
+          else 
+            a2l%start_tindex = mod(mod(yr-1850,nyears_spinup) + (1850-mystart), nyears_spinup) * 8760
+          end if
+
+          tindex(1) = a2l%start_tindex
           tindex(2) = tindex(1) + 1
           if (tindex(2) .lt. 1) tindex(2) = a2l%timelen
           if (tindex(2) .gt. a2l%timelen) tindex(2) = 1
         else
-          tindex(1) = mod(((nstep-1)+(17520)*int(nph))/int(nph),a2l%timelen)+1
+          tindex(1) = mod(((nstep-1)+(a2l%start_tindex)*int(nph))/int(nph),a2l%timelen)+1
           tindex(2) = tindex(1) + 1
           if (tindex(2) .lt. 1) tindex(2) = a2l%timelen
           if (tindex(2) .gt. a2l%timelen) tindex(2) = 1
@@ -1119,7 +1136,7 @@ ierr = nf90_open('/home/y9s/models/ccsm_inputdata/atm/datm7/CLM1PT_data/2x1pt_US
            wt2 = 0._r8
         end if
 
-        a2l%forc_t(g)       = a2l%atm_input(1,1,1,tindex(1))*wt1 + a2l%atm_input(1,1,1,tindex(2))*wt2                                                 ! forc_txy  Atm state K
+        a2l%forc_t(g)       = a2l%atm_input(1,1,1,tindex(1))*wt1 + a2l%atm_input(1,1,1,tindex(2))*wt2      
         a2l%forc_th(g)      = a2l%atm_input(1,1,1,tindex(1))*wt1 + a2l%atm_input(1,1,1,tindex(2))*wt2
         tbot                = a2l%atm_input(1,1,1,tindex(1))*wt1 + a2l%atm_input(1,1,1,tindex(2))*wt2
         if (yr .ge. startyear_experiment .and. yr .le. endyear_experiment) then
@@ -1143,70 +1160,70 @@ ierr = nf90_open('/home/y9s/models/ccsm_inputdata/atm/datm7/CLM1PT_data/2x1pt_US
         swndr               =(a2l%atm_input(5,1,1,tindex(1))*wt1 + a2l%atm_input(5,1,1,tindex(2))*wt2) * 0.50_R8
         ratio_rvrf =   min(0.99_R8,max(0.29548_R8 + 0.00504_R8*swndr  &
                         -1.4957e-05_R8*swndr**2 + 1.4881e-08_R8*swndr**3,0.01_R8))
-	!NOTE - CURRENTLY USING LINEAR INTERPOLATION FOR SOLAR RADIATION.
-	a2l%forc_solad(g,2) = ratio_rvrf*swndr
-	swndf               =(a2l%atm_input(5,1,1,tindex(1))*wt1 + a2l%atm_input(5,1,1,tindex(2))*wt2)*0.50_R8
-	a2l%forc_solai(g,2) = (1._R8 - ratio_rvrf)*swndf
-	swvdr               =(a2l%atm_input(5,1,1,tindex(1))*wt1 + a2l%atm_input(5,1,1,tindex(2))*wt2)*0.50_R8
-	ratio_rvrf =   min(0.99_R8,max(0.17639_R8 + 0.00380_R8*swvdr  &
+        !NOTE - CURRENTLY USING LINEAR INTERPOLATION FOR SOLAR RADIATION.
+        a2l%forc_solad(g,2) = ratio_rvrf*swndr
+        swndf               =(a2l%atm_input(5,1,1,tindex(1))*wt1 + a2l%atm_input(5,1,1,tindex(2))*wt2)*0.50_R8
+        a2l%forc_solai(g,2) = (1._R8 - ratio_rvrf)*swndf
+        swvdr               =(a2l%atm_input(5,1,1,tindex(1))*wt1 + a2l%atm_input(5,1,1,tindex(2))*wt2)*0.50_R8
+        ratio_rvrf =   min(0.99_R8,max(0.17639_R8 + 0.00380_R8*swvdr  &
                            -9.0039e-06_R8*swvdr**2 + 8.1351e-09_R8*swvdr**3,0.01_R8))
         a2l%forc_solad(g,1) = ratio_rvrf*swvdr
         swvdf               =(a2l%atm_input(5,1,1,tindex(1))*wt1 + a2l%atm_input(5,1,1,tindex(2))*wt2)*0.50_R8
         a2l%forc_solai(g,1) = (1._R8 - ratio_rvrf)*swvdf
-	frac = (a2l%forc_t(g) - 273.15)*0.5_R8                  ! ramp near freezing
+        frac = (a2l%forc_t(g) - 273.15)*0.5_R8                  ! ramp near freezing
         frac = min(1.0_R8,max(0.0_R8,frac))           ! bound in [0,1]
-	!Don't interpolate rainfall data
-	forc_rainc = 0.1_R8 * frac * (a2l%atm_input(6,1,1,tindex(1)))
-	forc_rainl = 0.9_R8 * frac * (a2l%atm_input(6,1,1,tindex(1)))
-	forc_snowc = 0.1_R8 * (1.0_R8 - frac) * (a2l%atm_input(6,1,1,tindex(1)))
-	forc_snowl = 0.9_R8 * (1.0_R8 - frac) * (a2l%atm_input(6,1,1,tindex(1)))
-	a2l%forc_u = (a2l%atm_input(7,1,1,tindex(1))*wt1 + a2l%atm_input(7,1,1,tindex(2))*wt2)/ sqrt(2.0_R8)
-	a2l%forc_v = (a2l%atm_input(7,1,1,tindex(1))*wt1 + a2l%atm_input(7,1,1,tindex(2))*wt2)/ sqrt(2.0_R8)          
+        !Don't interpolate rainfall data
+        forc_rainc = 0.1_R8 * frac * (a2l%atm_input(6,1,1,tindex(1)))
+        forc_rainl = 0.9_R8 * frac * (a2l%atm_input(6,1,1,tindex(1)))
+        forc_snowc = 0.1_R8 * (1.0_R8 - frac) * (a2l%atm_input(6,1,1,tindex(1)))
+        forc_snowl = 0.9_R8 * (1.0_R8 - frac) * (a2l%atm_input(6,1,1,tindex(1)))
+        a2l%forc_u = (a2l%atm_input(7,1,1,tindex(1))*wt1 + a2l%atm_input(7,1,1,tindex(2))*wt2)/ sqrt(2.0_R8)
+        a2l%forc_v = (a2l%atm_input(7,1,1,tindex(1))*wt1 + a2l%atm_input(7,1,1,tindex(2))*wt2)/ sqrt(2.0_R8)          
         a2l%forc_hgt(g)     = (a2l%atm_input(8,1,1,tindex(1))*wt1 + a2l%atm_input(8,1,1,tindex(2))*wt2)                            ! zgcmxy  Atm state 
 
    !------------------------------------Nitrogen deposition----------------------------------------------
         if (nstep .eq. 0) then 
-ierr = nf90_open('/home/y9s/models/ccsm_inputdata/lnd/clm2/ndepdata/fndep_clm_simyr1849-2006_2x1pt_US-SPR.nc', nf90_nowrite, ncid)
-	  ierr = nf90_inq_varid(ncid, 'NDEP_year', varid)
-	  ierr = nf90_get_var(ncid, varid, a2l%ndep_input)
-	  ierr = nf90_close(ncid)
+#THISSITENDEPFILE#
+          ierr = nf90_inq_varid(ncid, 'NDEP_year', varid)
+          ierr = nf90_get_var(ncid, varid, a2l%ndep_input)
+          ierr = nf90_close(ncid)
         end if
-	!get weights for interpolation
-	wt1 = 1._r8 - (thiscalday -1._r8)/365._r8
-	wt2 = 1._r8 - wt1
+        !get weights for interpolation
+        wt1 = 1._r8 - (thiscalday -1._r8)/365._r8
+        wt2 = 1._r8 - wt1
 
-	!DMR note - ndep will NOT be correct if more than 1850 years of model spinup (model year > 1850)
-	nindex(1) = yr-1848
-	nindex(2) = nindex(1)+1
+        !DMR note - ndep will NOT be correct if more than 1850 years of model spinup (model year > 1850)
+        nindex(1) = yr-1848
+        nindex(2) = nindex(1)+1
 
-	if (yr .lt. 1850) nindex(1:2) = 2
-	if (yr .ge. 2006) nindex(1:2) = 158
-           	 
-	a2l%forc_ndep(g)    = (a2l%ndep_input(1,1,nindex(1))*wt1 + &
-	                       a2l%ndep_input(1,1,nindex(2))*wt2) / (365._r8 * 86400._r8)
+        if (yr .lt. 1850) nindex(1:2) = 2
+        if (yr .ge. 2006) nindex(1:2) = 158
+            
+        a2l%forc_ndep(g)    = (a2l%ndep_input(1,1,nindex(1))*wt1 + &
+                               a2l%ndep_input(1,1,nindex(2))*wt2) / (365._r8 * 86400._r8)
    
    !------------------------------------Aerosol forcing--------------------------------------------------
-   	if (nstep .eq. 0) then 					
-     	  aerovars(1) = 'BCDEPWET'
-	  aerovars(2) = 'BCPHODRY'
-	  aerovars(3) = 'BCPHIDRY'
-	  aerovars(4) = 'OCDEPWET'
-	  aerovars(5) = 'OCPHODRY'
-	  aerovars(6) = 'OCPHIDRY'
-	  aerovars(7) = 'DSTX01DD'
-	  aerovars(8) = 'DSTX02DD'
+       if (nstep .eq. 0) then 
+          aerovars(1) = 'BCDEPWET'
+          aerovars(2) = 'BCPHODRY'
+          aerovars(3) = 'BCPHIDRY'
+          aerovars(4) = 'OCDEPWET'
+          aerovars(5) = 'OCPHODRY'
+          aerovars(6) = 'OCPHIDRY'
+          aerovars(7) = 'DSTX01DD'
+          aerovars(8) = 'DSTX02DD'
           aerovars(9) = 'DSTX03DD'
-	  aerovars(10) = 'DSTX04DD'
-	  aerovars(11) = 'DSTX01WD'
-	  aerovars(12) = 'DSTX02WD'
-	  aerovars(13) = 'DSTX03WD'
-	  aerovars(14) = 'DSTX04WD'
-ierr = nf90_open('/home/y9s/models/ccsm_inputdata/atm/cam/chem/trop_mozart_aero/aero/aerosoldep_monthly_1849-2006_2x1pt_US-SPR.nc', nf90_nowrite, ncid)
-	  do av=1,14
-	    ierr = nf90_inq_varid(ncid, trim(aerovars(av)), varid)
+          aerovars(10) = 'DSTX04DD'
+          aerovars(11) = 'DSTX01WD'
+          aerovars(12) = 'DSTX02WD'
+          aerovars(13) = 'DSTX03WD'
+          aerovars(14) = 'DSTX04WD'
+#THISSITEAEROFILE#
+          do av=1,14
+            ierr = nf90_inq_varid(ncid, trim(aerovars(av)), varid)
             ierr = nf90_get_var(ncid, varid, a2l%aero_input(av,1:1,1:1,1:1896))
- 	  end do
-	  ierr = nf90_close(ncid)
+         end do
+         ierr = nf90_close(ncid)
         end if
 
 	!get weights for interpolation (note this method doesn't get the month boundaries quite right..)
@@ -1319,35 +1336,34 @@ ierr = nf90_open('/home/y9s/models/ccsm_inputdata/atm/cam/chem/trop_mozart_aero/
 !        if (co2_type_idx == 1) then
 !           co2_ppmv_val = co2_ppmv_prog
 !        else if (co2_type_idx == 2) then
+
 #ifdef CPL_BYPASS
         !atmospheric CO2 (to be used for transient simulations only)
         if (nstep .eq. 0) then 
-ierr = nf90_open('/home/y9s/models/ccsm_inputdata/atm/datm7/CO2/fco2_datm_1765-2007_c100614_new.nc', nf90_nowrite, ncid)
+#THISCO2FILE#
           ierr = nf90_inq_varid(ncid, 'CO2', varid)
-	  !add 13C input HERE
-	  ierr = nf90_get_var(ncid, varid, a2l%co2_input)
-	  ierr = nf90_inq_varid(ncid, 'C13O2', varid)
+          !add 13C input HERE
+          ierr = nf90_get_var(ncid, varid, a2l%co2_input)
+          ierr = nf90_inq_varid(ncid, 'C13O2', varid)
           ierr = nf90_get_var(ncid, varid, a2l%c13o2_input)
-	  ierr = nf90_close(ncid)
+          ierr = nf90_close(ncid)
         end if
  
-	!get weights/indices for interpolation (assume values represent annual averages)
-	nindex(1) = min(max(yr,1765),2009)-1764
-	if (thiscalday .le. 182.5) then 
-	  nindex(2) = nindex(1)-1	  
+        !get weights/indices for interpolation (assume values represent annual averages)
+        nindex(1) = min(max(yr,1765),2009)-1764
+        if (thiscalday .le. 182.5) then 
+          nindex(2) = nindex(1)-1   
         else
           nindex(2) = nindex(1)+1
         end if
-	wt1 = 1._r8 - abs((182.5 - (thiscalday -1._r8))/365._r8)
-	wt2 = 1._r8 - wt1
+        wt1 = 1._r8 - abs((182.5 - (thiscalday -1._r8))/365._r8)
+        wt2 = 1._r8 - wt1
 
         co2_ppmv_val = a2l%co2_input(1,1,nindex(1))*wt1 + a2l%co2_input(1,1,nindex(2))*wt2
         if (use_c13) then 
           a2l%forc_pc13o2(g) = (a2l%c13o2_input(1,1,nindex(1))*wt1 + &
                a2l%c13o2_input(1,1,nindex(2))*wt2) * 1.e-6_r8 * a2l%forc_pbot(g)
         end if
-	!TEST (FACE-like experiment begins in 2010)
-	!if (yr .ge. 2040) a2l%co2_input = 550.
 #else
            !co2_ppmv_val = co2_ppmv_diag 
            !if (use_c13) then
@@ -1361,7 +1377,7 @@ ierr = nf90_open('/home/y9s/models/ccsm_inputdata/atm/datm7/CO2/fco2_datm_1765-2
 !           end if
 !        end if
         a2l%forc_pco2(g)   = co2_ppmv_val * 1.e-6_r8 * a2l%forc_pbot(g) 
-        !if (day == 1 .and. mon == 1) print*, yr, a2l%forc_pco2(g)
+        !if (day == 1 .and. mon == 1) print*, 'CO2', yr, a2l%forc_pco2(g)
      end do
 
    end subroutine lnd_import_mct

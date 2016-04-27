@@ -66,7 +66,7 @@ parser.add_option("--exit_spinup", action="store_true", \
 parser.add_option("--csmdir", dest="csmdir", default='..', \
                   help = "base CESM directory (default = ../)")
 parser.add_option("--ccsm_input", dest="ccsm_input", \
-                  default='../../ccsm_inputdata', \
+                  default='../inputdata', \
                   help = "input data directory for CESM (required)")
 parser.add_option("--finidat_case", dest="finidat_case", default='', \
                   help = "case containing initial data file to use" \
@@ -86,8 +86,8 @@ parser.add_option("--rmold", dest="rmold", default=False, action="store_true", \
                   +" before proceeding")
 parser.add_option("--srcmods_loc", dest="srcmods_loc", default='', \
                   help = 'Copy sourcemods from this location')
-parser.add_option("--parm_file", dest="parm_file", default='',
-                  help = 'file for parameter modifications')
+#parser.add_option("--parm_file", dest="parm_file", default='',
+#                  help = 'file for parameter modifications')
 parser.add_option("--hist_mfilt", dest="hist_mfilt", default=-1, \
                   help = 'number of output timesteps per file')
 parser.add_option("--hist_nhtfrq", dest="hist_nhtfrq", default=-999, \
@@ -109,9 +109,6 @@ parser.add_option("--no_submit", dest="no_submit", default=False, \
                   help = 'do NOT submit CESM to queue', action="store_true")
 parser.add_option("--align_year", dest="align_year", default=-999, \
                   help = 'Alignment year (transient run only)')
-parser.add_option("--regional", action="store_true", \
-                   dest="regional", default=False, \
-                   help="Flag for regional run (2x2 or greater)")
 parser.add_option("--np", dest="np", default=1, \
                   help = 'number of processors')
 parser.add_option("--ninst", dest="ninst", default=1, \
@@ -124,19 +121,15 @@ parser.add_option("--nyears_ad_spinup", dest="ny_ad", default=600, \
                   help = 'number of years to run ad_spinup')
 parser.add_option("--metdir", dest="metdir", default="none", \
                   help = 'subdirectory for met data forcing')
-parser.add_option("--nopointdata", action="store_true", \
-                  dest="nopointdata", help="Do NOT make point data (use data already created)", \
+parser.add_option("--makepointdata", action="store_true", \
+                  dest="makepointdata", help="Make point data (requires global data sets)", \
                   default=False)
-#parser.add_option("--cleanlogs",dest="cleanlogs", help=\
-#                   "Removes temporary and log files that are created",\
-#                   default=False,action="store_true")
 parser.add_option("--nofire", action="store_true", dest="nofire", default=False, \
                     help="To turn off wildfires")
 parser.add_option("--npoolmod", action="store_true", dest="npoolmod", default=False, \
                     help="To turn on nitrogen pool modifications")
 parser.add_option("--cpoolmod", action="store_true", dest="cpoolmod", default=False, \
                     help="To turn on carbon storage pool modifications")
-
 parser.add_option("--q10wbmod", action="store_true", dest="q10wbmod", default=False, \
                     help="To turn on Woodrow-Berry Q10 curve (CLM 4.0 only)")
 parser.add_option("--tfmod", action="store_true", dest="tfmod", default=False, \
@@ -172,7 +165,7 @@ parser.add_option("--include_nonveg", dest="include_nonveg", default=False, \
                   help = 'Include non-vegetated columns/Landunits in surface data')
 parser.add_option("--refcase", dest="refcase" , default='none', \
                   help = 'Use already compiled CLM case')
-parser.add_option("--xpts", dest="xpts", default=1, \
+parser.add_option("--xpts", dest="xpts", default=2, \
                       help = 'for regional runs: xpts')
 parser.add_option("--ypts", dest="ypts", default=1, \
                       help = 'for regional runs: ypts')
@@ -362,7 +355,7 @@ print("CASE rundir is: "+rundir+"\n")
 
 
 #------------------- make point data for site -------------------------------
-if (options.nopointdata == False):
+if (options.makepointdata):
     ptcmd = 'python makepointdata.py --casename '+casename+ \
         ' --site '+options.site+' --sitegroup '+options.sitegroup+ \
         ' --csmdir '+csmdir+' --ccsm_input '+options.ccsm_input+ \
@@ -408,15 +401,15 @@ for row in AFdatareader:
             startyear=int(row[6])
             endyear=int(row[7])
         alignyear = int(row[8])
-        if (options.regional == True):
-            if (options.xpts < 2 and options.ypts < 2):
-                print('Error:  xpts OR ypts MUST be greater than 1 for regional option\n')
-                sys.exit()
-            numxpts = int(options.xpts)
-            numypts = int(options.ypts)
-        else:
-            numxpts=1
-            numypts=1
+        #if (options.regional == True):
+        #    if (options.xpts < 2 and options.ypts < 2):
+        #        print('Error:  xpts OR ypts MUST be greater than 1 for regional option\n')
+        #        sys.exit()
+        numxpts = int(options.xpts)
+        numypts = int(options.ypts)
+        #else:
+        #    numxpts=1
+        #    numypts=1
 
            #numxpts=int(row[9])
            #numypts=int(row[10])
@@ -684,12 +677,12 @@ if (options.refcase == 'none'):
 
         output.write(" fsurdat = '"+options.ccsm_input+ \
                 "/lnd/clm2/"+surfdir+"/surfdata_"+str(numxpts)+'x'+ \
-                str(numypts)+"pt_"+casename+"_simyr"+str(mysimyr)+".nc'\n")
+                str(numypts)+"pt_US-SPR.nc'\n")
         #pft dynamics file for transient run
         if (compset == 'I20TRCLM45CN' or compset == 'I20TRCN'):
             output.write(" fpftdyn = '"+options.ccsm_input+ \
                  "/lnd/clm2/"+surfdir+"/surfdata.pftdyn_"+str(numxpts)+'x' \
-                 +str(numypts)+"pt_"+casename+".nc'\n")
+                 +str(numypts)+"pt_US-SPR.nc'\n")
         #pft-physiology file
         #output.write(" fpftcon = '"+options.ccsm_input+ \
         #             "/lnd/clm2/pftdata/pft-physiology."+pftphys_stamp+"."+ \
@@ -699,7 +692,13 @@ if (options.refcase == 'none'):
         #nitrogen deposition file
         if (options.compset[-2:] == 'CN'):
             output.write( " stream_fldfilename_ndep = '"+options.ccsm_input+ \
-      "/lnd/clm2/ndepdata/fndep_clm_hist_simyr1849-2006_1.9x2.5_c100428.nc'\n")
+      "/lnd/clm2/ndepdata/fndep_clm_hist_simyr1849-2006_2x1pt_US-SPR.nc'\n")
+        #site-specific fire stream files
+        output.write(" stream_fldfilename_popdens = '/home/zdr/models/CLM_SPRUCE/inputdata/lnd/clm2/firedata/clmforc.Li_" \
+                      +"2012_hdm_1x1pt_US-SPR_AVHRR_simyr1850-2010_c130401.nc'\n")
+        output.write(" stream_fldfilename_lightng = '/home/zdr/models/CLM_SPRUCE/inputdata/atm/datm7/NASA_LIS/clmforc.Li_" \
+                      +"2012_climo1995-2011.1x1pt_US-SPR.lnfm_c130327.nc'\n")
+
         if (options.C13):
             output.write(" use_c13 = .true.\n")
     #ad spinup option (CLM45 only)
@@ -742,13 +741,16 @@ if (options.refcase == 'none'):
     if ('1850' in compset):
     	myinput  = open('CaseDocs/datm.streams.txt.presaero.clim_1850')
         myoutput = open('./user_datm.streams.txt.presaero.clim_1850','w')
-        for s in myinput:
-            if (s[0:22] == '            aerosoldep'):
-                myoutput.write('            aerosoldep_monthly_1849-2006_1.9x2.5_c090803.nc\n')
-            else:
-                myoutput.write(s)
-        myinput.close()
-        myoutput.close()
+    elif ('20TR' in compset):
+        myinput = open('CaseDocs/datm.streams.txt.presaero.trans_1850-2000')
+        myoutput = open('./user_datm.streams.txt.presaero.trans_1850-2000','w')  
+    for s in myinput:
+        if ('aerosoldep' in s):
+            myoutput.write('            aerosoldep_monthly_1849-2006_2x1pt_US-SPR.nc\n')
+        else:
+            myoutput.write(s)
+    myinput.close()
+    myoutput.close()
    
     #CPPDEF modifications
     infile  = open("Macros")
@@ -799,13 +801,6 @@ if (options.refcase == 'none'):
                          src_output.write("ierr = nf90_open('"+options.ccsm_input+"/atm/datm7/CO2/fco2_datm_1765-2007_c100614_new.nc', nf90_nowrite, ncid)\n")
                     elif ('#THISSITEAEROFILE#' in s):
                          src_output.write("ierr = nf90_open('"+options.ccsm_input+"/atm/cam/chem/trop_mozart_aero/aero/aerosoldep_monthly_1849-2006_"+ptstr+"_"+options.site+".nc', nf90_nowrite, ncid)\n")
-                    elif ('#STARTHOUR#' in s):
-                        nyr_cycle = endyear-startyear+1
-                        if ('20TR' in compset and options.align_year != -999):
-                            starthour = (nyr_cycle - (int(options.align_year) - 1850))*8760
-                        else:
-                            starthour = nyr_cycle*8760
-                        src_output.write(s.replace('#STARTHOUR#',str(starthour)))
                     else:
                         src_output.write(s)
                 os.system('mv ./SourceMods/src.clm/lnd_comp_mct_tmp.F90 ./SourceMods/src.clm/lnd_comp_mct.F90')
@@ -936,7 +931,7 @@ if (finidat != '' and options.runroot == '' ):
     os.system('cp -f '+csmdir+'/run/'+options.finidat_case+'/run/'+ \
               'rpointer.* '+csmdir+'/run/'+casename+'/run/')
 
-os.system('cp -f ../microbepar_in ' +csmdir+'/run/'+casename+'/run/')
+os.system('cp -f '+options.ccsm_input+'/lnd/clm2/paramdata/microbepar_in ' +csmdir+'/run/'+casename+'/run/')
 
 #submit job if requested
 if (options.no_submit == False):
