@@ -38,7 +38,9 @@ module CanopyFluxesMod
 ! Created by Mariana Vertenstein
 ! 4/25/05, Peter Thornton: replaced old Stomata subroutine with what
 !   used to be called StomataCN, as part of migration to new sun/shade
-!   algorithms. 
+!   algorithms.
+! 11/20/2015, Xiaoing Shi: added the hydrological dynamics and photosynthesis
+!     for Moss. 
 !
 !EOP
 !------------------------------------------------------------------------------
@@ -998,17 +1000,17 @@ contains
 !KO
          rhal(p) = rhaf(p)
          vpdal(p) = svpts(p) - eah(p)
-         ! Calculate the internal water (tissue water content) content for moss
-         if(ivt(p) == 12) then   
+         ! XShi 11/20/15 - Calculate the internal water (tissue water content) content for moss
+         if(ivt(p) == 12) then    
             !DMRicciuto 12/4/2015 - changed to use average of layer 3 and 4 
             h2o_moss_inter(p) = -18032 * ((h2osoi_vol(c,3)+h2osoi_vol(c,4))/2._r8)**4 +  &
                                 7248.1 * ((h2osoi_vol(c,3)+h2osoi_vol(c,4))/2._r8)**3 +  &
-                               -591.74 * ((h2osoi_vol(c,3)+h2osoi_vol(c,4))/2._r8)**2 +  &
+                               -591.74 * ((h2osoi_vol(c,3)+h2osoi_vol(c,4))/2._r8)**2 +  & 
                                 6.9031 * ((h2osoi_vol(c,3)+h2osoi_vol(c,4))/2._r8)       &
                                 + 0.4945
             !if (h2o_moss_inter(p).lt.0._r8) h2o_moss_inter(p) = 0._r8
             if ((h2osoi_vol(c,3) + h2osoi_vol(c,4))/2._r8 .gt. 0.25) then
-                 h2o_moss_inter(p) = -18032 *0.25**4 + 7248.1 * 0.25**3                     &
+                 h2o_moss_inter(p) = -18032 *0.25**4 + 7248.1 * 0.25**3                  &
                                      -591.74 *0.25**2 + 6.9031*0.25 + 0.4954
             endif
             if (leafc(p).gt. 0._r8) then
@@ -1422,6 +1424,7 @@ contains
 ! local pointers to implicit in variables
    integer , pointer :: pgridcell(:)! pft's gridcell index
    integer , pointer :: ivt(:)      ! pft vegetation type
+   integer , pointer :: pcolumn(:)  ! pft's column index
    real(r8), pointer :: forc_pbot(:)! atmospheric pressure (Pa)
    real(r8), pointer :: t_veg(:)    ! vegetation temperature (Kelvin)
    real(r8), pointer :: btran(:)    ! transpiration wetness factor (0 to 1)
@@ -1520,7 +1523,7 @@ contains
    real(r8) :: theta_ip          ! empirical curvature parameter for ap photosynthesis co-limitation
 
 ! Other
-   integer  :: f,p,g,iv          ! indices
+   integer  :: f,p,g,c,iv        ! indices
    real(r8) :: cf                ! s m**2/umol -> s/m
    real(r8) :: rsmax0            ! maximum stomatal resistance [s/m]
    real(r8) :: gb                ! leaf boundary layer conductance (m/s)
@@ -1572,6 +1575,8 @@ contains
    real(r8) :: rh_can
    ! variables related to moss photosynthesis 
    real(r8), pointer :: h2o_moss_wc(:)    ! total water content of moss (g water/g dry mass)
+   real(r8) :: moss_factor
+   real(r8) :: wcscaler                   ! moss water content scalor ( 0 -1.0)
 !------------------------------------------------------------------------------
 
    ! Temperature and soil water response functions
@@ -1586,6 +1591,7 @@ contains
    ! Assign local pointers to derived type members (pft-level)
    pgridcell =>pft%gridcell
    ivt       =>pft%itype
+   pcolumn   =>pft%column
    t_veg     => pes%t_veg
    btran     => pps%btran
    tgcm      => pes%thm
@@ -1659,6 +1665,7 @@ contains
    mbb    => ppsyns%mbb
    ! Assign local pointers to moss
    h2o_moss_wc   => pws%h2o_moss_wc
+   
    
    !==============================================================================!
    ! Photosynthesis and stomatal conductance parameters, from:
@@ -1762,7 +1769,7 @@ contains
                   -0.0000984*(h2o_moss_wc(p) + 1.0_r8)**4 + 0.00000168* (h2o_moss_wc(p) + 1._r8)**5) &
                   *1.e06_r8/0.634
         if(bbb(p) .lt.(0.005*1.e06_r8/0.634)) bbb(p) = 0.005*1.e06_r8/0.634
-        if(bbb(p) .gt.(0.07*1.e06_r8/0.634))  bbb(p) = 0.07*1.e06_r8/0.634
+        if(bbb(p) .gt.(0.07*1.e06_r8/0.634)) bbb(p) = 0.07*1.e06_r8/0.634
         mbb(p) = 0.0 
         !write(iulog,*)'h2o_moss_wc+1=',h2o_moss_wc(p)+1._r8,'bbb=',bbb(p)
       else
@@ -1957,6 +1964,7 @@ contains
    do f = 1, fn
       p = filterp(f)
       g = pgridcell(p)
+      c = pcolumn(p)
 
       ! Leaf boundary layer conductance, umol/m**2/s
 
@@ -1965,9 +1973,24 @@ contains
       gb_mol(p) = gb * cf
 
       ! Loop through canopy layers (above snow). Only do calculations if daytime
-
+      
+      !DMR:  Calculate dessication effect on moss photosynthesis.
+      !Equation appies to net assimlation, so apply to both lmr_z and ag
+      !  Note:  For ag, this appears in the ci function.
+       ! if (ivt(p) == 12) then
+       ! if (h2o_moss_wc(p) .gt. 2.5 .and. h2o_moss_wc(p) .lt. 10._r8) then
+       !   moss_factor = (-0.656 + 1.654 *log10(h2o_moss_wc (p)))
+       ! else if (h2o_moss_wc(p) .le. 2.5) then
+       !   moss_factor = 0._r8
+       ! end if
+       ! end if
+      
+      if (ivt(p) == 12)then
+       wcscaler = (-0.656_r8 + 1.654_r8 *log10(h2o_moss_wc (p)))
+       wcscaler = max(0._r8, min(1.0_r8, wcscaler))
+      endif
       do iv = 1, nrad(p)
-
+         if (ivt(p) == 12) lmr_z(p,iv) = lmr_z(p,iv) * wcscaler 
          if (par_z(p,iv) <= 0._r8) then           ! night time
 
             ac(p,iv) = 0._r8
@@ -2019,14 +2042,14 @@ contains
 
             ciold = ci_z(p,iv)
             !find ci and stomatal conductance
-            call hybrid(ciold, p, iv, g, gb_mol(p), je, cair(p), oair(p), &
+            call hybrid(ciold, p, iv, g,c, gb_mol(p), je, cair(p), oair(p), &
                lmr_z(p,iv), par_z(p,iv), rh_can, gs_mol(p,iv), niter)
 
 
             ! End of ci iteration.  Check for an < 0, in which case gs_mol = bbb
 
             if (an(p,iv) < 0._r8) gs_mol(p,iv) = bbb(p)
-            !if (ivt(p) == 12) gs_mol(p,iv) = bbb(p)
+            if (ivt(p) == 12) gs_mol(p,iv) = bbb(p)
 
             ! Final estimates for cs and ci (needed for early exit of ci iteration when an < 0)
 
@@ -2104,7 +2127,11 @@ contains
          psncan_wj = psncan_wj + psn_wj_z(p,iv) * lai_z(p,iv)
          psncan_wp = psncan_wp + psn_wp_z(p,iv) * lai_z(p,iv)
          lmrcan = lmrcan + lmr_z(p,iv) * lai_z(p,iv)
+        if (ivt(p) == 12) then
+         gscan = gscan + lai_z(p,iv) / rs_z(p,iv)
+        else
          gscan = gscan + lai_z(p,iv) / (rb(p)+rs_z(p,iv))
+        endif 
          laican = laican + lai_z(p,iv)
       end do
       if (laican > 0._r8) then
@@ -2131,7 +2158,7 @@ contains
 ! !IROUTINE: ci_func
 !
 ! !INTERFACE:
-   subroutine ci_func(ci, fval, p, iv, g, gb_mol, je, cair, oair, lmr_z, par_z,&
+   subroutine ci_func(ci, fval, p, iv, g, c, gb_mol, je, cair, oair, lmr_z, par_z,&
       rh_can, gs_mol)
    
    !
@@ -2162,7 +2189,7 @@ contains
    real(r8), intent(in) :: cair              ! Atmospheric CO2 partial pressure (Pa)
    real(r8), intent(in) :: oair              ! Atmospheric O2 partial pressure (Pa)
    real(r8), intent(in) :: rh_can            ! canopy air realtive humidity
-   integer,  intent(in) :: p, iv, g          ! pft, vegetation type and column indexes
+   integer,  intent(in) :: p, iv, g, c       ! pft, vegetation type and column indexes
    real(r8), intent(out) :: fval             !return function of the value f(ci)
    real(r8), intent(out) :: gs_mol           ! leaf stomatal conductance (umol H2O/m**2/s)
 !
@@ -2187,6 +2214,9 @@ contains
    real(r8),pointer :: bbb(:)                ! Ball-Berry minimum leaf conductance (umol H2O/m**2/s)
    real(r8),pointer :: mbb(:)                ! Ball-Berry slope of conductance-photosynthesis relationship
    integer , pointer :: ivt(:)               ! pft vegetation type
+   real(r8), pointer :: h2o_moss_wc(:)       ! total water content of moss (g water/g dry mass)
+   real(r8), pointer :: h2ocan(:)            ! canopy water (mm H2O)
+   real(r8) :: wcscaler                      ! moss water content scalor ( 0 -1.0) 
    
    real(r8) :: ai                  ! intermediate co-limited photosynthesis (umol CO2/m**2/s)
    real(r8) :: cs                ! CO2 partial pressure at leaf surface (Pa)
@@ -2218,6 +2248,8 @@ contains
    bbb     =>ppsyns%bbb
    mbb    => ppsyns%mbb
    ivt    =>pft%itype
+   h2o_moss_wc    => pws%h2o_moss_wc 
+   h2ocan         => pws%h2ocan 
    ! Miscellaneous parameters, from Bonan et al (2011) JGR, 116, doi:10.1029/2010JG001593
    fnps = 0.15_r8
    theta_psii = 0.7_r8
@@ -2261,9 +2293,27 @@ contains
    ag(p,iv) = min(r1,r2)
 
    ! Net photosynthesis. Exit iteration if an < 0
-
+   !DMR - reduce Moss AG for dessication (note this has already been done for
+   !lmr_z)
+   !if (ivt(p) == 12) then
+   !  if (h2o_moss_wc(p) .gt. 2.5 .and. h2o_moss_wc(p) .lt. 10._r8) then
+   !     ag(p,iv) = ag(p,iv) * (-0.656 + 1.654 *log10(h2o_moss_wc (p)))
+   !   else if (h2o_moss_wc(p) .le. 2.5) then
+   !     ag(p,iv) = 0._r8
+   !   end if
+   !end if
+   if (ivt(p) == 12)then
+      wcscaler = (-0.656_r8 + 1.654_r8 *log10(h2o_moss_wc (p)))
+      wcscaler = max(0._r8, min(1.0_r8, wcscaler))
+      ag(p,iv) = ag(p,iv) * wcscaler
+   endif
    an(p,iv) = ag(p,iv) - lmr_z 
-  ! if (ivt(p) == 12) an(p,iv) = (ag(p,iv) - lmr_z) * (-0.656 + 1.654 *log10(h2o_moss_wc (p)) 
+   !if (ivt(p) == 12)then
+   !   if (2.5_r8 .lt. h2o_moss_wc(p) .and. h2o_moss_wc(p).lt. 10.0_r8) & 
+   !   an(p,iv) = (ag(p,iv) - lmr_z)*(-0.656 + 1.654 *log10(h2o_moss_wc (p)))
+   !  if (h2o_moss_wc (p) .le. 2.5_r8) an(p,iv) = 0._r8
+   !   if (h2o_moss_wc (p) .ge. 10._r8) an(p,iv) = ag(p,iv) - lmr_z 
+   !endif       
    if (an(p,iv) < 0._r8) then
       fval = 0._r8
       return
@@ -2278,6 +2328,7 @@ contains
    cquad = -gb_mol*(cs*bbb(p) + mbb(p)*an(p,iv)*forc_pbot(g)*rh_can)
    call quadratic (aquad, bquad, cquad, r1, r2)
    gs_mol = max(r1,r2)
+   if (ivt(p) == 12) gs_mol = bbb(p)
 
    ! Derive new estimate for ci
 
@@ -2345,7 +2396,7 @@ contains
 ! !IROUTINE: brent
 !
 ! !INTERFACE:
-   subroutine brent(x, x1,x2,f1, f2, tol, ip, iv, ig, gb_mol, je, cair, oair,&
+   subroutine brent(x, x1,x2,f1, f2, tol, ip, iv, ig, ic, gb_mol, je, cair, oair,&
       lmr_z, par_z, rh_can, gs_mol)
       
    !
@@ -2373,7 +2424,7 @@ contains
    real(r8), intent(in) :: cair              ! Atmospheric CO2 partial pressure (Pa)
    real(r8), intent(in) :: oair              ! Atmospheric O2 partial pressure (Pa)
    real(r8), intent(in) :: rh_can            ! inside canopy relative humidity 
-   integer,  intent(in) :: ip, iv, ig        ! pft, c3/c4, and column index
+   integer,  intent(in) :: ip, iv, ig, ic    ! pft, c3/c4, and column index
    real(r8), intent(out) :: gs_mol           ! leaf stomatal conductance (umol H2O/m**2/s)
 
 ! !CALLED FROM:
@@ -2450,7 +2501,7 @@ contains
       else
          b=b+sign(tol1,xm)
       endif
-      call ci_func(b, fb, ip, iv, ig, gb_mol, je, cair, oair, lmr_z, par_z, rh_can, gs_mol)
+      call ci_func(b, fb, ip, iv, ig, ic, gb_mol, je, cair, oair, lmr_z, par_z, rh_can, gs_mol)
       if(fb==0._r8)exit
    enddo
    if(iter==ITMAX)write(iulog,*) 'brent exceeding maximum iterations', b, fb
@@ -2466,7 +2517,7 @@ contains
 !
 ! !INTERFACE:
 
-   subroutine hybrid(x0, p, iv, g, gb_mol, je, cair, oair, lmr_z, par_z,&
+   subroutine hybrid(x0, p, iv, g, c, gb_mol, je, cair, oair, lmr_z, par_z,&
      rh_can, gs_mol,iter)
    !
    !! DESCRIPTION:
@@ -2495,7 +2546,7 @@ contains
    real(r8), intent(in) :: je                 ! electron transport rate (umol electrons/m**2/s)
    real(r8), intent(in) :: cair               ! Atmospheric CO2 partial pressure (Pa)
    real(r8), intent(in) :: oair               ! Atmospheric O2 partial pressure (Pa)
-   integer,  intent(in) :: p, iv, g           ! pft, c3/c4, and column index
+   integer,  intent(in) :: p, iv, g, c        ! pft, c3/c4, and column index
    real(r8), intent(out) :: gs_mol            ! leaf stomatal conductance (umol H2O/m**2/s)
    integer,  intent(out) :: iter              !number of iterations used, for record only   
 
@@ -2513,13 +2564,13 @@ contains
    real(r8) :: tol,minx,minf
 
    
-   call ci_func(x0, f0, p, iv, g, gb_mol, je, cair, oair, lmr_z, par_z, rh_can, gs_mol)
+   call ci_func(x0, f0, p, iv, g, c, gb_mol, je, cair, oair, lmr_z, par_z, rh_can, gs_mol)
    if(f0 == 0._r8)return
    
    minx=x0
    minf=f0
    x1 = x0 * 0.99_r8
-   call ci_func(x1,f1, p, iv, g, gb_mol, je, cair, oair, lmr_z, par_z, rh_can, gs_mol)
+   call ci_func(x1,f1, p, iv, g, c, gb_mol, je, cair, oair, lmr_z, par_z, rh_can, gs_mol)
 
    if(f1==0._r8)then
       x0 = x1
@@ -2544,7 +2595,7 @@ contains
       x0 = x1
       f0 = f1
       x1 = x   
-      call ci_func(x1,f1, p, iv, g, gb_mol, je, cair, oair, lmr_z, par_z, rh_can, gs_mol)
+      call ci_func(x1,f1, p, iv, g, c, gb_mol, je, cair, oair, lmr_z, par_z, rh_can, gs_mol)
       if(f1<minf)then
          minx=x1
          minf=f1
@@ -2556,7 +2607,7 @@ contains
       
       !if a root zone is found, use the brent method for a robust backup strategy
       if(f1 * f0 < 0._r8)then
-         call brent(x, x0,x1,f0,f1, tol, p, iv, g, gb_mol, je, cair, oair, &
+         call brent(x, x0,x1,f0,f1, tol, p, iv, g, c, gb_mol, je, cair, oair, &
             lmr_z, par_z, rh_can, gs_mol)
          x0=x
          exit
@@ -2566,7 +2617,7 @@ contains
          !stop at the minimum function
          !this happens because of some other issues besides the stomatal conductance calculation
          !and it happens usually in very dry places and more likely with c4 plants.
-         call ci_func(minx,f1, p, iv, g, gb_mol, je, cair, oair, lmr_z, par_z, rh_can, gs_mol)
+         call ci_func(minx,f1, p, iv, g, c, gb_mol, je, cair, oair, lmr_z, par_z, rh_can, gs_mol)
          exit
       endif   
    enddo
