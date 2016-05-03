@@ -435,6 +435,7 @@ contains
     use abortutils      ,only : endrun
     use clm_varctl      ,only : iulog, create_glacier_mec_landunit 
     use clm_varctl      ,only : startyear_experiment, endyear_experiment, add_temperature
+    use clm_varctl      ,only : add_co2
     use clm_varorb      ,only : eccen, obliqr, lambm0, mvelpp
     use shr_file_mod    ,only : shr_file_setLogUnit, shr_file_setLogLevel, &
                                 shr_file_getLogUnit, shr_file_getLogLevel
@@ -933,6 +934,7 @@ contains
     use clm_atmlnd      , only: atm2lnd_type
     use clm_varctl      , only: co2_type, co2_ppmv, iulog, use_c13
     use clm_varctl      , only: startyear_experiment, endyear_experiment, add_temperature
+    use clm_varctl      , only: add_co2
     use clm_varcon      , only: rair, o2_molar_const
     use clm_varcon      , only: c13ratio
     use shr_const_mod   , only: SHR_CONST_TKFRZ
@@ -1184,8 +1186,11 @@ contains
    !------------------------------------Nitrogen deposition----------------------------------------------
         if (nstep .eq. 0) then 
 #THISSITENDEPFILE#
+          starti(:)=1
+          counti(1:2)=1
+          counti(3)=158
           ierr = nf90_inq_varid(ncid, 'NDEP_year', varid)
-          ierr = nf90_get_var(ncid, varid, a2l%ndep_input)
+          ierr = nf90_get_var(ncid, varid, a2l%ndep_input,starti,counti)
           ierr = nf90_close(ncid)
         end if
         !get weights for interpolation
@@ -1294,8 +1299,6 @@ contains
            co2_ppmv_diag = co2_ppmv
         end if
 
-	co2_ppmv_diag = co2_ppmv  !DMR
-
 #ifdef LCH4
         if (index_x2l_Sa_methane /= 0) then
            a2l%forc_pch4(g) = x2l_l%rAttr(index_x2l_Sa_methane,i)
@@ -1365,11 +1368,15 @@ contains
                a2l%c13o2_input(1,1,nindex(2))*wt2) * 1.e-6_r8 * a2l%forc_pbot(g)
         end if
 #else
-           !co2_ppmv_val = co2_ppmv_diag 
+           co2_ppmv_val = co2_ppmv_diag 
            !if (use_c13) then
            !  a2l%forc_pc13o2(g) = co2_ppmv_val * c13ratio * 1.e-6_r8 * a2l%forc_pbot(g)
            !end if
 #endif
+        if (yr .ge. startyear_experiment .and. yr .le. endyear_experiment) then
+          co2_ppmv_val = co2_ppmv_val + add_co2
+        end if
+
 !        else
 !           co2_ppmv_val = co2_ppmv
 !           if (use_c13) then

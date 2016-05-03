@@ -28,7 +28,7 @@ module controlMod
                             glc_topomax, glc_grid, subgridflag, &
                             use_c13, use_c14, irrigate, &
                             spinup_state, override_bgc_restart_mismatch_dump, &
-                            startyear_experiment, endyear_experiment, add_temperature
+                            startyear_experiment, endyear_experiment, add_temperature, add_co2
   use CanopyFluxesMod , only : perchroot, perchroot_alt
 #if (defined LCH4) && (defined CN)
   use clm_varctl   , only : anoxia
@@ -269,7 +269,7 @@ contains
     ! BGC info
 
     namelist /clm_inparm/ &
-         add_temperature, startyear_experiment, endyear_experiment
+         add_temperature, add_co2, startyear_experiment, endyear_experiment
 
 #if (defined CN)
     namelist /clm_inparm/  &
@@ -538,6 +538,7 @@ contains
     call mpi_bcast (endyear_experiment,         1, MPI_INTEGER,  0, mpicom, ier)
     call mpi_bcast (startyear_experiment,       1, MPI_INTEGER,  0, mpicom, ier)
     call mpi_bcast (add_temperature,            1, MPI_INTEGER,  0, mpicom, ier)
+    call mpi_bcast (add_co2,                    1, MPI_INTEGER,  0, mpicom, ier)
 
     ! BGC
 

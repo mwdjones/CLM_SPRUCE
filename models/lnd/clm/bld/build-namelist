@@ -846,6 +846,12 @@ if ( defined($opts{$var}) ) {
    add_default($nl, 'add_temperature','val'=>"$opts{'add_temperature'}");
 }
 
+$var = "add_co2";
+if ( defined($opts{$var}) ) {
+   $val = $opts{$var};
+   add_default($nl, 'add_co2','val'=>"$opts{'add_co2'}");
+}
+
 $var = "clm_startfile";
 if ( defined($opts{$var}) ) {
     $val = $opts{$var};
