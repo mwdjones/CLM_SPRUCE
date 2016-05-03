@@ -57,6 +57,11 @@ Ending year for experimental manipulation
 Temperature manipulation during experimental period (K)
 </entry>
 
+<entry id="add_co2" type="real" category = "clm_physics"
+        group="clm_inparm" >
+CO2 manipulation during experimental period (K)
+</entry>
+
 <entry id="co2_ppmv" type="real" category="clm_physics"
        group="clm_inparm" valid_values="" >
 Atmospheric CO2 molar ratio (by volume) only used when co2_type==constant (umol/mol)

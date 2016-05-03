@@ -181,6 +181,8 @@ parser.add_option("--endyear_experiment", dest="endyear_experiment", default=203
                   help = 'Ending year for experimental manipulation')
 parser.add_option("--add_temperature", dest="add_temperature", default=0, \
                   help = 'Temperature to add during manipulation')
+parser.add_option("--add_co2", dest="add_co2", default=0, \
+                  help = 'Temperature to add during manipulation')
 
 (options, args) = parser.parse_args()
 
@@ -246,7 +248,12 @@ if (compset == 'I20TRCLM45CN' or compset == 'I20TRCN'):
         sys.exit()
 
 #get full path of finidat file
-finidat=options.finidat
+if (options.finidat != ''):
+  finidat=options.ccsm_input+'/lnd/clm2/inidata/'+options.finidat
+  if (not os.path.exists(finidat)):
+	print 'Error:  '+finidat+' does not exist'
+        sys.exit()
+  
 finidat_year=int(options.finidat_year)
 
 if (options.exit_spinup):
@@ -639,6 +646,7 @@ if (options.refcase == 'none'):
         output.write(" startyear_experiment = "+str(options.startyear_experiment)+"\n")
         output.write(" endyear_experiment = "+str(options.endyear_experiment)+"\n")
         output.write(" add_temperature = "+str(options.add_temperature)+"\n")
+        output.write(" add_co2 = "+str(options.add_co2)+"\n")
 	#history file options
         if (options.hist_mfilt != -1):
             if ('20TR' in compset):
@@ -796,7 +804,7 @@ if (options.refcase == 'none'):
                         ptstr = str(numxpts)+'x'+str(numypts)+'pt'
                         src_output.write("ierr = nf90_open('"+options.ccsm_input+"/atm/datm7/CLM1PT_data/"+ptstr+"_"+options.site+"/all_hourly.nc', NF90_NOWRITE, ncid)\n")
                     elif ('#THISSITENDEPFILE#' in s):
-                        src_output.write("ierr = nf90_open('"+options.ccsm_input+"/lnd/clm2/ndepdata/fndep_clm_simyr1849-2006_"+ptstr+"_"+options.site+".nc', nf90_nowrite, ncid)\n")
+                        src_output.write("ierr = nf90_open('"+options.ccsm_input+"/lnd/clm2/ndepdata/fndep_clm_hist_simyr1849-2006_"+ptstr+"_"+options.site+".nc', nf90_nowrite, ncid)\n")
                     elif ('#THISCO2FILE#' in s):
                          src_output.write("ierr = nf90_open('"+options.ccsm_input+"/atm/datm7/CO2/fco2_datm_1765-2007_c100614_new.nc', nf90_nowrite, ncid)\n")
                     elif ('#THISSITEAEROFILE#' in s):

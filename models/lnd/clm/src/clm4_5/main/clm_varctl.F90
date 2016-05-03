@@ -83,9 +83,8 @@ module clm_varctl
 !experimental manipulation
   integer, public :: startyear_experiment = 0           !Starting year for experimental maipulation
   integer, public :: endyear_experiment = 0             !Ending year for experimental maipulation
-  real(r8), public :: add_temperature = 0                !Add temperature during experimental maipulation
-!
-
+  real(r8), public :: add_temperature = 0               !Add temperature during experimental maipulation
+  real(r8), public :: add_co2 = 0                       !Add co2 during experimental manipulation
 
 ! Physics
 !
