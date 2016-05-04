@@ -454,7 +454,7 @@ implicit none
 	real(r8) :: lxacesat
 #endif
 	real(r8) :: som_diffus = 1e-4_r8 / (secspday * 365._r8)  ! [m^2/sec] = 1 cm^2 / yr
-	real(r8) :: dom_diffus = 1e8_r8							! times to som diffus 
+!	real(r8) :: dom_diffus = 1e8_r8							! times to som diffus 
 
 
 !-----------------------------------------------------------------------
@@ -2135,7 +2135,7 @@ end do
 	if (ltype(l) == istsoil .or. ltype(l) == istcrop) then 
 	do j = 2,nlevsoi
 	if(j > jwaterhead_unsat(c) .and. j <= nlevsoi) then
-		caces_unsat_temp(c,j) = (caces_unsat(c,j-1) - caces_unsat(c,j)) * som_diffus * dom_diffus *1000.* (soiltemp(c,j)/298)**1.87 * get_step_size() / (z(c,j) - z(c,j-1)) !CH4_dif
+		caces_unsat_temp(c,j) = (caces_unsat(c,j-1) - caces_unsat(c,j)) * dom_diffus * (soiltemp(c,j)/298)**1.87 * get_step_size() / (z(c,j) - z(c,j-1)) !CH4_dif
 
 		if(abs(caces_unsat_temp(c,j)) < abs(caces_unsat(c,j-1) - (caces_unsat(c,j-1) * dz(c,j-1) + caces_unsat(c,j) * dz(c,j)) / (dz(c,j) + dz(c,j-1))))  then
 		caces_unsat_temp(c,j) = caces_unsat_temp(c,j)
@@ -2147,7 +2147,7 @@ end do
 		caces_unsat(c,j) = caces_unsat(c,j) + caces_unsat_temp(c,j) * dz(c,j)	
 		!write(*,*)"after: unsat ",j, caces_unsat(c,j-1),caces_unsat(c,j)
 	end if
-		caces_sat_temp(c,j) = (caces_sat(c,j-1) - caces_sat(c,j)) * som_diffus * dom_diffus *1000.* (soiltemp(c,j)/298)**1.87 * get_step_size() / (z(c,j) - z(c,j-1)) !CH4_dif
+		caces_sat_temp(c,j) = (caces_sat(c,j-1) - caces_sat(c,j)) * dom_diffus * (soiltemp(c,j)/298)**1.87 * get_step_size() / (z(c,j) - z(c,j-1)) !CH4_dif
 
 		if(abs(caces_sat_temp(c,j)) < abs(caces_sat(c,j-1) - (caces_sat(c,j-1) * dz(c,j-1) + caces_sat(c,j) * dz(c,j)) / (dz(c,j) + dz(c,j-1))))  then
 		caces_sat_temp(c,j) = caces_sat_temp(c,j)
@@ -2284,10 +2284,10 @@ end do
 		!~ lat_flux_factor2 	= (hum_frac/hol_frac)
 		
 !~ !	if(wa(1) > 1e-10 .and. wa(2) > 1e-10) then
-		!~ lxdomunsat 		= (cdocs_unsat(1,j) - cdocs_unsat(2,j)) * som_diffus * dom_diffus * get_step_size()
-		!~ lxdomsat 			= (cdocs_sat(1,j) - cdocs_sat(2,j)) * som_diffus * dom_diffus * get_step_size()
-		!~ lxaceunsat 		= (caces_unsat(1,j) - caces_unsat(2,j)) * som_diffus * dom_diffus *100* get_step_size()
-		!~ lxacesat 			= (caces_sat(1,j) - caces_sat(2,j)) * som_diffus * dom_diffus *100* get_step_size()
+		!~ lxdomunsat 		= (cdocs_unsat(1,j) - cdocs_unsat(2,j)) * dom_diffus * get_step_size()
+		!~ lxdomsat 			= (cdocs_sat(1,j) - cdocs_sat(2,j)) * dom_diffus * get_step_size()
+		!~ lxaceunsat 		= (caces_unsat(1,j) - caces_unsat(2,j)) * dom_diffus *100* get_step_size()
+		!~ lxacesat 			= (caces_sat(1,j) - caces_sat(2,j)) * dom_diffus *100* get_step_size()
 !~ !write(iulog,*) "LBGC debug 7", lxdomunsat, cdocs_unsat(1,j), cdocs_unsat(2,j)
 		!~ if(abs(lxdomunsat) < abs(cdocs_unsat(1,j) - (cdocs_unsat(1,j) * sqrt(lat_flux_factor2) + cdocs_unsat(2,j) * sqrt(lat_flux_factor1))) / (sqrt(lat_flux_factor2) + sqrt(lat_flux_factor1)))  then
 		!~ lxdomunsat = lxdomunsat
@@ -3021,7 +3021,7 @@ implicit none
 	real(r8) :: ccon_ch4s_sat_spruce2(1:20)
 
 	real(r8) :: som_diffus = 1e-4_r8 / (secspday * 365._r8)  ! [m^2/sec] = 1 cm^2 / yr
-	real(r8) :: dom_diffus = 1e8_r8							! times to som diffus 
+!	real(r8) :: dom_diffus = 1e8_r8							! times to som diffus 
 
 	dz                				=> cps%dz
 	qflx_lat_aqu_layer 			=> cwf%qflx_lat_aqu_layer
@@ -3381,12 +3381,12 @@ end do
 
 ! lateral diffusion
 do j = 1, 14
-		lxdocsat 			= (cdocs_sat_spruce1(j+6) - cdocs_sat_spruce2(j)) * som_diffus * dom_diffus * get_step_size()
-		lxdonsat 			= (cdons_sat_spruce1(j+6) - cdons_sat_spruce2(j)) * som_diffus * dom_diffus * get_step_size()
-		lxacesat 			= (caces_sat_spruce1(j+6) - caces_sat_spruce2(j)) * som_diffus * dom_diffus * get_step_size()
-		!~ lxdocsat 			= (cdocs_sat_spruce1(j+6)/hu_h2o(j+6) - cdocs_sat_spruce2(j)/ho_h2o(j)) * som_diffus * dom_diffus * get_step_size()
-		!~ lxdonsat 			= (cdocs_sat_spruce1(j+6)/hu_h2o(j+6) - cdocs_sat_spruce2(j)/ho_h2o(j)) * som_diffus * dom_diffus * get_step_size()
-		!~ lxacesat 			= (caces_sat_spruce1(j+6)/hu_h2o(j+6) - caces_sat_spruce2(j)/ho_h2o(j)) * som_diffus * dom_diffus * get_step_size()
+		lxdocsat 			= (cdocs_sat_spruce1(j+6) - cdocs_sat_spruce2(j)) * dom_diffus * get_step_size()
+		lxdonsat 			= (cdons_sat_spruce1(j+6) - cdons_sat_spruce2(j)) * dom_diffus * get_step_size()
+		lxacesat 			= (caces_sat_spruce1(j+6) - caces_sat_spruce2(j)) * dom_diffus * get_step_size()
+		!~ lxdocsat 			= (cdocs_sat_spruce1(j+6)/hu_h2o(j+6) - cdocs_sat_spruce2(j)/ho_h2o(j)) * dom_diffus * get_step_size()
+		!~ lxdonsat 			= (cdocs_sat_spruce1(j+6)/hu_h2o(j+6) - cdocs_sat_spruce2(j)/ho_h2o(j)) * dom_diffus * get_step_size()
+		!~ lxacesat 			= (caces_sat_spruce1(j+6)/hu_h2o(j+6) - caces_sat_spruce2(j)/ho_h2o(j)) * dom_diffus * get_step_size()
 !write(iulog,*) "inside0: ", j, lxdocsat, cdocs_sat_spruce1(j+6), cdocs_sat_spruce2(j), hu_h2o(j+6), ho_h2o(j)
 	if(lxdocsat > 0 .and. abs(lxdocsat) > (cdocs_sat_spruce1(j+6)/sqrt(lat_flux_factor1))) then
 	lxdocsat = cdocs_sat_spruce1(j+6)/sqrt(lat_flux_factor1)*0.9

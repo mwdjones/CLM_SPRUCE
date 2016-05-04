@@ -35,7 +35,7 @@ module microbevarcon
   real(r8), PARAMETER :: Mmmin = 0.1
   real(r8), PARAMETER :: MFGbiomin = 1e-15
 
-  integer, parameter :: nummicrobepar = 81
+  integer, parameter :: nummicrobepar = 82
   real(r8) :: q10ch4base = 295._r8  ! Rough estimate from comparison between Walter and previous CLM-CH4 data
   ! Uses Michigan bog data from Shannon & White
   ! This is the temperature at which the effective f_ch4 actually equals the constant f_ch4.
@@ -237,6 +237,7 @@ module microbevarcon
   real(r8) :: k_dom = 0.042
   real(r8) :: k_bacteria = 0.56
   real(r8) :: k_fungi = 0.56
+  real(r8) :: dom_diffus = 10. / 3600. / 365.
   
 !
 ! !PUBLIC MEMBER FUNCTIONS:
@@ -394,6 +395,7 @@ q10ch4base                         = dummy(i); i=i+1
 	k_dom = dummy(i); i=i+1
 	k_bacteria = dummy(i); i=i+1
 	k_fungi = dummy(i); i=i+1
+	dom_diffus = dummy(i); i=i+1
   
     !xiaofeng xu creared new mechanisms and the new parameters         
 end if
@@ -486,6 +488,7 @@ end if
     call mpi_bcast (k_dom, 1 , MPI_REAL8, 0, mpicom, ierr)
     call mpi_bcast (k_bacteria, 1 , MPI_REAL8, 0, mpicom, ierr)
     call mpi_bcast (k_fungi, 1 , MPI_REAL8, 0, mpicom, ierr)
+    call mpi_bcast (dom_diffus, 1 , MPI_REAL8, 0, mpicom, ierr)
     
     if (masterproc) then
        write(iulog,*) 'Successfully read CH4 namelist'
@@ -578,6 +581,7 @@ end if
 	write(iulog,*)'k_dom = ', k_dom
 	write(iulog,*)'k_bacteria = ', k_bacteria
 	write(iulog,*)'k_fungi = ', k_fungi
+	write(iulog,*)'dom_diffus = ', dom_diffus
 	
        if (ch4offline) write(iulog,*)'CH4 Model will be running offline and not affect fluxes to atmosphere.'
        if (aereoxid >= 0._r8) write(iulog,*) 'Fixed aerenchyma oxidation has been selected.'
