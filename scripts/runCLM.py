@@ -2,8 +2,8 @@
 
 import os, sys, csv, time, math
 from optparse import OptionParser
-import Scientific.IO.NetCDF
-from Scientific.IO import NetCDF
+#import Scientific.IO.NetCDF
+#from Scientific.IO import NetCDF
 #from Numeric import *
 
 
@@ -702,9 +702,9 @@ if (options.refcase == 'none'):
             output.write( " stream_fldfilename_ndep = '"+options.ccsm_input+ \
       "/lnd/clm2/ndepdata/fndep_clm_hist_simyr1849-2006_2x1pt_US-SPR.nc'\n")
         #site-specific fire stream files
-        output.write(" stream_fldfilename_popdens = '/home/zdr/models/CLM_SPRUCE/inputdata/lnd/clm2/firedata/clmforc.Li_" \
+        output.write(" stream_fldfilename_popdens = '"+options.ccsm_input+"/lnd/clm2/firedata/clmforc.Li_" \
                       +"2012_hdm_1x1pt_US-SPR_AVHRR_simyr1850-2010_c130401.nc'\n")
-        output.write(" stream_fldfilename_lightng = '/home/zdr/models/CLM_SPRUCE/inputdata/atm/datm7/NASA_LIS/clmforc.Li_" \
+        output.write(" stream_fldfilename_lightng = '"+options.ccsm_input+"/atm/datm7/NASA_LIS/clmforc.Li_" \
                       +"2012_climo1995-2011.1x1pt_US-SPR.lnfm_c130327.nc'\n")
 
         if (options.C13):
