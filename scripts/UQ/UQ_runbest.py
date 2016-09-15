@@ -18,16 +18,10 @@ parser = OptionParser()
 
 parser.add_option("--runroot", dest="runroot", default="../../run", \
                   help="Directory where the run would be created")
-parser.add_option("--ens_num", dest="ensnum", default=1, \
-                  help="Ensemble member number")
-parser.add_option("--parm_list", dest="parm_list", default="", \
-                  help="File containing parameter names/pfts to modify")
-parser.add_option("--parm_data", dest="parm_data", default="", \
-                  help="File containing parameter values and ranges")
-parser.add_option("--constraints", dest="constraints", default="", \
+parser.add_option("--constraints", dest="constraints", default="./constraints", \
                   help="Directory containing constraining variables")
-parser.add_option("--norun", dest="norun", default=False, action="store_true", \
-                  help="Don't run model (use for testing purposes)")
+parser.add_option("--parm_list", dest="parm_list", default="./parm_list", \
+                  help="File containing parameter names/pfts to modify")
 
 (options, args) = parser.parse_args()
 
@@ -96,19 +90,22 @@ for s in myinput:
 myinput.close()
 
 #get parameter values
-myinput = open(options.parm_data, 'r')
-for s in myinput:    
-    parm_values.append(float(s))
+myinput = open('qpso_best.txt', 'r')
+lnum=0
+for s in myinput: 
+    if (lnum >= 2):   
+      parm_values.append(float(s.split()[2]))
+    lnum=lnum+1
 myinput.close()
 
 n_parameters = len(parm_names)
-gst=str(100000+int(options.ensnum))
+#gst=str(100000+int(options.ensnum))
 
 #create ensemble directory from original case 
 orig_dir = str(os.path.abspath(options.runroot)+'/'+casename+'/run')
-ens_dir  = os.path.abspath(options.runroot)+'/UQ/'+casename+'/g'+gst[1:]
+ens_dir  = os.path.abspath(options.runroot)+'/UQ/'+casename+'/best'
 
-os.system('mkdir -p '+options.runroot+'/UQ/'+casename+'/g'+gst[1:]+'/timing/checkpoints')
+os.system('mkdir -p '+options.runroot+'/UQ/'+casename+'/best/timing/checkpoints')
 os.system('cp '+orig_dir+'/*_in* '+ens_dir)
 os.system('cp '+orig_dir+'/*nml '+ens_dir)
 os.system('cp '+orig_dir+'/*stream* '+ens_dir)
@@ -120,8 +117,7 @@ os.system('cp '+orig_dir+'/*pftdyn* '+ens_dir)
 os.system('cp '+ens_dir+'/microbepar_in '+ens_dir+'/microbepar_in_orig')
 username = getpass.getuser()
 os.system('cp /home/'+username+'/models/CLM_SPRUCE/inputdata/lnd/clm2/paramdata/'+ \
-               'clm_params_spruce_calveg.nc '+ens_dir+'/clm_params_'+ \
-               gst[1:]+".nc")	
+               'clm_params_spruce_calveg.nc '+ens_dir+'/clm_params_best.nc')	
 inifile = ens_dir+'/'+casename+'.clm2.r.1974-01-01-00000.nc'
 #inifile =  ens_dir+'/SPRUCE-finalspinup-peatland-carbon-initial.nc'
 cwdc=getvar(inifile, 'cwdc_vr')
@@ -148,10 +144,10 @@ for f in os.listdir(ens_dir):
         myoutput=open(ens_dir+'/'+f+'.tmp','w')
         for s in myinput:
             if ('fpftcon' in s):
-                est = str(100000+int(options.ensnum))
-                myoutput.write(" fpftcon = './clm_params_"+est[1:]+".nc'\n")
+                #est = str(100000+int(options.ensnum))
+                myoutput.write(" fpftcon = './clm_params_best.nc'\n")
                 #Hard-coded parameter file
-                pftfile = ens_dir+'/clm_params_'+est[1:]+'.nc'
+                pftfile = ens_dir+'/clm_params_best.nc'
                 microbefile = ens_dir+'/microbepar_in'
                 pnum = 0
                 for p in parm_names:
@@ -192,8 +188,7 @@ for f in os.listdir(ens_dir):
 workdir = os.path.abspath('.')
 
 os.chdir(ens_dir)
-if (options.norun == False):
-    os.system(orig_dir+'/../bld/cesm.exe > ccsm_log.txt')
+os.system(orig_dir+'/../bld/cesm.exe > ccsm_log.txt')
                     
 
 #---------  code to post-process ensebmle member and cacluate total normalized SSE ----------
@@ -304,7 +299,7 @@ for filename in os.listdir(UQdir+'/'+options.constraints):
         lnum = lnum+1
 myoutput.close()
 
-myoutput = open(workdir+'/ssedata/mysse_'+gst[1:]+'.txt','w')
+myoutput = open(workdir+'/ssedata/mysse_best.txt','w')
 myoutput.write(str(sse))
 myoutput.close()
 

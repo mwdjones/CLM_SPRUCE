@@ -25,13 +25,14 @@ double precision gpar(maxiter,maxparms)
 double precision gobj(maxiter)
 double precision pmin(maxparms), pmax(maxparms)
 double precision fi(maxparms), u(maxparms), v(maxparms)
+logical isvalid
 
 character(len=100) dummy, parm_name(maxparms), case_name
 
 !------- user-tunable QPSO algorithm parameters ----------------
 
 npop = 64         !number of particles
-niter = 1000       !number of iterations
+niter = 200       !number of iterations
 beta_l = 0.4d0
 beta_u = 0.7d0
 
@@ -69,20 +70,16 @@ nfunc(:) = 0   !keep track of total function evaluations
 x(:,:) = 0d0
 f_x(:) = 0d0
 f_pbest(:) = 0d0
-nparms = 2
-pmin(1:2) =-3d0
-pmax(1:2) = 3d0
 
 do i=myid+1,npop,np      
    !randomize starting locations
    call init_random_seed
    call random_number(u)
    x(i,:) = pmin + (pmax-pmin) * u
-   f_x(i) = feval(x(i,:), nparms)
+   f_x(i) = feval(x(i,:), nparms, i)
    nfunc(i) = nfunc(i)+1
    f_pbest(i) = f_x(i)
 end do
-
 
 call mpi_allreduce(x, xall, maxparms*maxpop, mpi_double, mpi_sum, &
         mpi_comm_world, ierr)
@@ -105,7 +102,7 @@ call mpi_bcast(f_gbest, 1, mpi_double, 0, mpi_comm_world, ierr)
 
 !QPSO algorithm
 do i=1,niter
-
+   if (myid .eq. 0) print*, 'Iteration', i
    beta = beta_u - (beta_u-beta_l)*i/niter
    !compute mean of best parameters (all procs)
    do k=1, nparms
@@ -117,21 +114,29 @@ do i=1,niter
    pbest(:,:) = 0d0
    f_pbest(:) = 0d0
    do j = myid+1,npop,np
-      call random_number(fi)
-      call random_number(u)
-      call random_number(v)
+      isvalid = .false.
+      do while (isvalid .eqv. .false.)   !Force a set of parameters within the bounds
+         call random_number(fi)
+         call random_number(u)
+         call random_number(v)
 
-      do k=1,nparms
-        pupdate = fi(k)*pbestall(j,k) + (1-fi(k))*gbest
-        betapro = beta * abs(mbest(k)-xall(j,k))
+         isvalid=.true.
+         do k=1,nparms
+            pupdate = fi(k)*pbestall(j,k) + (1-fi(k))*gbest
+            betapro = beta * abs(mbest(k)-xall(j,k))
 
-        x(j,k) = pupdate(k)+((-1d0)**ceiling(0.5+v(k)))*betapro(k)*(-log(u(k)))
+            x(j,k) = pupdate(k)+((-1d0)**ceiling(0.5+v(k)))*betapro(k)*(-log(u(k)))
 
-         if (x(j,k) .lt. pmin(k) .or. x(j,k) .gt. pmax(k)) goto 20
+            if (x(j,k) .lt. pmin(k) .or. x(j,k) .gt. pmax(k)) isvalid=.false.
+            !DMR for better load balancing, instead of not running, run at the boundary.  Testing only.
+            !if (x(j,k) .lt. pmin(k)) x(j,k) = pmin(k)
+            !if (x(j,k) .gt. pmax(k)) x(j,k) = pmax(k)
+
+         end do
       end do
 
       !run the model to get the cost function
-      f_x(j) = feval(x(j,:),nparms)
+      f_x(j) = feval(x(j,:),nparms, j)
       nfunc(j) = nfunc(j)+1
 
 20 continue
@@ -165,8 +170,20 @@ do i=1,niter
    call mpi_allreduce(nfunc,nfuncall, maxpop, mpi_integer, mpi_sum, &
         mpi_comm_world, ierr)
    if (myid .eq. 0) then 
-     !print*, i, gpar(i,1:nparms), gobj(i), sum(nfuncall(1:npop))
-     print*, i, gobj(i)
+     open(unit=8, file='qpso_best.txt')
+     write(8,*), 'Iteration', i
+     write(8,*), 'Objective function:', gobj(i)
+     do k=1,nparms
+        write(8,'(A,1x,I2,1x,g13.6)') trim(parm_name(k)), pft(k), gpar(i,k)
+     end do
+     close(8)
+     if (i .eq. 1) then
+        open(unit=10, file='qpso_costfunc.txt')
+     else
+        open(unit=10, file='qpso_costfunc.txt', status='old', position='append', action='write')
+     end if
+     write(10,*) i, sum(nfuncall) , gobj(i)
+     close(10)
    end if
 end do
 call mpi_finalize(ierr)
@@ -175,32 +192,33 @@ end program qpso
 
 
 !Function to evaluate the CLM/ALM model
-double precision function feval(parms, nparms)
+double precision function feval(parms, nparms, thispop)
 
-integer nparms, i
+integer nparms, i, thispop
 double precision parms(500), trueparms(4)
 double precision mydata(1000), model(1000), sse(1000)
 double precision temp(1000), par(1000)
-!write parameters to file
-!execute python script
-!read in sum of squared errors
-!trueparms(1) = 1.0d0
-!trueparms(2) = 1.2d0
-!trueparms(3) = 10.0d0
-!trueparms(4) = 300.0d0
-trueparms(1) = 2.282789137828685e-01
-trueparms(2) = -1.625534957238061
-mydata(1) = (3d0*(1-trueparms(1))**2) * exp(-1d0*trueparms(1)**2 - &
-     (trueparms(2)+1)**2) - 10*(trueparms(1)/5d0 - trueparms(1)**3 - &
-     trueparms(2)**5)*exp(-1d0*trueparms(1)**2-trueparms(2)**2) - &
-     1d0/3*exp(-(trueparms(1)+1d0)**2 - trueparms(2)**2)
+character(len=6) thispopst
 
-model(1) =  (3d0*(1-parms(1))**2) * exp(-1d0*parms(1)**2 - &
-     (parms(2)+1)**2) - 10*(parms(1)/5d0 - parms(1)**3 - &
-     parms(2)**5)*exp(-1d0*parms(1)**2-parms(2)**2) - &
-     1d0/3*exp(-(parms(1)+1d0)**2 - parms(2)**2)
 
-feval = (model(1)-mydata(1))**2
+write(thispopst, '(I6)') 100000+thispop
+
+!write the parameters to file 
+open(unit=9, file='./parm_data_files/parm_data_' // thispopst(2:6))
+do i=1,nparms
+   write(9,*) parms(i)
+end do
+close(9)
+
+!Call python workflow to set up and launch model simulation
+call system('python UQ_runens.py --ens_num ' // thispopst(2:6) // &
+     ' --parm_list ' // 'parm_list --parm_data ./parm_data_files/' // &
+     'parm_data_' // thispopst(2:6) // ' --constraints constraints')
+
+!get the sum of squared errors
+open(unit=9, file='./ssedata/mysse_' // thispopst(2:6) // '.txt')
+read(9,*) feval
+close(9)
 
 return 
 

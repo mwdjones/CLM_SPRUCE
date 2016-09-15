@@ -1,15 +1,14 @@
-F90 = mpif90
-#F90 = /projects/cesm/devtools/mpich-3.0.4-gcc4.8.1/bin/mpif90
-CC  = mpicc
-#CC = /projects/cesm/devtools/mpich-3.0.4-gcc4.8.1/bin/mpicc
+F90 = /software/tools/spack/opt/spack/linux-x86_64/gcc-5.3.0/openmpi-1.10.2-w26llp27jmybo7wlgoqxjrtptltmripg/bin/mpif90
+CC  = /software/tools/spack/opt/spack/linux-x86_64/gcc-5.3.0/openmpi-1.10.2-w26llp27jmybo7wlgoqxjrtptltmripg/bin/mpicc
+
 
 # Define environment
 ENVIRON = -DERGO
 ENVIRON = -DHAVE_MPI
 
 #Compiler options
-#FFLAGS = -O3 -fno-range-check 
-FFLAGS = -O3 -module obj
+FFLAGS = -O3 -fno-range-check 
+#FFLAGS = -O3 
 CFLAGS = -O3
 MODEL = CLM
 
@@ -20,12 +19,14 @@ FSRCDIR = ./srctmp
 
 #directories
 OD = ./obj
-BASE_NETCDF=/home/zdr/netcdf-4.0
-#BASE_NETCDF =/projects/cesm/devtools/netcdf-4.1.3-gcc4.8.1-mpich3.0.4
-INCDIR = -I/projects/cesm/devtools/mpich-3.0.4-gcc.4.8.1/include  -I/usr/include -I$(BASE_NETCDF)/include 
-LIBDIR = -L. -L$(BASE_NETCDF)/lib -L/projects/cesm/devtools/mpich-3.0.4-gcc4.8.1/lib
+BASE_NETCDF=/software/user_tools/current/cades-ccsi/netcdf4/4.4.0/openmpi-1.10.2-gcc-5.3
+INCDIR = -I/usr/include -I$(BASE_NETCDF)/include 
+LIBDIR = -L. -L$(BASE_NETCDF)/lib 
 
 all: postproc 
+
+QPSO: $(OD)/QPSO.o $(OD)/init_random_seed.o
+	$(F90) -o $@ $(FFLAGS) $(INCDIR) $^ $(LIBDIR) -lnetcdf
 
 ERGO_CLM: $(OD)/main.o $(OD)/ergo_global.o $(OD)/ERGO.o $(OD)/ergo_fileIO.o $(OD)/ergo_input_vars.o $(OD)/ergo_converge.o $(OD)/ergo_timer.o $(OD)/ergo_rndseed.o $(OD)/DE.o $(OD)/ceo.o $(OD)/mt19937ar.o $(OD)/model.o 
 	$(F90) -o $@ $(FFLAGS) $(INCDIR) $^ $(LIBDIR) -lnetcdf
@@ -37,6 +38,10 @@ postproc: $(OD)/postproc.o
 #object files
 $(OD)/postproc.o: postproc.f90
 	$(F90) -c $(FFLAGS) $(INCDIR) postproc.f90 -o $@
+$(OD)/QPSO.o: QPSO_src/qpso.f90
+	$(F90) -c $(FFLAGS) $(INCDIR) QPSO_src/qpso.f90 -o $@
+$(OD)/init_random_seed.o: QPSO_src/init_random_seed.f90
+	$(F90) -c $(FFLAGS) $(INCDIR) QPSO_src/init_random_seed.f90 -o $@
 
 #ERGO optimization code
 $(OD)/main.o: $(OD)/ergo_global.o $(OD)/ERGO.o $(OD)/ergo_fileIO.o $(OD)/model.o $(FSRCDIR)/main.f90
