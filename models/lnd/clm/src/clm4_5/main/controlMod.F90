@@ -81,9 +81,9 @@ module controlMod
   use CNVerticalProfileMod, only: exponential_rooting_profile, rootprof_exp, surfprof_exp, pftspecific_rootingprofile
 
 #ifndef CENTURY_DECOMP
-  use CNDecompCascadeMod_BGC, only: decomp_depth_efolding, froz_q10
+  use CNDecompCascadeMod_BGC, only: froz_q10
 #else
-  use CNDecompCascadeMod_CENTURY, only: decomp_depth_efolding, froz_q10
+  use CNDecompCascadeMod_CENTURY, only: froz_q10
 #endif
 #endif   
 
@@ -93,9 +93,9 @@ module controlMod
   use CNVerticalProfileMod, only: exponential_rooting_profile, rootprof_exp, surfprof_exp, pftspecific_rootingprofile
 
 #ifndef CENTURY_DECOMP
-  use CNDecompCascadeMod_BGC, only: decomp_depth_efolding, froz_q10
+  use CNDecompCascadeMod_BGC, only: froz_q10
 #else
-  use CNDecompCascadeMod_CENTURY, only: decomp_depth_efolding, froz_q10
+  use CNDecompCascadeMod_CENTURY, only: froz_q10
 #endif
 #endif    
 
@@ -316,7 +316,7 @@ contains
 
     ! depth inhibition of decomposition paramters
     namelist /clm_inparm/  &
-         decomp_depth_efolding, froz_q10
+         froz_q10
 
     ! C and N input vertical profiles
     namelist /clm_inparm/  & 
@@ -330,7 +330,7 @@ contains
 
     ! depth inhibition of decomposition paramters
     namelist /clm_inparm/  &
-         decomp_depth_efolding, froz_q10
+         froz_q10
 
     ! C and N input vertical profiles
     namelist /clm_inparm/  & 
@@ -563,7 +563,7 @@ contains
     call mpi_bcast (max_depth_cryoturb,         1, MPI_REAL8,     0, mpicom, ier)
 
     ! depth inhibition of decomposition paramters
-    call mpi_bcast (decomp_depth_efolding,          1, MPI_REAL8,     0, mpicom, ier)
+    !call mpi_bcast (decomp_depth_efolding,          1, MPI_REAL8,     0, mpicom, ier)
     call mpi_bcast (froz_q10,                       1, MPI_REAL8,     0, mpicom, ier)
 
     ! C and N input vertical profiles
@@ -582,7 +582,7 @@ contains
     call mpi_bcast (max_depth_cryoturb,         1, MPI_REAL8,     0, mpicom, ier)
 
     ! depth inhibition of decomposition paramters
-    call mpi_bcast (decomp_depth_efolding,          1, MPI_REAL8,     0, mpicom, ier)
+    !call mpi_bcast (decomp_depth_efolding,          1, MPI_REAL8,     0, mpicom, ier)
     call mpi_bcast (froz_q10,                       1, MPI_REAL8,     0, mpicom, ier)
 
     ! C and N input vertical profiles
@@ -778,7 +778,7 @@ contains
     write(iulog, *) '   max_altdepth_cryoturbation (m)                        : ', max_altdepth_cryoturbation
     write(iulog, *) '   max_depth_cryoturb (m)                                : ', max_depth_cryoturb
 
-    write(iulog, *) '   decomp_depth_efolding                                 : ', decomp_depth_efolding
+    !write(iulog, *) '   decomp_depth_efolding                                 : ', decomp_depth_efolding
     write(iulog, *) '   froz_q10                                              : ', froz_q10
 
     write(iulog, *) '   exponential_rooting_profile                           : ', exponential_rooting_profile
@@ -794,7 +794,7 @@ contains
     write(iulog, *) '   max_altdepth_cryoturbation (m)                        : ', max_altdepth_cryoturbation
     write(iulog, *) '   max_depth_cryoturb (m)                                : ', max_depth_cryoturb
 
-    write(iulog, *) '   decomp_depth_efolding                                 : ', decomp_depth_efolding
+    !write(iulog, *) '   decomp_depth_efolding                                 : ', decomp_depth_efolding
     write(iulog, *) '   froz_q10                                              : ', froz_q10
 
     write(iulog, *) '   exponential_rooting_profile                           : ', exponential_rooting_profile

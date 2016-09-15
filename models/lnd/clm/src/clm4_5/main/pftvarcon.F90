@@ -147,7 +147,10 @@ module pftvarcon
   real(r8):: fleafcn(0:mxpft)      !C:N during grain fill; leaf
   real(r8):: ffrootcn(0:mxpft)     !C:N during grain fill; fine root
   real(r8):: fstemcn(0:mxpft)      !C:N during grain fill; stem
-  real(r8):: bdnr
+  real(r8):: bdnr                  !bulk denitrification rate
+  real(r8):: decomp_depth_efolding
+  real(r8):: ksomfac
+  real(r8):: br_mr
 
   ! pft parameters for CNDV code
   ! from LPJ subroutine pftparameters
@@ -383,6 +386,14 @@ contains
     if ( .not. readv ) call endrun( trim(subname)//' ERROR: error in reading in pft data' )
     call ncd_io('bdnr',bdnr, 'read', ncid, readvar=readv, posNOTonfile=.true.)
     if ( .not. readv ) call endrun( trim(subname)//' ERROR: error in reading inpft data' )
+    call ncd_io('decomp_depth_efolding',decomp_depth_efolding, 'read', ncid, readvar=readv, posNOTonfile=.true.)
+    if ( .not. readv ) call endrun( trim(subname)//' ERROR: error in reading inpft data' )
+    call ncd_io('ksomfac',ksomfac, 'read', ncid, readvar=readv, posNOTonfile=.true.)
+    if ( .not. readv ) call endrun( trim(subname)//' ERROR: error in reading inpft data' )
+    call ncd_io('br_mr',br_mr, 'read', ncid, readvar=readv,posNOTonfile=.true.)
+    if ( .not. readv ) call endrun( trim(subname)//' ERROR: error in reading inpft data' )
+
+
 
 #if (defined VERTSOILC) || (defined MICROBE)
     call ncd_io('rootprof_beta',rootprof_beta, 'read', ncid, readvar=readv, posNOTonfile=.true.)

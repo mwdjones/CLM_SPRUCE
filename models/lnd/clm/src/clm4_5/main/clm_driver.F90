@@ -971,7 +971,7 @@ subroutine write_diagnostic (wrtdia, nstep)
   else
 
      if (masterproc) then
-        write(iulog,*)'clm2: completed timestep ',nstep
+        !write(iulog,*)'clm2: completed timestep ',nstep
         call shr_sys_flush(iulog)
      end if
 

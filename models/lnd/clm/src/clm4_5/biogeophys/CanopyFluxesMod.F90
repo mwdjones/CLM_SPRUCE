@@ -1397,7 +1397,7 @@ contains
    use clm_atmlnd  , only : clm_a2l
    use clm_varcon  , only : rgas, tfrz
    use clm_varpar  , only : nlevcan
-   use pftvarcon    , only : nbrdlf_dcd_tmp_shrub, mp
+   use pftvarcon    , only : nbrdlf_dcd_tmp_shrub, mp, br_mr
    use pftvarcon    , only : nsoybean, nsoybeanirrig, npcropmin
 #if (defined CN)
    use CNAllocationMod, only : CNAllocation_Carbon_only
@@ -1856,7 +1856,9 @@ contains
       !
       ! Then scale this value at the top of the canopy for canopy depth
 
-      lmr25top = 2.525e-6_r8 * (1.5_r8 ** ((25._r8 - 20._r8)/10._r8))
+
+!      lmr25top = 2.525e-6_r8 * (1.5_r8 ** ((25._r8 - 20._r8)/10._r8))
+      lmr25top = br_mr  * (1.5_r8 ** ((25._r8 - 20._r8)/10._r8))
       lmr25top = lmr25top * lnc(p) / 12.e-06_r8
 
 #else
