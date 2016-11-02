@@ -1397,7 +1397,7 @@ contains
    use clm_atmlnd  , only : clm_a2l
    use clm_varcon  , only : rgas, tfrz
    use clm_varpar  , only : nlevcan
-   use pftvarcon    , only : nbrdlf_dcd_tmp_shrub, mp, br_mr
+   use pftvarcon    , only : nbrdlf_dcd_tmp_shrub, mp, br_mr, q10_mr
    use pftvarcon    , only : nsoybean, nsoybeanirrig, npcropmin
 #if (defined CN)
    use CNAllocationMod, only : CNAllocation_Carbon_only
@@ -1858,7 +1858,7 @@ contains
 
 
 !      lmr25top = 2.525e-6_r8 * (1.5_r8 ** ((25._r8 - 20._r8)/10._r8))
-      lmr25top = br_mr  * (1.5_r8 ** ((25._r8 - 20._r8)/10._r8))
+      lmr25top = br_mr  * (q10_mr ** ((25._r8 - 20._r8)/10._r8))
       lmr25top = lmr25top * lnc(p) / 12.e-06_r8
 
 #else
@@ -1898,12 +1898,14 @@ contains
          ! Maintenance respiration
 
          lmr25 = lmr25top * nscaler
-         if (c3flag(p)) then
-            lmr_z(p,iv) = lmr25 * ft(t_veg(p), lmrha) * fth(t_veg(p), lmrhd, lmrse, lmrc)
-         else
-            lmr_z(p,iv) = lmr25 * 2._r8**((t_veg(p)-(tfrz+25._r8))/10._r8)
-            lmr_z(p,iv) = lmr_z(p,iv) / (1._r8 + exp( 1.3_r8*(t_veg(p)-(tfrz+55._r8)) ))
-         end if
+         !if (c3flag(p)) then
+         !   lmr_z(p,iv) = lmr25 * ft(t_veg(p), lmrha) * fth(t_veg(p), lmrhd, lmrse, lmrc)
+         !else
+         !   lmr_z(p,iv) = lmr25 * 2._r8**((t_veg(p)-(tfrz+25._r8))/10._r8)
+         !   lmr_z(p,iv) = lmr_z(p,iv) / (1._r8 + exp( 1.3_r8*(t_veg(p)-(tfrz+55._r8)) ))
+         !end if
+         !Return to simple Q10 relationship
+         lmr_z(p,iv) = lmr25 * q10_mr ** ((t_veg(p)-(tfrz+25._r8))/10._r8)
 
          if (par_z(p,iv) <= 0._r8) then           ! night time
 

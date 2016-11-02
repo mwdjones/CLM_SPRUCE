@@ -27,7 +27,8 @@ setenv LD_LIBRARY_PATH /opt/torque/lib:/usr/local/lib:/usr/lib64
 setenv USER_SOFTWARES /software/user_tools/current/cades-ccsi
 
 # gcc-5.3.0 for CLM/PFLOTRAN on OR-CONDO 
-module load linux-x86_64/gcc@5.3.0%gcc@4.8.5+gold-5hy3c4b
+#module load linux-x86_64/gcc@5.3.0%gcc@4.8.5+gold-5hy3c4b
+module load gcc/5.3.0
 setenv GCC_ROOT /software/tools/spack/opt/spack/linux-x86_64/gcc-4.8.5/gcc-5.3.0-5hy3c4b3xqemygnfwyl5dsc753gbvzrc
 
 setenv PATH ${GCC_ROOT}/bin:${PATH}
@@ -37,7 +38,7 @@ setenv gfortran ${GCC_ROOT}/bin/gfortran
 
 # mpi built with gcc-5.3.0
 #
-module load linux-x86_64/openmpi@1.10.2%gcc@5.3.0~psm~tm~verbs-w26llp2
+#module load linux-x86_64/openmpi@1.10.2%gcc@5.3.0~psm~tm~verbs-w26llp2
 setenv MPI_ROOT /software/tools/spack/opt/spack/linux-x86_64/gcc-5.3.0/openmpi-1.10.2-w26llp27jmybo7wlgoqxjrtptltmripg
 setenv MPILIBNAME openmpi
 
@@ -50,20 +51,21 @@ setenv mpicxx ${MPI_ROOT}/bin/mpicxx
 setenv HDF5_ROOT $USER_SOFTWARES/hdf5/1.8.16/openmpi-1.10.2-gcc-5.3
 setenv PATH ${HDF5_ROOT}/bin:${PATH}
 
-setenv NETCDF_PATH $USER_SOFTWARES/netcdf4/4.4.0/openmpi-1.10.2-gcc-5.3
+setenv NETCDF_PATH $USER_SOFTWARES/netcdf4/4.4.0/openmpi-1.10-gcc-5.3
 setenv LIB_NETCDF ${NETCDF_PATH}/lib
 setenv INC_NETCDF ${NETCDF_PATH}/include
 setenv PATH ${NETCDF_PATH}/bin:${PATH}
 
 # the LAPACK-BLAS libraries are needed in CLM4.5 for solver in thermal-hydrological iteration 
-module load linux-x86_64/netlib-lapack@3.5.0%gcc@5.3.0+shared-ktb3cld
+#imodule load linux-x86_64/netlib-lapack@3.5.0%gcc@5.3.0+shared-ktb3cld
 setenv LAPACK_LIBDIR /software/tools/spack/opt/spack/linux-x86_64/gcc-5.3.0/netlib-lapack-3.5.0-ktb3cldqesiba6ndoiifvr3irojqhdhc/lib
 
-module load linux-x86_64/netlib-blas@3.5.0%gcc@5.3.0+fpic-cxsdr3o
+#module load linux-x86_64/netlib-blas@3.5.0%gcc@5.3.0+fpic-cxsdr3o
 setenv BLAS_LIBDIR /software/tools/spack/opt/spack/linux-x86_64/gcc-5.3.0/netlib-blas-3.5.0-cxsdr3okwvgr6u7kusa5ee5vhsyqxwgg/lib
 
 # CMake is required for building PIO
-module load linux-x86_64/cmake@3.4.0%gcc@5.3.0+ncurses-sr4jjqc
+#module load linux-x86_64/cmake@3.4.0%gcc@5.3.0+ncurses-sr4jjqc
+module load cmake/3.6.1
 
 # for PFLOTRAN
 setenv PETSC_DIR $USER_SOFTWARES/petsc4pf/openmpi-1.10.2-gcc-5.3

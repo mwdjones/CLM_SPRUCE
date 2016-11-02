@@ -174,6 +174,7 @@ for f in os.listdir(ens_dir):
                         elif (parm_indices[pnum] == 0):
                             param = parm_values[pnum]
                         else:
+                            print p
                             param[:] = parm_values[pnum]
                         ierr = putvar(pftfile, p, param)
                     pnum = pnum+1

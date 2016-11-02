@@ -648,8 +648,8 @@ subroutine CNAllocation (lbp, ubp, lbc, ubc, &
       ! This variable allocation is only for trees. Shrubs have a constant
       ! allocation as specified in the pft-physiology file.  The value is also used
       ! as a trigger here: -1.0 means to use the dynamic allocation (trees).
-      if (stem_leaf(ivt(p)) == -1._r8) then
-         f3 = (2.7/(1.0+exp(-0.004*(annsum_npp(p) - 300.0)))) - 0.4
+      if (stem_leaf(ivt(p)) < 0.0_r8) then
+         f3 = max((-1.0_r8*stem_leaf(ivt(p))/(1.0+exp(-0.004*(annsum_npp(p) - 300.0)))) - 0.4, 0.0_r8)
       else
          f3 = stem_leaf(ivt(p))
       end if
@@ -1323,8 +1323,8 @@ subroutine CNAllocation (lbp, ubp, lbc, ubc, &
       ! This variable allocation is only for trees. Shrubs have a constant
       ! allocation as specified in the pft-physiology file.  The value is also used
       ! as a trigger here: -1.0 means to use the dynamic allocation (trees).
-      if (stem_leaf(ivt(p)) == -1._r8) then
-        f3 = (2.7/(1.0+exp(-0.004*(annsum_npp(p) - 300.0)))) - 0.4
+      if (stem_leaf(ivt(p)) < 0.0_r8) then
+        f3 = max((-1.0_r8*stem_leaf(ivt(p))/(1.0+exp(-0.004*(annsum_npp(p) - 300.0)))) - 0.4, 0.0_r8)
       else
         f3 = stem_leaf(ivt(p))
       end if

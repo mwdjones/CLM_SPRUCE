@@ -41,7 +41,7 @@ subroutine CNMResp(lbc, ubc, num_soilc, filter_soilc, num_soilp, filter_soilp)
 !
 ! !USES:
    use clmtype
-   use pftvarcon    , only : npcropmin, br_mr
+   use pftvarcon    , only : npcropmin, br_mr, q10_mr
 !
 ! !ARGUMENTS:
    implicit none
@@ -143,7 +143,8 @@ subroutine CNMResp(lbc, ubc, num_soilc, filter_soilc, num_soilp, filter_soilp)
    ! Q10 was originally set to 2.0, an arbitrary choice, but reduced to 1.5 as part of the tuning
    ! to improve seasonal cycle of atmospheric CO2 concentration in global
    ! simulatoins
-   q10 = 1.5_r8
+   !q10 = 1.5_r8
+   q10 = q10_mr
 
    ! column loop to calculate temperature factors in each soil layer
    do j=1,nlevgrnd
