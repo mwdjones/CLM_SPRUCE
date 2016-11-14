@@ -1385,7 +1385,7 @@ endif
          end do
       end do
 #endif
-print*, 'depth scalar', decomp_depth_efolding
+!print*, 'depth scalar', decomp_depth_efolding
 
 #if (defined VERTSOILC) || (defined MICROBE)
    do j = 1,nlevdecomp

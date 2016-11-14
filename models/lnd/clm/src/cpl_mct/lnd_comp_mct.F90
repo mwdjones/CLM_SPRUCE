@@ -1065,14 +1065,14 @@ contains
           counti(1:2) = 1
           !meteorological forcing
 #THISSITEFILE#
-          ierr = nf90_inq_dimid(ncid, 'time', dimid)
+          ierr = nf90_inq_dimid(ncid, 'DTIME', dimid)
           ierr = nf90_Inquire_Dimension(ncid, dimid, len = a2l%timelen)
           counti(3) = a2l%timelen
           ierr = nf90_inq_varid(ncid, 'TBOT', varid)
           ierr = nf90_get_var(ncid, varid, a2l%atm_input(1,1:1,1:1,1:a2l%timelen), starti, counti)
           ierr = nf90_inq_varid(ncid, 'PSRF', varid)
           ierr = nf90_get_var(ncid, varid, a2l%atm_input(2,1:1,1:1,1:a2l%timelen), starti, counti)
-          ierr = nf90_inq_varid(ncid, 'QBOT', varid)
+          ierr = nf90_inq_varid(ncid, 'RH', varid)
           ierr = nf90_get_Var(ncid, varid, a2l%atm_input(3,1:1,1:1,1:a2l%timelen), starti, counti)
           ierr = nf90_inq_varid(ncid, 'FLDS', varid)
           ierr = nf90_get_var(ncid, varid, a2l%atm_input(4,1:1,1:1,1:a2l%timelen), starti, counti)
@@ -1086,10 +1086,9 @@ contains
           ierr = nf90_get_var(ncid, varid, a2l%atm_input(8,1:1,1:1,1:a2l%timelen), starti, counti)
           starti(1) = 1
           counti(1) = 2
-          ierr = nf90_inq_varid(ncid, 'time', varid)
+          ierr = nf90_inq_varid(ncid, 'DTIME', varid)
           ierr = nf90_get_var(ncid, varid, timetemp, starti(1:1), counti(1:1))
           nph = 86400*(timetemp(2)-timetemp(1))/get_step_size()  !number of model timeteps per forcing timestep
-         
           ierr = nf90_close(ncid)
           !if input data are sub-hourly, average to hourly (temporary solution for existing half-hourly data)
           if (nph .lt. 1) then 
@@ -1099,22 +1098,23 @@ contains
                  a2l%atm_input(v,1,1,n) = sum(temp(1,1,1,(n-1)*nint(1/nph)+1:n*nint(1/nph)))/nint(1/nph)
               end do
             end do
-          a2l%timelen = a2l%timelen/nint(1/nph)
+            a2l%timelen = a2l%timelen/nint(1/nph)
+            nph = 1
           end if
 
           !Input data - IF YEARS CHANGED, THIS MUST BE CHANGED
           !Align spinups and transient simulations
           !figure out which year to start with (assuming spinups always use
           !integer multiple of met cycles)
-          mystart = 2000
-          nyears_spinup = 14
+          mystart = 2011
+          nyears_spinup = 5
           do while (mystart > 1850)
              mystart = mystart - nyears_spinup
           end do
  
           if (yr .lt. 1850) then
-            a2l%start_tindex = mod(mod(yr-1,nyears_spinup) + (1850-mystart), nyears_spinup) * 8760
-          else 
+            a2l%start_tindex = mod(mod(yr-1,nyears_spinup) + (1850-mystart), nyears_spinup) * 8760 
+          else
             a2l%start_tindex = mod(mod(yr-1850,nyears_spinup) + (1850-mystart), nyears_spinup) * 8760
           end if
 
@@ -1148,15 +1148,15 @@ contains
         end if
 
         a2l%forc_pbot(g)    = a2l%atm_input(2,1,1,tindex(1))*wt1 + a2l%atm_input(2,1,1,tindex(2))*wt2        
-!	if (a2l%forc_t(g) .gt. 273.15) then 
-!  	  e                 =(a2l%atm_input(3,1,1,tindex(1))*wt1 + a2l%atm_input(3,1,1,tindex(2))*wt2) &
-!	                          * 0.01_R8 * esatw(tdc(tbot))
-! 	else
-!          e                 =(a2l%atm_input(3,1,1,tindex(1))*wt1 + a2l%atm_input(3,1,1,tindex(2))*wt2) &
-!	                          * 0.01_R8 * esati(tdc(tbot))
- !       end if
-        !q = (0.622_R8 * e)/(a2l%forc_pbot(g) - 0.378_R8 * e)	
-        q = a2l%atm_input(3,1,1,tindex(1))*wt1 + a2l%atm_input(3,1,1,tindex(2))*wt2
+	if (a2l%forc_t(g) .gt. 273.15) then 
+  	  e                 =(a2l%atm_input(3,1,1,tindex(1))*wt1 + a2l%atm_input(3,1,1,tindex(2))*wt2) &
+	                          * 0.01_R8 * esatw(tdc(tbot))
+ 	else
+          e                 =(a2l%atm_input(3,1,1,tindex(1))*wt1 + a2l%atm_input(3,1,1,tindex(2))*wt2) &
+	                          * 0.01_R8 * esati(tdc(tbot))
+        end if
+        q = (0.622_R8 * e)/(a2l%forc_pbot(g) - 0.378_R8 * e)	
+        !q = a2l%atm_input(3,1,1,tindex(1))*wt1 + a2l%atm_input(3,1,1,tindex(2))*wt2
         a2l%forc_q(g) = q
         a2l%forc_lwrad(g)   =(a2l%atm_input(4,1,1,tindex(1))*wt1 + a2l%atm_input(4,1,1,tindex(2))*wt2)     
         swndr               =(a2l%atm_input(5,1,1,tindex(1))*wt1 + a2l%atm_input(5,1,1,tindex(2))*wt2) * 0.50_R8
@@ -1179,8 +1179,8 @@ contains
         forc_rainl = 0.9_R8 * frac * (a2l%atm_input(6,1,1,tindex(1)))
         forc_snowc = 0.1_R8 * (1.0_R8 - frac) * (a2l%atm_input(6,1,1,tindex(1)))
         forc_snowl = 0.9_R8 * (1.0_R8 - frac) * (a2l%atm_input(6,1,1,tindex(1)))
-        a2l%forc_u = (a2l%atm_input(7,1,1,tindex(1))*wt1 + a2l%atm_input(7,1,1,tindex(2))*wt2)/ sqrt(2.0_R8)
-        a2l%forc_v = (a2l%atm_input(7,1,1,tindex(1))*wt1 + a2l%atm_input(7,1,1,tindex(2))*wt2)/ sqrt(2.0_R8)          
+        a2l%forc_u(g) = (a2l%atm_input(7,1,1,tindex(1))*wt1 + a2l%atm_input(7,1,1,tindex(2))*wt2)/ sqrt(2.0_R8)
+        a2l%forc_v(g) = (a2l%atm_input(7,1,1,tindex(1))*wt1 + a2l%atm_input(7,1,1,tindex(2))*wt2)/ sqrt(2.0_R8)       
         a2l%forc_hgt(g)     = (a2l%atm_input(8,1,1,tindex(1))*wt1 + a2l%atm_input(8,1,1,tindex(2))*wt2)                            ! zgcmxy  Atm state 
 
    !------------------------------------Nitrogen deposition----------------------------------------------

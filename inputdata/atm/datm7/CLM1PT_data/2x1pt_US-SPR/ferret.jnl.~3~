@@ -1,0 +1,9 @@
+ ! NOAA/PMEL TMAP
+ ! FERRET v6.72  
+ ! Linux 2.6.32-131.12.1.el6.x86_64 64-bit - 09/13/11
+ ! 14-Nov-16 12:52     
+
+use all_hourly.nc
+show data
+plot zbot[i=1]
+exit
