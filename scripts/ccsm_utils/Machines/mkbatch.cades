@@ -38,6 +38,7 @@ cat >! $file << EOF1
 #PBS -l walltime=${walltime}
 #PBS -j oe
 #PBS -S /bin/csh -V
+#PBS -W group_list=cades-ccsi
 EOF1
 
 #################################################################################
