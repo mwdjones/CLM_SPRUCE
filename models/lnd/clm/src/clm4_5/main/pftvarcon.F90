@@ -153,6 +153,8 @@ module pftvarcon
   real(r8):: ksomfac
   real(r8):: br_mr
   real(r8):: q10_mr
+  real(r8):: r_mort
+  real(r8):: lwtop_ann
 
   ! pft parameters for CNDV code
   ! from LPJ subroutine pftparameters
@@ -387,20 +389,21 @@ contains
     call ncd_io('fstemcn',fstemcn, 'read', ncid, readvar=readv, posNOTonfile=.true.)
     if ( .not. readv ) call endrun( trim(subname)//' ERROR: error in reading in pft data' )
     call ncd_io('crit_onset_gdd',crit_onset_gdd, 'read', ncid, readvar=readv, posNOTonfile=.true.)
-    if ( .not. readv ) call endrun( trim(subname)//' ERROR: error in reading inpft data' )
+    if ( .not. readv ) call endrun( trim(subname)//' ERROR: error in reading in pft data' )
     call ncd_io('bdnr',bdnr, 'read', ncid, readvar=readv, posNOTonfile=.true.)
-    if ( .not. readv ) call endrun( trim(subname)//' ERROR: error in reading inpft data' )
+    if ( .not. readv ) call endrun( trim(subname)//' ERROR: error in reading in pft data' )
     call ncd_io('decomp_depth_efolding',decomp_depth_efolding, 'read', ncid, readvar=readv, posNOTonfile=.true.)
-    if ( .not. readv ) call endrun( trim(subname)//' ERROR: error in reading inpft data' )
+    if ( .not. readv ) call endrun( trim(subname)//' ERROR: error in reading in pft data' )
     call ncd_io('ksomfac',ksomfac, 'read', ncid, readvar=readv, posNOTonfile=.true.)
-    if ( .not. readv ) call endrun( trim(subname)//' ERROR: error in reading inpft data' )
+    if ( .not. readv ) call endrun( trim(subname)//' ERROR: error in reading in pft data' )
     call ncd_io('br_mr',br_mr, 'read', ncid, readvar=readv,posNOTonfile=.true.)
-    if ( .not. readv ) call endrun( trim(subname)//' ERROR: error in reading inpft data' )
+    if ( .not. readv ) call endrun( trim(subname)//' ERROR: error in reading in pft data' )
     call ncd_io('q10_mr',q10_mr, 'read', ncid, readvar=readv,posNOTonfile=.true.)
+    if ( .not. readv ) call endrun( trim(subname)//' ERROR: error in reading in pft data' )
+    call ncd_io('r_mort',r_mort, 'read', ncid, readvar=readv,posNOTonfile=.true.)
+    if ( .not. readv ) call endrun( trim(subname)//' ERROR: error in reading in pft data' )
+    call ncd_io('lwtop_ann',lwtop_ann, 'read', ncid, readvar=readv,posNOTonfile=.true.)
     if ( .not. readv ) call endrun( trim(subname)//' ERROR: error in reading inpft data' )
-
-
-
 
 #if (defined VERTSOILC) || (defined MICROBE)
     call ncd_io('rootprof_beta',rootprof_beta, 'read', ncid, readvar=readv, posNOTonfile=.true.)

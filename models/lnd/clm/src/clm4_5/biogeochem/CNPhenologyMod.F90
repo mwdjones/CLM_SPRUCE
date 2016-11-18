@@ -161,6 +161,7 @@ subroutine CNPhenologyInit( begp, endp )
    use clm_time_manager, only: get_step_size
    use surfrdMod       , only: crop_prog
    use clm_varcon      , only: secspday
+   use pftvarcon       , only: lwtop_ann
 !
 ! !ARGUMENTS:
    implicit none
@@ -223,7 +224,7 @@ subroutine CNPhenologyInit( begp, endp )
 
     ! set the global parameter for livewood turnover rate
     ! define as an annual fraction (0.7), and convert to fraction per second
-    lwtop = 0.7_r8 / 31536000.0_r8
+    lwtop = lwtop_ann / 31536000.0_r8
 
     ! -----------------------------------------
     ! Call any subroutine specific initialization routines
