@@ -31,158 +31,162 @@ from optparse import OptionParser
 
 parser = OptionParser()
 
+parser.add_option("--ad_spinup", action="store_true", \
+                  dest="ad_spinup", default=False, \
+                  help = 'Run accelerated decomposition spinup')
+parser.add_option("--add_temperature", dest="add_temperature", default=0, \
+                  help = 'Temperature to add during manipulation')
+parser.add_option("--add_co2", dest="add_co2", default=0, \
+                  help = 'Temperature to add during manipulation')
+parser.add_option("--align_year", dest="align_year", default=-999, \
+                  help = 'Alignment year (transient run only)')
+#parser.add_option("--arcticpft", dest="arcticpft", default=False, \
+#                  help = 'To turn on Expanded Arctic PFTs flag (-DPFTARCTIC) in CLM4.5. Must provide --parm_file', action="store_true")
+parser.add_option("--branch", dest="branch", default=False, \
+		  help = 'Switch for branch run', action="store_true")
+parser.add_option("--C13", dest="C13", default=False, \
+                  help = 'Switch to turn on C13', action="store_true")
+#parser.add_option("--C14", dest="C14", default=False, \
+#                  help = 'Use C14 as C13 (no decay)', action="store_true")
+parser.add_option("--ccsm_input", dest="ccsm_input", \
+                  default='../inputdata', \
+                  help = "input data directory for CESM (required)")
 parser.add_option("--caseidprefix", dest="mycaseid", default="", \
                   help="Unique identifier to include as a prefix to the case name")
 parser.add_option("--caseroot", dest="caseroot", default='./', \
                   help = "case root directory (default = ./, i.e., under scripts/)")
-parser.add_option("--cpl_bypass", dest="cpl_bypass", default=False, \
-                   help = "Bypass coupler (point CLM only)", action = "store_true")
-parser.add_option("--runroot", dest="runroot", default="../run", \
-                  help="Directory where the run would be created")
-parser.add_option("--exeroot_case", dest="exeroot_case", default='', \
-                   help = "Root for executable (do not rebuild)")
-parser.add_option("--site", dest="site", default='', \
-                  help = '6-character FLUXNET code to run (required)')
-parser.add_option("--sitegroup", dest="sitegroup", default="AmeriFlux", \
-                  help = "site group to use (default AmeriFlux)")
+parser.add_option("--centbgc", dest="centbgc", default=False, \
+                  help = 'To turn on CN with multiple soil layers, CENTURY C module (CLM4ME on as well)', action="store_true")
+parser.add_option("--CH4", dest="CH4", default=False, \
+                  help = 'To turn on CN with CLM4me', action="store_true")
+parser.add_option("--clean_build", dest="clean_build", default=False, \
+                  help = 'Perform clean build before building', \
+                  action="store_true")
+parser.add_option("--clean_config", dest="clean_config", default=False, \
+                  help = 'Run cesm_setup -clean script')
+parser.add_option("--co2_file", dest="co2_file", default="fco2_datm_1765-2007_c100614.nc", \
+                  help = 'CLM timestep (hours)')
 parser.add_option("--coldstart", dest="coldstart", default=False, \
                   help = "set cold start (mutually exclusive w/finidat)", \
                   action="store_true")
+parser.add_option("--compiler", dest="compiler", default='gnu', \
+	          help = "compiler to use (pgi, gnu)")
 parser.add_option("--compset", dest="compset", default='I1850CLM45CN', \
                   help = "component set to use (required)\n"
                          "Curretnly supports ONLY *CLM45CN compsets")
-parser.add_option("--machine", dest="machine", default = 'oic2', \
-                  help = "machine to use (default = oic2)\n")
-parser.add_option("--compiler", dest="compiler", default='gnu', \
-	          help = "compiler to use (pgi, gnu)")
-parser.add_option("--mpilib", dest="mpilib", default="mpi-serial", \
-                      help = "mpi library (openmpi*, mpich, ibm, mpi-serial)")
-parser.add_option("--ad_spinup", action="store_true", \
-                  dest="ad_spinup", default=False, \
-                  help = 'Run accelerated decomposition spinup')
+parser.add_option("--cpl_bypass", dest="cpl_bypass", default=False, \
+                   help = "Bypass coupler (point CLM only)", action = "store_true")
+parser.add_option("--cpoolmod", action="store_true", dest="cpoolmod", default=False, \
+                    help="To turn on carbon storage pool modifications")
+parser.add_option("--cruncep", dest="cruncep", default=False, \
+                  action="store_true", help = 'Use CRU-NCEP meteorology')
+parser.add_option("--csmdir", dest="csmdir", default='..', \
+                  help = "base CESM directory (default = ../)")
+parser.add_option("--exeroot_case", dest="exeroot_case", default='', \
+                   help = "Root for executable (do not rebuild)")
 parser.add_option("--exit_spinup", action="store_true", \
                   dest="exit_spinup", default=False, \
                   help = 'Run exit spinup (CLM 4.0 only)')
-parser.add_option("--csmdir", dest="csmdir", default='..', \
-                  help = "base CESM directory (default = ../)")
-parser.add_option("--ccsm_input", dest="ccsm_input", \
-                  default='../inputdata', \
-                  help = "input data directory for CESM (required)")
-parser.add_option("--finidat_case", dest="finidat_case", default='', \
-                  help = "case containing initial data file to use" \
-                  +" (should be in your run directory)")
 parser.add_option("--finidat", dest="finidat", default='', \
                   help = "initial data file to use" \
+                  +" (should be in your run directory)")
+parser.add_option("--finidat_case", dest="finidat_case", default='', \
+                  help = "case containing initial data file to use" \
                   +" (should be in your run directory)")
 parser.add_option("--finidat_year", dest="finidat_year", default=-1, \
                   help = "model year of initial data file (default is" \
                   +" last available)")
-parser.add_option("--run_units", dest="run_units", default='nyears', \
-                  help = "run length units (ndays, nyears)")
-parser.add_option("--run_n", dest="run_n", default=50, \
-                  help = "run length (in run units)")
-parser.add_option("--rmold", dest="rmold", default=False, action="store_true", \
-                  help = 'Remove old case directory with same name' \
-                  +" before proceeding")
-parser.add_option("--srcmods_loc", dest="srcmods_loc", default='', \
-                  help = 'Copy sourcemods from this location')
-#parser.add_option("--parm_file", dest="parm_file", default='',
-#                  help = 'file for parameter modifications')
+parser.add_option("--harvmod", action="store_true", dest="harvmod", \
+                      default=False, help = "Turn on harvest modificaton" \
+                      "All harvest is performed in first timestep")
 parser.add_option("--hist_mfilt", dest="hist_mfilt", default=-1, \
                   help = 'number of output timesteps per file')
 parser.add_option("--hist_nhtfrq", dest="hist_nhtfrq", default=-999, \
                   help = 'output file timestep')
 parser.add_option("--hist_vars", dest="hist_vars", default='', \
                   help = 'use hist_vars file')
-#parser.add_option("--queue", dest="queue", default='essg08q', \
-#                  help = 'PBS submission queue')
-parser.add_option("--clean_config", dest="clean_config", default=False, \
-                  help = 'Run cesm_setup -clean script')
-parser.add_option("--clean_build", dest="clean_build", default=False, \
-                  help = 'Perform clean build before building', \
-                  action="store_true")
-parser.add_option("--no_config", dest="no_config", default=False, \
-                  help = 'do NOT configure case', action="store_true")
-parser.add_option("--no_build", dest="no_build", default=False, \
-                  help = 'do NOT build CESM', action="store_true")
-parser.add_option("--no_submit", dest="no_submit", default=False, \
-                  help = 'do NOT submit CESM to queue', action="store_true")
-parser.add_option("--align_year", dest="align_year", default=-999, \
-                  help = 'Alignment year (transient run only)')
-parser.add_option("--np", dest="np", default=1, \
-                  help = 'number of processors')
-parser.add_option("--ninst", dest="ninst", default=1, \
-                  help = 'number of land model instances')
-parser.add_option("--tstep", dest="tstep", default=0.5, \
-                  help = 'CLM timestep (hours)')
-parser.add_option("--co2_file", dest="co2_file", default="fco2_datm_1765-2007_c100614.nc", \
-                  help = 'CLM timestep (hours)')
-parser.add_option("--nyears_ad_spinup", dest="ny_ad", default=600, \
-                  help = 'number of years to run ad_spinup')
-parser.add_option("--metdir", dest="metdir", default="none", \
-                  help = 'subdirectory for met data forcing')
+parser.add_option("--humhol", action="store_true", dest="humhol", \
+                      default=False, help = "SPRUCE Hummock/Hollow modification")
+parser.add_option("--include_nonveg", dest="include_nonveg", default=False, \
+                  help = 'Include non-vegetated columns/Landunits in surface data')
+parser.add_option("--makemetdata", dest="makemet", default=False, \
+		  help = 'Generate meteorology', action="store_true")
 parser.add_option("--makepointdata", action="store_true", \
                   dest="makepointdata", help="Make point data (requires global data sets)", \
                   default=False)
+parser.add_option("--machine", dest="machine", default = 'oic2', \
+                  help = "machine to use (default = oic2)\n")
+parser.add_option("--metdir", dest="metdir", default="none", \
+                  help = 'subdirectory for met data forcing')
+parser.add_option("--MICROBE", dest="MICROBE", default=False, \
+                  help = 'To turn on MICROBE with CN', action="store_true")
+parser.add_option("--mpilib", dest="mpilib", default="mpi-serial", \
+                      help = "mpi library (openmpi*, mpich, ibm, mpi-serial)")
+parser.add_option("--ninst", dest="ninst", default=1, \
+                  help = 'number of land model instances')
+parser.add_option("--nitrif", dest="nitrif", default=False, \
+                  help = 'To turn on nitrification-denitrificaiton scheme', action="store_true")
+parser.add_option("--no_build", dest="no_build", default=False, \
+                  help = 'do NOT build CESM', action="store_true")
+parser.add_option("--no_config", dest="no_config", default=False, \
+                  help = 'do NOT configure case', action="store_true")
+parser.add_option("--no_submit", dest="no_submit", default=False, \
+                  help = 'do NOT submit CESM to queue', action="store_true")
 parser.add_option("--nofire", action="store_true", dest="nofire", default=False, \
                     help="To turn off wildfires")
 parser.add_option("--npoolmod", action="store_true", dest="npoolmod", default=False, \
                     help="To turn on nitrogen pool modifications")
-parser.add_option("--cpoolmod", action="store_true", dest="cpoolmod", default=False, \
-                    help="To turn on carbon storage pool modifications")
+parser.add_option("--np", dest="np", default=1, \
+                  help = 'number of processors')
+parser.add_option("--nyears_ad_spinup", dest="ny_ad", default=600, \
+                  help = 'number of years to run ad_spinup')
+#parser.add_option("--parm_file", dest="parm_file", default='',
+#                  help = 'file for parameter modifications')
 parser.add_option("--q10wbmod", action="store_true", dest="q10wbmod", default=False, \
                     help="To turn on Woodrow-Berry Q10 curve (CLM 4.0 only)")
-parser.add_option("--tfmod", action="store_true", dest="tfmod", default=False, \
-                    help="To set temperature threshold (0 degC) for plant wilting factor")
-parser.add_option("--harvmod", action="store_true", dest="harvmod", \
-                      default=False, help = "Turn on harvest modificaton" \
-                      "All harvest is performed in first timestep")
-parser.add_option("--humhol", action="store_true", dest="humhol", \
-                      default=False, help = "SPRUCE Hummock/Hollow modification")
-parser.add_option("--vertsoilc", dest="vsoilc", default=False, \
-                  help = 'To turn on CN with multiple soil layers, excluding CENTURY C module (CLM4ME on as well)', action="store_true")
-parser.add_option("--centbgc", dest="centbgc", default=False, \
-                  help = 'To turn on CN with multiple soil layers, CENTURY C module (CLM4ME on as well)', action="store_true")
-parser.add_option("--nitrif", dest="nitrif", default=False, \
-                  help = 'To turn on nitrification-denitrificaiton scheme', action="store_true")
-parser.add_option("--CH4", dest="CH4", default=False, \
-                  help = 'To turn on CN with CLM4me', action="store_true")
-parser.add_option("--MICROBE", dest="MICROBE", default=False, \
-                  help = 'To turn on MICROBE with CN', action="store_true")
-#parser.add_option("--arcticpft", dest="arcticpft", default=False, \
-#                  help = 'To turn on Expanded Arctic PFTs flag (-DPFTARCTIC) in CLM4.5. Must provide --parm_file', action="store_true")
-parser.add_option("--C13", dest="C13", default=False, \
-                  help = 'Switch to turn on C13', action="store_true")
-#parser.add_option("--C14", dest="C14", default=False, \
-#                  help = 'Use C14 as C13 (no decay)', action="store_true")
-parser.add_option("--branch", dest="branch", default=False, \
-		  help = 'Switch for branch run', action="store_true")
-parser.add_option("--makemetdata", dest="makemet", default=False, \
-		  help = 'Generate meteorology', action="store_true")
-parser.add_option("--surfdata_grid", dest="surfdata_grid", default=False, \
-                  help = 'Use gridded surface data instead of site data', action="store_true")
-parser.add_option("--include_nonveg", dest="include_nonveg", default=False, \
-                  help = 'Include non-vegetated columns/Landunits in surface data')
+#parser.add_option("--queue", dest="queue", default='essg08q', \
+#                  help = 'PBS submission queue')
 parser.add_option("--refcase", dest="refcase" , default='none', \
                   help = 'Use already compiled CLM case')
+parser.add_option("--rmold", dest="rmold", default=False, action="store_true", \
+                  help = 'Remove old case directory with same name' \
+                  +" before proceeding")
+parser.add_option("--run_n", dest="run_n", default=50, \
+                  help = "run length (in run units)")
+parser.add_option("--run_units", dest="run_units", default='nyears', \
+                  help = "run length units (ndays, nyears)")
+parser.add_option("--runroot", dest="runroot", default="../run", \
+                  help="Directory where the run would be created")
+parser.add_option("--site", dest="site", default='', \
+                  help = '6-character FLUXNET code to run (required)')
+parser.add_option("--sitegroup", dest="sitegroup", default="AmeriFlux", \
+                  help = "site group to use (default AmeriFlux)")
+parser.add_option("--spinup_vars", dest="spinup_vars", default=False, \
+                  help = 'Limit output vars in spinup runs', action="store_true")
+parser.add_option("--startyear_run", dest="startyear_run", default=-1, \
+                  help = 'Starting year for model output')
+parser.add_option("--srcmods_loc", dest="srcmods_loc", default='', \
+                  help = 'Copy sourcemods from this location')
+parser.add_option("--surfdata_grid", dest="surfdata_grid", default=False, \
+                  help = 'Use gridded surface data instead of site data', action="store_true")
+parser.add_option("--tfmod", action="store_true", dest="tfmod", default=False, \
+                    help="To set temperature threshold (0 degC) for plant wilting factor")
+parser.add_option("--trans2", dest="trans2", default=False, action="store_true", \
+                  help = 'Tranisnent phase 2 (1901-2010) - CRUNCEP only')
+parser.add_option("--tstep", dest="tstep", default=0.5, \
+                  help = 'CLM timestep (hours)')
+parser.add_option("--vertsoilc", dest="vsoilc", default=False, \
+                  help = 'To turn on CN with multiple soil layers, excluding CENTURY C module (CLM4ME on as well)', action="store_true")
 parser.add_option("--xpts", dest="xpts", default=2, \
                       help = 'for regional runs: xpts')
 parser.add_option("--ypts", dest="ypts", default=1, \
                       help = 'for regional runs: ypts')
-parser.add_option("--cruncep", dest="cruncep", default=False, \
-                  action="store_true", help = 'Use CRU-NCEP meteorology')
-parser.add_option("--trans2", dest="trans2", default=False, action="store_true", \
-                  help = 'Tranisnent phase 2 (1901-2010) - CRUNCEP only')
-parser.add_option("--spinup_vars", dest="spinup_vars", default=False, \
-                  help = 'Limit output vars in spinup runs', action="store_true")
+
 parser.add_option("--startyear_experiment", dest="startyear_experiment", default=2014, \
                   help = 'Starting year for experimental manipulation')
 parser.add_option("--endyear_experiment", dest="endyear_experiment", default=2030, \
                   help = 'Ending year for experimental manipulation')
-parser.add_option("--add_temperature", dest="add_temperature", default=0, \
-                  help = 'Temperature to add during manipulation')
-parser.add_option("--add_co2", dest="add_co2", default=0, \
-                  help = 'Temperature to add during manipulation')
+
 
 (options, args) = parser.parse_args()
 
@@ -249,7 +253,8 @@ if (compset == 'I20TRCLM45CN' or compset == 'I20TRCN'):
 
 #get full path of finidat file
 if (options.finidat != ''):
-  finidat=options.ccsm_input+'/lnd/clm2/inidata/'+options.finidat
+  #finidat=options.ccsm_input+'/lnd/clm2/inidata/'+options.finidat
+  finidat = options.finidat
   if (not os.path.exists(finidat)):
 	print 'Error:  '+finidat+' does not exist'
         sys.exit()
@@ -532,6 +537,9 @@ if (options.refcase == 'none'):
     if (options.ccsm_input != ''):
         os.system('./xmlchange -file env_run.xml -id DIN_LOC_ROOT -val ' \
                       +options.ccsm_input)
+    if (int(options.startyear_run) >= 0):
+        os.system('./xmlchange -file env_run.xml -id RUN_STARTDATE -val ' \
+                  +options.startyear_run+'-01-01')
     
     #define mask and resoultion
     os.system('./xmlchange -file env_run.xml -id CLM_USRDAT_NAME ' \
@@ -939,7 +947,7 @@ if (finidat != '' and options.runroot == '' ):
     os.system('cp -f '+csmdir+'/run/'+options.finidat_case+'/run/'+ \
               'rpointer.* '+csmdir+'/run/'+casename+'/run/')
 
-os.system('cp -f '+options.ccsm_input+'/lnd/clm2/paramdata/microbepar_in ' +csmdir+'/run/'+casename+'/run/')
+os.system('cp -f '+options.ccsm_input+'/lnd/clm2/paramdata/microbepar_in '+options.runroot+'/'+casename+'/run/')
 
 #submit job if requested
 if (options.no_submit == False):

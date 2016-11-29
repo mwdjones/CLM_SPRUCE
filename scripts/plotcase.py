@@ -1,22 +1,33 @@
 #!/usr/bin/python
 
 import os, sys, csv, glob
-import Scientific.IO.NetCDF
-from Scientific.IO import NetCDF
-import numpy
-import pp
+import numpy, scipy
+from scipy.io import netcdf
+#import pp
 import matplotlib
 from optparse import OptionParser
 
-def getvar(fname, var, npf, index, scale_factor):
-    nffile = Scientific.IO.NetCDF.NetCDFFile(fname,"r")
-    varout=nffile.variables[var]
-    thisval = varout.getValue()[0:npf,index] * scale_factor
+def getvar(fname, varname, npf, index, scale_factor):
+    usescipy = False
+    try:
+        import Scientific.IO.NetCDF as netcdf
+    except ImportError:
+        import scipy
+        from scipy.io import netcdf
+        usescipy = True
+    if (usescipy):
+        nffile = netcdf.netcdf_file(fname,"r",mmap=False)
+        var = nffile.variables[varname]
+        varvals = var[:].copy()   #works for vector only?
+        nffile.close()
+    else:
+        nffile = netcdf.NetCDFFile(fname,"r")
+        var = nffile.variables[varname]
+        varvals = var.getValue()
+        nffile.close()
     if ('ZWT' in var):
-        thisval = thisval*-1+0.3
-    nffile.close()
-    return thisval
-
+        varvals = varvals*-1+0.3
+    return varvals[0:npf,index] * scale_factor
 
 parser = OptionParser()
 parser.add_option("--csmdir", dest="mycsmdir", default='..', \
@@ -67,10 +78,11 @@ parser.add_option("--scale_factor", dest="scale_factor", help = 'scale factor', 
 (options,args) = parser.parse_args()
                
 #set up parallel
-ppservers = ("*",)
+#ppservers = ("*",)
 #ppservers=()
-job_server = pp.Server(ppservers=ppservers)
-print "Starting pp with", job_server.get_ncpus(), "workers"
+
+#job_server = pp.Server(ppservers=ppservers)
+#print "Starting pp with", job_server.get_ncpus(), "workers"
 
 cesmdir=os.path.abspath(options.mycsmdir)                 
 if (options.mycase == ''): # or os.path.exists(options.mycase) == False):
@@ -128,7 +140,8 @@ for c in range(0,ncases):
         diro='/home/zdr/models/LoTEC/assim/observations'
         os.chdir(diro)
     else:
-	dirs.append(cesmdir+'/run/'+mycases[c]+'_'+site+'_'+compset+'/run/')
+        dirs.append('/lustre/pfs1/cades-ccsi/scratch/dmricciuto/'+mycases[c]+'_'+site+'_'+compset+'/run/')
+	#dirs.append(cesmdir+'/run/'+mycases[c]+'_'+site+'_'+compset+'/run/')
         os.chdir(dirs[c])
  
     #query lnd_in file for output file information
@@ -249,7 +262,8 @@ for c in range(0,ncases):
     os.system('pwd')
     if (os.path.isfile(testfile) == False):
         print('Output not in run directory.  Switching to archive directory')
-        archdir=cesmdir+'/run/archive/'+mycases[c]+'_'+site+'_'+compset+'/lnd/hist'
+        #archdir=cesmdir+'/run/archive/'+mycases[c]+'_'+site+'_'+compset+'/lnd/hist'
+        archdir='/lustre/pfs1/cades-ccsi/scratch/dmricciuto/archive/'+mycases[c]+'_'+site+'_'+compset+'/lnd/hist/'
         print(archdir)
         if (os.path.exists(archdir) == False):
             print('Archive directory does not exist.  Exiting')
@@ -307,22 +321,21 @@ for c in range(0,ncases):
     if (ftype == 'custom'):
         for v in range(0,nvar):
             jobs = []
+            nsteps = 0
             for y in range(ystart,yend+1):
                 yst=str(10000+y)[1:5]
                 myfile = os.path.abspath('./'+mycases[c]+"_"+site+'_'+compset+".clm2."+hst+"."+yst+\
                                              "-01-01-00000.nc")
+                nffile = netcdf.netcdf_file(myfile,"r")
                 if (y == ystart and c == 0):
-                    nffile = Scientific.IO.NetCDF.NetCDFFile(myfile,"r")
                     varout=nffile.variables[myvars[v]]
                     var_long_names.append(varout.long_name)
                     var_units.append(varout.units)
-                    nffile.close()
-                jobs.append(job_server.submit(getvar,(myfile,myvars[v],npf,int(options.index), \
-                                               float(options.scale_factor)), (), ("Scientific.IO.NetCDF",)))
-            nsteps = 0
-            for job in jobs:
+                myvar = getvar(myfile,myvars[v],npf,int(options.index), \
+                                               float(options.scale_factor))
+                nffile.close()
                 for i in range(0,npf):
-                    mydata[v,nsteps] = job()[i]
+                    mydata[v,nsteps] = myvar[i]
                     x[nsteps] = ystart+(nsteps*1.0)/npf
                     nsteps=nsteps+1
         
