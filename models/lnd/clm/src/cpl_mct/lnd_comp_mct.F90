@@ -1072,7 +1072,7 @@ contains
           ierr = nf90_get_var(ncid, varid, a2l%atm_input(1,1:1,1:1,1:a2l%timelen), starti, counti)
           ierr = nf90_inq_varid(ncid, 'PSRF', varid)
           ierr = nf90_get_var(ncid, varid, a2l%atm_input(2,1:1,1:1,1:a2l%timelen), starti, counti)
-          ierr = nf90_inq_varid(ncid, 'RH', varid)
+          ierr = nf90_inq_varid(ncid, 'QBOT', varid)
           ierr = nf90_get_Var(ncid, varid, a2l%atm_input(3,1:1,1:1,1:a2l%timelen), starti, counti)
           ierr = nf90_inq_varid(ncid, 'FLDS', varid)
           ierr = nf90_get_var(ncid, varid, a2l%atm_input(4,1:1,1:1,1:a2l%timelen), starti, counti)
@@ -1148,15 +1148,15 @@ contains
         end if
 
         a2l%forc_pbot(g)    = a2l%atm_input(2,1,1,tindex(1))*wt1 + a2l%atm_input(2,1,1,tindex(2))*wt2        
-	if (a2l%forc_t(g) .gt. 273.15) then 
-  	  e                 =(a2l%atm_input(3,1,1,tindex(1))*wt1 + a2l%atm_input(3,1,1,tindex(2))*wt2) &
-	                          * 0.01_R8 * esatw(tdc(tbot))
- 	else
-          e                 =(a2l%atm_input(3,1,1,tindex(1))*wt1 + a2l%atm_input(3,1,1,tindex(2))*wt2) &
-	                          * 0.01_R8 * esati(tdc(tbot))
-        end if
-        q = (0.622_R8 * e)/(a2l%forc_pbot(g) - 0.378_R8 * e)	
-        !q = a2l%atm_input(3,1,1,tindex(1))*wt1 + a2l%atm_input(3,1,1,tindex(2))*wt2
+        !if (a2l%forc_t(g) .gt. 273.15) then 
+        !   e                 =(a2l%atm_input(3,1,1,tindex(1))*wt1 + a2l%atm_input(3,1,1,tindex(2))*wt2) &
+	!                          * 0.01_R8 * esatw(tdc(tbot))
+ 	!else
+        !  e                 =(a2l%atm_input(3,1,1,tindex(1))*wt1 + a2l%atm_input(3,1,1,tindex(2))*wt2) &
+	!                          * 0.01_R8 * esati(tdc(tbot))
+        !end if
+        !q = (0.622_R8 * e)/(a2l%forc_pbot(g) - 0.378_R8 * e)	
+        q = a2l%atm_input(3,1,1,tindex(1))*wt1 + a2l%atm_input(3,1,1,tindex(2))*wt2
         a2l%forc_q(g) = q
         a2l%forc_lwrad(g)   =(a2l%atm_input(4,1,1,tindex(1))*wt1 + a2l%atm_input(4,1,1,tindex(2))*wt2)     
         swndr               =(a2l%atm_input(5,1,1,tindex(1))*wt1 + a2l%atm_input(5,1,1,tindex(2))*wt2) * 0.50_R8

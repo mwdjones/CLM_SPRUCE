@@ -1,7 +1,8 @@
 #!/usr/bin/python
 
 import os, csv, time, math
-from
+import Scientific.IO
+from Scientific.IO import NetCDF
 import numpy
 
 site_code  = 'US-SPR'  #AmeriFlux/FLUXNET identifier
@@ -23,8 +24,8 @@ def qsat(t,pres):
     myqsat = 0.622 * esat / (pres - 0.378*esat)
     return myqsat
 
-site_lat = 
-site_lon = 
+site_lat = 47.563 
+site_lon = 266.512
 lst = -6
 startyear = 2011
 endyear  = 2015
@@ -38,7 +39,7 @@ print 'Local time offset is UTC'+str(lst)
 #---------------load the data -----------------------------------------
 
 vars_ind = [7,9,11,17,19,15,13,13]
-vars_out = ['TBOT','RH','WIND','FSDS','FLDS','PSRF','PRECTmms','ZBOT']
+vars_out = ['TBOT','QBOT','WIND','FSDS','FLDS','PSRF','PRECTmms','ZBOT']
 vars_ncep = ['air', 'shum', 'uwnd', 'dswrf', 'dlwrf', 'pres', 'prate', 'vwnd']
 levs_ncep = ['2m', '2m', '10m', 'sfc', 'sfc', 'sfc', 'sfc', '10m']
 vars_out_units = ['K','kg/kg','m/s','W/m2','W/m2','Pa','kg/m2/s','m']
@@ -64,10 +65,10 @@ for v in vars_in:
         myval =  myvar_vals.append(s.split(',')[vars_ind]) 
         if (lnum == 3):
             for l in range(0,12):
-                alldata(vnum,thisind) = float(myval)
+                alldata[vnum,thisind] = float(myval)
                 thisind = thisind+1
         if (lnum > 3):
-            alldata(vnum,thisind) = float(myval)
+            alldata[vnum,thisind] = float(myval)
             thisind = thisind+1
         lnum = lnum+1
     vnum = vnum+1
@@ -87,11 +88,14 @@ for v in vars_out:
         alldata[vars_out_i[vnum],0:npoints] = \
         alldata[vars_out_i[vnum],0:npoints] + 273.15
     if (vnum == 1):
-        #NCEP specific humidity to relative humidity
+        #RH to QBOT
         for i in range(0,npoints):
-            alldata_ncep[1,i] = (alldata_ncep[1,i]/ \
-                qsat(alldata_ncep[0,i], alldata_ncep[5,i]))*100.
-            alldata_ncep[1,i] = max( min(alldata_ncep[1,i], 100.), 0.)
+            alldata[vars_out_i[vnum],i] = qsat(alldata[vars_out_i[0],i], \
+                alldata[vars_out_i[5],i]*1000.) * alldata[vars_out_i[vnum],i] \
+                /100.0
+            #alldata_ncep[1,i] = (alldata_ncep[1,i]/ \
+            #    qsat(alldata_ncep[0,i], alldata_ncep[5,i]))*100.
+            #alldata_ncep[1,i] = max( min(alldata_ncep[1,i], 100.), 0.)
     elif (vnum == 3 and vars_out_i[3] == 2):  #convert PAR to W/m2
         alldata[vars_out_i[vnum],0:npoints] = \
         alldata[vars_out_i[vnum],0:npoints] / 0.48 / 4.6 
