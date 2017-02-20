@@ -182,7 +182,7 @@ parser.add_option("--xpts", dest="xpts", default=2, \
 parser.add_option("--ypts", dest="ypts", default=1, \
                       help = 'for regional runs: ypts')
 
-parser.add_option("--startyear_experiment", dest="startyear_experiment", default=2014, \
+parser.add_option("--startyear_experiment", dest="startyear_experiment", default=2015, \
                   help = 'Starting year for experimental manipulation')
 parser.add_option("--endyear_experiment", dest="endyear_experiment", default=2030, \
                   help = 'Ending year for experimental manipulation')
@@ -240,6 +240,7 @@ if (compset[-7:] == 'CLM45CN' or compset[-5:] == 'CLM45'):
     surfdir = 'surfdata_map'
     pftphys_stamp = 'c130801'
 
+finidat = options.finidat
 #check consistency of options
 if (compset == 'I20TRCLM45CN' or compset == 'I20TRCN'):
     #ignore spinup option if transient compset
@@ -381,10 +382,9 @@ if (options.makepointdata):
         ptcmd = ptcmd + ' --surfdata_grid'
     if (options.include_nonveg):
         ptcmd = ptcmd + ' --include_nonveg'
-    if (options.regional):
-        ptcmd = ptcmd + ' --regional'
-        ptcmd = ptcmd + ' --xpts '+options.xpts
-        ptcmd = ptcmd + ' --ypts '+options.ypts
+    #if (options.xpts == 2):
+    ptcmd = ptcmd + ' --xpts '+options.xpts
+    ptcmd = ptcmd + ' --ypts '+options.ypts
     if ('45' not in compset):
         ptcmd = ptcmd + ' --clm40'
     print(ptcmd)
@@ -479,7 +479,7 @@ if (options.refcase == 'none'):
 
 #------------------ env_build.xml modifications ------------------------
     if (options.exeroot_case != ''):
-        os.system('./xmlchange -file env_build.xml -id EXEROOT -val '+ \
+    	os.system('./xmlchange -file env_build.xml -id EXEROOT -val '+ \
 	  runroot+'/'+options.exeroot_case+'/bld')
         options.no_build=True
 
@@ -660,7 +660,7 @@ if (options.refcase == 'none'):
             if ('20TR' in compset):
               output.write(" hist_mfilt = "+ str(options.hist_mfilt)+','+str(options.hist_mfilt)+'\n')
               output.write(' hist_dov2xy = .true., .false.\n')
-              output.write(" hist_fincl2 = 'GPP', 'NPP', 'AR', 'MR', 'GR', 'TLAI', 'DEADSTEMC', 'LIVESTEMC', 'FROOTC', 'DEADCROOTC', 'LIVECROOTC', 'LEAFC', \
+              output.write(" hist_fincl2 = 'AGNPP', 'GPP', 'NPP', 'AR', 'MR', 'GR', 'TLAI', 'DEADSTEMC', 'LIVESTEMC', 'FROOTC', 'DEADCROOTC', 'LIVECROOTC', 'LEAFC', \
                                   'QVEGT', 'QVEGE', 'BTRAN', 'FPSN', 'FPG'\n")
             else:
               output.write(" hist_mfilt = "+ str(options.hist_mfilt)+"\n")
@@ -917,11 +917,11 @@ if (options.refcase == 'none'):
     if (options.clean_build):
         os.system('./'+casename+'.clean_build')
     #compile cesm
-    if (options.no_build == False):
-        os.system('./'+casename+'.build')
-    else:	
+    #if (options.no_build == False):
+    os.system('./'+casename+'.build')
+    #else:	
         #Assume build is complete
-        os.system('./xmlchange BUILD_COMPLETE=TRUE')
+    #    os.system('./xmlchange BUILD_COMPLETE=TRUE')
     if (compset == "I20TRCLM45CN" or compset == "I20TRCN"):
         #note:  *.build will sweep everything under Buildconf, but we need 'co2streams.txt'
         #        in transient run
@@ -947,7 +947,7 @@ if (finidat != '' and options.runroot == '' ):
     os.system('cp -f '+csmdir+'/run/'+options.finidat_case+'/run/'+ \
               'rpointer.* '+csmdir+'/run/'+casename+'/run/')
 
-os.system('cp -f '+options.ccsm_input+'/lnd/clm2/paramdata/microbepar_in '+options.runroot+'/'+casename+'/run/')
+os.system('cp -f '+options.ccsm_input+'/lnd/clm2/paramdata/microbepar_in '+runroot+'/'+casename+'/run/')
 
 #submit job if requested
 if (options.no_submit == False):

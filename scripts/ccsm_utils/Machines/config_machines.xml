@@ -394,13 +394,13 @@
       <OS>LINUX</OS>
       <COMPILERS>gnu,intel</COMPILERS>
       <MPILIBS>openmpi,mpi-serial</MPILIBS>
-      <RUNDIR>/lustre/pfs1/cades-ccsi/scratch/$CCSMUSER/$CASE/run</RUNDIR>
-      <EXEROOT>/lustre/pfs1/cades-ccsi/scratch/$CCSMUSER/$CASE/bld</EXEROOT>
-      <DIN_LOC_ROOT>/lustre/pfs1/cades-ccsi/proj-shared/project_acme/cesm-inputdata</DIN_LOC_ROOT>
-      <DIN_LOC_ROOT_CLMFORC>/lustre/pfs1/cades-ccsi/proj-shared/project_acme/cesm-inputdata/atm/datm7</DIN_LOC_ROOT_CLMFORC>
-      <DOUT_S_ROOT>/lustre/pfs1/cades-ccsi/proj-shared/project_acme/archives/$CASE</DOUT_S_ROOT>
+      <RUNDIR>/lustre/or-hydra/cades-ccsi/scratch/$CCSMUSER/$CASE/run</RUNDIR>
+      <EXEROOT>/lustre/or-hydra/cades-ccsi/scratch/$CCSMUSER/$CASE/bld</EXEROOT>
+      <DIN_LOC_ROOT>/lustre/or-hydra/cades-ccsi/proj-shared/project_acme/cesm-inputdata</DIN_LOC_ROOT>
+      <DIN_LOC_ROOT_CLMFORC>/lustre/or-hydra/cades-ccsi/proj-shared/project_acme/cesm-inputdata/atm/datm7</DIN_LOC_ROOT_CLMFORC>
+      <DOUT_S_ROOT>/lustre/or-hydra/cades-ccsi/proj-shared/project_acme/archives/$CASE</DOUT_S_ROOT>
       <DOUT_L_MSROOT>csm/$CASE</DOUT_L_MSROOT>
-      <CCSM_BASELINE>/lustre/pfs1/cades-ccsi/proj-shared/project_acme/baselines</CCSM_BASELINE>
+      <CCSM_BASELINE>/lustre/or-hydra/cades-ccsi/proj-shared/project_acme/baselines</CCSM_BASELINE>
       <BATCHQUERY>qstat -f </BATCHQUERY>
       <BATCHSUBMIT>qsub </BATCHSUBMIT>
       <SUPPORTED_BY>Fengming Yuan</SUPPORTED_BY>

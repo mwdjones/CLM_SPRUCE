@@ -1,16 +1,16 @@
-program qpso
+roe program qpso
 
 implicit none
 include "mpif.h"
 
 integer maxiter, maxpop, maxparms
 parameter (maxiter = 10000)
-parameter (maxpop = 10000)
-parameter (maxparms = 500)
+parameter (maxpop = 2048)
+parameter (maxparms = 512)
 
 integer i, j,k, npop, nparms, niter, gInx, nfunc(maxpop)
 integer nfuncall(maxpop)
-integer np, myid, ierr
+integer np, myid, ierr, start_iter
 integer pft(maxparms)
 double precision gbest(maxparms)
 double precision mbest(maxparms)
@@ -25,9 +25,9 @@ double precision gpar(maxiter,maxparms)
 double precision gobj(maxiter)
 double precision pmin(maxparms), pmax(maxparms)
 double precision fi(maxparms), u(maxparms), v(maxparms)
-logical isvalid
-
-character(len=100) dummy, parm_name(maxparms), case_name
+logical isvalid, restart
+character(len=4) popst
+character(len=100) dummy, parm_name(maxparms), case_name, thisfmt
 
 !------- user-tunable QPSO algorithm parameters ----------------
 
@@ -35,6 +35,7 @@ npop = 64         !number of particles
 niter = 200       !number of iterations
 beta_l = 0.4d0
 beta_u = 0.7d0
+restart = .false.
 
 !---------------------------------------------------------------
 
@@ -71,37 +72,58 @@ x(:,:) = 0d0
 f_x(:) = 0d0
 f_pbest(:) = 0d0
 
-do i=myid+1,npop,np      
-   !randomize starting locations
-   call init_random_seed
-   call random_number(u)
-   x(i,:) = pmin + (pmax-pmin) * u
-   f_x(i) = feval(x(i,:), nparms, i)
-   nfunc(i) = nfunc(i)+1
-   f_pbest(i) = f_x(i)
-end do
-
-call mpi_allreduce(x, xall, maxparms*maxpop, mpi_double, mpi_sum, &
-        mpi_comm_world, ierr)
-call mpi_allreduce(f_pbest, f_pbestall, maxpop, mpi_double, mpi_sum, &
-        mpi_comm_world, ierr)
-pbestall = xall
-
-!initialize pbest and gbest
-if (myid .eq. 0) then 
-   gInx = 1
-   do i=2,npop
-      if (f_pbestall(i) .lt. f_pbestall(gInx)) gInx = i
+if (restart .eqv. .false.) then 
+   do i=myid+1,npop,np      
+      !randomize starting locations
+      call init_random_seed
+      call random_number(u)
+      x(i,:) = pmin + (pmax-pmin) * u
+      f_x(i) = feval(x(i,:), nparms, i)
+      nfunc(i) = nfunc(i)+1
+      f_pbest(i) = f_x(i)
    end do
-   gbest = pbestall(gInx,:)
-   f_gbest = f_pbestall(gInx)
+   
+   call mpi_allreduce(x, xall, maxparms*maxpop, mpi_double, mpi_sum, &
+        mpi_comm_world, ierr)
+   call mpi_allreduce(f_pbest, f_pbestall, maxpop, mpi_double, mpi_sum, &
+        mpi_comm_world, ierr)
+   pbestall = xall
+
+   !initialize pbest and gbest
+   if (myid .eq. 0) then 
+      gInx = 1
+      do i=2,npop
+         if (f_pbestall(i) .lt. f_pbestall(gInx)) gInx = i
+      end do
+      gbest = pbestall(gInx,:)
+      f_gbest = f_pbestall(gInx)
+   end if
+   call mpi_bcast(gbest, maxparms, mpi_double, 0, mpi_comm_world, ierr)
+   call mpi_bcast(f_gbest, 1, mpi_double, 0, mpi_comm_world, ierr)
+   start_iter = 1
+else
+   !load restart information 
+   if (myid .eq. 0) then 
+      open(unit=8, file='./qpso_restart.txt')
+      read(8,*) start_iter
+      do j=1,npop
+         read(8,*) pbestall(1:nparms,i)
+         read(8,*) f_pbestall(i)
+      end do
+      read(8,*) gbest(1:nparms)
+      read(8,*) f_gbest
+   end if
+   call mpi_bcast(pbestall, maxparms*maxpop, mpi_double, 0, mpi_comm_world, ierr)
+   call mpi_bcast(f_pbestall, maxpop, mpi_double, 0, mpi_comm_world, ierr)
+   call mpi_bcast(gbest, maxparms, mpi_double, 0, mpi_comm_world, ierr)
+   call mpi_bcast(f_gbest, 1, mpi_double, 0, mpi_comm_world, ierr)
 end if
-call mpi_bcast(gbest, maxparms, mpi_double, 0, mpi_comm_world, ierr)
-call mpi_bcast(f_gbest, 1, mpi_double, 0, mpi_comm_world, ierr)
+
+
 
 
 !QPSO algorithm
-do i=1,niter
+do i=start_iter,niter
    if (myid .eq. 0) print*, 'Iteration', i
    beta = beta_u - (beta_u-beta_l)*i/niter
    !compute mean of best parameters (all procs)
@@ -184,7 +206,20 @@ do i=1,niter
      end if
      write(10,*) i, sum(nfuncall) , gobj(i)
      close(10)
-   end if
+
+     !write the restart file
+     write(popst, '(I4)') nparms
+     thisfmt = '(' // trim(popst) // '(g13.6,1x))'
+     open(unit=11, file = 'qpso_restart.txt')
+     write(11,'(I4)') i        !current iteration number
+     do j=1,npop
+        write(11,fmt=trim(thisfmt)) pbestall(j,1:nparms)  !current parameters for all population members
+        write(11,'(g13.6)') f_pbestall(j)
+     end do
+     write(11,fmt=trim(thisfmt)) gbest(:)
+     write(11,'(g13.6)') f_gbest
+     close(11)
+  end if
 end do
 call mpi_finalize(ierr)
 
