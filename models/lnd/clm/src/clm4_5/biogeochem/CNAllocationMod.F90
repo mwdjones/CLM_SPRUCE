@@ -14,7 +14,8 @@ module CNAllocationMod
   use shr_kind_mod, only: r8 => shr_kind_r8
   use clm_varcon, only: dzsoi_decomp
   use abortutils  , only: endrun
-  use clm_varctl, only: use_c13, use_c14
+  use clm_varctl, only: spinup_state, use_c13, use_c14
+  use clm_time_manager, only: get_curr_date
   implicit none
   save
   private
@@ -84,6 +85,7 @@ subroutine CNAllocationInit ( lbc, ubc, lbp, ubp )
    use pftvarcon     , only : bdnr
 ! !ARGUMENTS:
    implicit none
+   integer year, mon, day, sec
    integer, intent(in) :: lbc, ubc        ! column-index bounds
    integer, intent(in) :: lbp, ubp        ! pft-index bounds
 !
@@ -117,6 +119,8 @@ subroutine CNAllocationInit ( lbc, ubc, lbp, ubp )
    select case(suplnitro)
       case(suplnNon)
          Carbon_only = .false.
+         call get_curr_date(year, mon, day, sec)
+         if (year .lt. 40 .and. spinup_state == 1) Carbon_only = .true.
       case(suplnAll)
          Carbon_only = .true.
       case default
@@ -374,7 +378,7 @@ subroutine CNAllocation (lbp, ubp, lbc, ubc, &
    real(r8) fleaf                  !fraction allocated to leaf
    real(r8) r, rc                  !Plant npool resistance parameters
    real(r8) t1                     !temporary variable
-
+   integer year, mon, day, sec
 #ifndef NITRIF_DENITRIF
    integer :: nlimit(lbc:ubc,0:nlevdecomp)               !flag for N limitation
    real(r8):: residual_sminn_vr(lbc:ubc, 1:nlevdecomp)
@@ -550,6 +554,8 @@ subroutine CNAllocation (lbp, ubp, lbc, ubc, &
    aleaf                       => pps%aleaf
    astem                       => pps%astem
 
+   call get_curr_date(year, mon, day, sec)
+   if (year .ge. 40 .and. spinup_state == 1) Carbon_only = .false.
 
    ! set time steps
    dt = real( get_step_size(), r8 )

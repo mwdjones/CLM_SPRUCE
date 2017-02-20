@@ -1120,12 +1120,12 @@ contains
 
           tindex(1) = a2l%start_tindex
           tindex(2) = tindex(1) + 1
-          if (tindex(2) .lt. 1) tindex(2) = a2l%timelen
+          if (tindex(1) .lt. 1) tindex(1) = a2l%timelen
           if (tindex(2) .gt. a2l%timelen) tindex(2) = 1
         else
           tindex(1) = mod(((nstep-1)+(a2l%start_tindex)*int(nph))/int(nph),a2l%timelen)+1
           tindex(2) = tindex(1) + 1
-          if (tindex(2) .lt. 1) tindex(2) = a2l%timelen
+          if (tindex(1) .lt. 1) tindex(1) = a2l%timelen
           if (tindex(2) .gt. a2l%timelen) tindex(2) = 1
         end if
         
