@@ -131,7 +131,7 @@ implicit none
 	integer, intent(in) :: num_soilc          			! number of column soil points in column filter
 	integer, intent(in) :: filter_soilc(ubc-lbc+1)    	! column filter for soil points
 	integer, intent(in) :: num_soilp          			! number of soil points in pft filter
-	integer, intent(in) :: filter_soilp(ubp-lbp+1) 	! pft filter for soil points
+	integer, intent(in) :: filter_soilp(ubp-lbp+1) 		! pft filter for soil points
 ! !CALLED FROM:
 ! driver.F90
 !
@@ -139,15 +139,15 @@ implicit none
 ! !LOCAL VARIABLES:
 ! local pointers to implicit in variables
 	real(r8), pointer :: gmicbios(:)				! grid-level biomass of microbes molC/m2
-	real(r8), pointer :: gdocs(:)				! grid-level doc concentration molC/m2
-	real(r8), pointer :: gaces(:)				! grid-level acetate concentration molC/m2
+	real(r8), pointer :: gdocs(:)					! grid-level doc concentration molC/m2
+	real(r8), pointer :: gaces(:)					! grid-level acetate concentration molC/m2
 	real(r8), pointer :: gacebios(:)				! grid-level biomass of methanogen based on acetate molC/m2
 	real(r8), pointer :: gco2bios(:)				! grid-level biomass of methanogen based on CO2 and H2 molC/m2
-	real(r8), pointer :: gaerch4bios(:)			! grid-level biomass of aerobix methanotrophy molC/m2
+	real(r8), pointer :: gaerch4bios(:)				! grid-level biomass of aerobix methanotrophy molC/m2
 	real(r8), pointer :: ganaerch4bios(:)			! grid-level biomass of anaerobic methanotrophy molC/m2
    
-	real(r8), pointer :: cmicbiocs(:,:)			! column-level biomass of all microbes molC/m3
-	real(r8), pointer :: cdocs_pre(:,:)			! column-level concentration of DOC molC/m3 
+	real(r8), pointer :: cmicbiocs(:,:)				! column-level biomass of all microbes molC/m3
+	real(r8), pointer :: cdocs_pre(:,:)				! column-level concentration of DOC molC/m3 
 	real(r8), pointer :: cdocs(:,:)				! column-level concentration of DOC molC/m3 
 	real(r8), pointer :: cdocs_unsat(:,:)			! column-level concentration of DOC molC/m3 in unsaturated fraction
 	real(r8), pointer :: cdocs_sat(:,:)			! column-level concentration of DOC molC/m3 in saturated fraction
@@ -724,13 +724,13 @@ implicit none
 		micfinundated = finundated(c)
 	end if  
       
-      cdocs(c,j)		= decomp_cpools_vr(c,j,i_dom) 
-      cdocs_unsat(c,j) 	= cdocs(c,j) !* (1. - micfinundated) ! concentration
-      cdocs_sat(c,j) 	= cdocs(c,j) !* micfinundated ! concentration
-      cdons(c,j) 		= decomp_npools_vr(c,j,i_dom)
+      cdocs(c,j)			= decomp_cpools_vr(c,j,i_dom) 
+      cdocs_unsat(c,j) 		= cdocs(c,j) !* (1. - micfinundated) ! concentration
+      cdocs_sat(c,j) 		= cdocs(c,j) !* micfinundated ! concentration
+      cdons(c,j) 			= decomp_npools_vr(c,j,i_dom)
       cdons_unsat(c,j) 	= cdons(c,j) !* (1. - micfinundated)  ! concentration
-      cdons_sat(c,j) 	= cdons(c,j) !* micfinundated ! concentration
-      cdons_min(c,j) 	= 0_r8
+      cdons_sat(c,j) 		= cdons(c,j) !* micfinundated ! concentration
+      cdons_min(c,j) 		= 0_r8
            end do
       end do
       
@@ -812,7 +812,7 @@ implicit none
 
 !	call seasonality(lbc, ubc, lbp, ubp, num_soilc, filter_soilc, num_soilp, filter_soilp)
 	call get_waterhead(lbc, ubc, num_soilc, filter_soilc,jwaterhead_unsat)
-!	call gas_diffusion(lbc, ubc, num_soilc, filter_soilc)
+	call gas_diffusion(lbc, ubc, num_soilc, filter_soilc)
 #if (defined HUM_HOL)
 	call lateral_bgc(lbc, ubc, num_soilc, filter_soilc)
 #endif
@@ -956,7 +956,7 @@ if(j >= jwaterhead_unsat(c)) then
 	
 !	caces_unsat_prod(c,j) = AceProd
 
-	if(IsH2Production == 1.0)  then
+	if(IsH2Production == 1)  then
 	ACH2Prod = (AceProd / 6.0)
 	ACCO2Prod = 0.5 * AceProd
 	else
@@ -1035,7 +1035,7 @@ if(j >= jwaterhead_unsat(c)) then
 	!	// For acetate dyndamics
 	AceCons = m_dGrowRAceMethanogens / m_dYAceMethanogens * cacebios_unsat(c,j) &
 	* caces_unsat(c,j)  / (caces_unsat(c,j)  + m_dKCH4ProdAce) &
-		* (m_dCH4ProdQ10 ** ((soiltemp(c,j) - 286.65) / 10.)) * pHeffect * 1. / (1. + ccon_co2s_unsat(c,j))
+		* (m_dCH4ProdQ10 ** ((soiltemp(c,j) - 286.65) / 10.)) * pHeffect !* 1. / (1. + ccon_co2s_unsat(c,j))
 	!else
 !write(iulog,*)"acecons: ", m_dGrowRAceMethanogens, m_dYAceMethanogens, cacebios(c,j), caces(c,j), m_dKCH4ProdAce, m_dCH4ProdQ10, AceCons, ccon_co2s(c,j) 
 	!endif
@@ -1621,16 +1621,16 @@ end if  ! end if of the frozen mechanism in trapping gases in soil
 	l = clandunit(c)     
 	if (ltype(l) == istsoil .or. ltype(l) == istcrop) then 
 	do j = 1,nlevsoi
-	cdocs_unsat(c,j) 				= cdocs_unsat(c,j) * 12.	! convert from mmol/m3 to gC/m3
-	caces_unsat(c,j) 				= caces_unsat(c,j) * 12.	! convert from mmol/m3 to gC/m3
-	cacebios_unsat(c,j) 				= cacebios_unsat(c,j) * 12.	! convert from mmol/m3 to gC/m3
-	cco2bios_unsat(c,j) 				= cco2bios_unsat(c,j) * 12. 	! convert from mmol/m3 to gC/m3
-	caerch4bios_unsat(c,j) 			= caerch4bios_unsat(c,j) * 12.	! convert from mmol/m3 to gC/m3
+	cdocs_unsat(c,j) 				= cdocs_unsat(c,j) * 12.			! convert from mmol/m3 to gC/m3
+	caces_unsat(c,j) 				= caces_unsat(c,j) * 12.			! convert from mmol/m3 to gC/m3
+	cacebios_unsat(c,j) 				= cacebios_unsat(c,j) * 12.		! convert from mmol/m3 to gC/m3
+	cco2bios_unsat(c,j) 				= cco2bios_unsat(c,j) * 12. 		! convert from mmol/m3 to gC/m3
+	caerch4bios_unsat(c,j) 			= caerch4bios_unsat(c,j) * 12.		! convert from mmol/m3 to gC/m3
 	canaerch4bios_unsat(c,j) 			= canaerch4bios_unsat(c,j) * 12.	! convert from mmol/m3 to gC/m3
-	ccon_o2s_unsat(c,j) 				= ccon_o2s_unsat(c,j) * 32.	! convert from mmol/m3 to gC/m3
-	ccon_ch4s_unsat(c,j) 				= ccon_ch4s_unsat(c,j) * 12.	! convert from mmol/m3 to gC/m3
-	ccon_h2s_unsat(c,j) 				= ccon_h2s_unsat(c,j) * 2.	! convert from mmol/m3 to gC/m3
-	ccon_co2s_unsat(c,j) 				= ccon_co2s_unsat(c,j) * 12.	! convert from mmol/m3 to gC/m3
+	ccon_o2s_unsat(c,j) 				= ccon_o2s_unsat(c,j) * 32.		! convert from mmol/m3 to gC/m3
+	ccon_ch4s_unsat(c,j) 			= ccon_ch4s_unsat(c,j) * 12.		! convert from mmol/m3 to gC/m3
+	ccon_h2s_unsat(c,j) 				= ccon_h2s_unsat(c,j) * 2.		! convert from mmol/m3 to gC/m3
+	ccon_co2s_unsat(c,j) 			= ccon_co2s_unsat(c,j) * 12.		! convert from mmol/m3 to gC/m3
 	end do
 	end if
 	end do
@@ -1734,7 +1734,7 @@ end if  ! end if of the frozen mechanism in trapping gases in soil
 	
 !	caces_sat_prod(c,j) = AceProd
 
-	if(IsH2Production == 1.0)  then
+	if(IsH2Production == 1)  then
 	ACH2Prod = (AceProd / 6.0)
 	ACCO2Prod = 0.5 * AceProd
 	else
@@ -1828,7 +1828,7 @@ end if  ! end if of the frozen mechanism in trapping gases in soil
 	!	// For acetate dyndamics
 	AceCons = m_dGrowRAceMethanogens / m_dYAceMethanogens * cacebios_sat(c,j) &
 	* caces_sat(c,j)  / (caces_sat(c,j)  + m_dKCH4ProdAce) &
-		* (m_dCH4ProdQ10 ** ((soiltemp(c,j) - 286.65) / 10.)) * pHeffect * 1. / (1. + ccon_co2s_sat(c,j))
+		* (m_dCH4ProdQ10 ** ((soiltemp(c,j) - 286.65) / 10.)) * pHeffect !* 1. / (1. + ccon_co2s_sat(c,j))
 	!else
 !	write(iulog,*)"acecons: ", m_dGrowRAceMethanogens, m_dYAceMethanogens, cacebios(c,j), caces(c,j), m_dKCH4ProdAce, m_dCH4ProdQ10, AceCons, ccon_co2s(c,j) 
 	!endif
