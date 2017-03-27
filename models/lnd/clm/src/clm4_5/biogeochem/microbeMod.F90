@@ -148,15 +148,15 @@ implicit none
    
 	real(r8), pointer :: cmicbiocs(:,:)				! column-level biomass of all microbes molC/m3
 	real(r8), pointer :: cdocs_pre(:,:)				! column-level concentration of DOC molC/m3 
-	real(r8), pointer :: cdocs(:,:)				! column-level concentration of DOC molC/m3 
+	real(r8), pointer :: cdocs(:,:)					! column-level concentration of DOC molC/m3 
 	real(r8), pointer :: cdocs_unsat(:,:)			! column-level concentration of DOC molC/m3 in unsaturated fraction
-	real(r8), pointer :: cdocs_sat(:,:)			! column-level concentration of DOC molC/m3 in saturated fraction
-	real(r8), pointer :: cmicbions(:,:)			! column-level biomass of all microbes molN/m3
-	real(r8), pointer :: cdons(:,:)				! column-level concentration of DON molN/m3 
+	real(r8), pointer :: cdocs_sat(:,:)				! column-level concentration of DOC molC/m3 in saturated fraction
+	real(r8), pointer :: cmicbions(:,:)				! column-level biomass of all microbes molN/m3
+	real(r8), pointer :: cdons(:,:)					! column-level concentration of DON molN/m3 
 	real(r8), pointer :: cdons_unsat(:,:)			! column-level concentration of DON molN/m3 in unsaturated fraction
-	real(r8), pointer :: cdons_sat(:,:)			! column-level concentration of DON molN/m3 in saturated fraction
-	real(r8), pointer :: cdons_min(:,:)			! minteralization of DON
-	real(r8), pointer :: caces(:,:)				! column-level concentration of acetate molC/m3
+	real(r8), pointer :: cdons_sat(:,:)				! column-level concentration of DON molN/m3 in saturated fraction
+	real(r8), pointer :: cdons_min(:,:)				! minteralization of DON
+	real(r8), pointer :: caces(:,:)					! column-level concentration of acetate molC/m3
 	real(r8), pointer :: cacebios(:,:)				! column-level biomass of methanogen based on acetate molC/m3
 	real(r8), pointer :: cco2bios(:,:)				! column-level biomass of methanogen based on CO2/H2 molC/m3
 	real(r8), pointer :: caerch4bios(:,:)			! column-level biomass of aerobix methanotrophy molC/m3
@@ -191,19 +191,19 @@ implicit none
 	real(r8), pointer :: ccon_h2s_sat(:,:)			! column-level concentration of H2 in saturated fraction  mol H2/m3
 	
 	integer, pointer :: ltype(:)					! type of land unit
-	integer, pointer :: ptype(:)				! type of plant functional type
+	integer, pointer :: ptype(:)					! type of plant functional type
 	integer, pointer :: clandunit(:)				! index of land nnit in column
 	real(r8), pointer :: soilpH_unsat(:,:)			! soil pH for unsaturated fraction soil column
-	real(r8), pointer :: soilpH_sat(:,:)			! soil pH for saturated fraction soil column
+	real(r8), pointer :: soilpH_sat(:,:)				! soil pH for saturated fraction soil column
 	real(r8), pointer :: soiltemp(:,:)				! soil temperature
 	real(r8), pointer :: sand(:)					! sand
 	real(r8), pointer :: silt(:)					! silt
-!	real(r8), pointer :: psi(:)					! water potential
-!	real(r8), pointer :: psisat(:)					! water potential at saturated
-	real(r8), pointer :: vwc(:,:)				! volumetic water content
+!	real(r8), pointer :: psi(:)						! water potential
+!	real(r8), pointer :: psisat(:)						! water potential at saturated
+	real(r8), pointer :: vwc(:,:)					! volumetic water content
 	real(r8), pointer :: vwcsat(:,:)				! volumetic water content at saturation
 
-	real(r8), pointer :: fsat_pre(:)    			! finundated from previous timestep
+	real(r8), pointer :: fsat_pre(:)    				! finundated from previous timestep
 	real(r8), pointer :: c_atm(:,:)     			! CH4, O2, CO2 atmospheric conc  (mol/m3)
 	real(r8), pointer :: flux_ch4(:)    			! gridcell CH4 flux to atm. (kg C/m**2/s)
 
@@ -752,6 +752,7 @@ implicit none
 	ccon_ch4s_unsat(c,j) 			= ccon_ch4s_unsat(c,j) / 12. 		!/ dz(c,j)
 	ccon_h2s_unsat(c,j) 			= ccon_h2s_unsat(c,j) / 2. 			!/ dz(c,j)
 	ccon_co2s_unsat(c,j) 			= ccon_co2s_unsat(c,j) / 12. 		!/ dz(c,j)
+!	write(iulog,*)"c ", c, " j ",j," ", ccon_o2s_unsat(c,j), " ",ccon_o2s_sat(c,j)
 	
 	cdocs_sat(c,j) 				= cdocs_sat(c,j) / 12. 			!/ dz(c,j)
 	caces_sat(c,j) 				= caces_sat(c,j) / 12. 			!/ dz(c,j)
@@ -784,7 +785,7 @@ implicit none
 		roothr_vr(c,j) = roothr_vr(c,j) + roothr(p)*rootfr_vr(p,j)*wtcol(p)
 		froot_r(c,j) = froot_r(c,j) + froot_mr(p)*rootfr_vr(p,j)*wtcol(p)
 		rootfraction(c,j) = rootfraction(c,j) + rootfr_vr(p,j)*wtcol(p)
-!write(iulog,*) "roothr_vr(c,j)", roothr_vr(c,j), "roothr(p)", roothr(p), "rootfr_vr(p,j)", rootfr_vr(p,j), "wtcol(p)", wtcol(p), "rootfraction(c,j)", rootfraction(c,j)
+		!write(iulog,*) "roothr_vr(c,j)",j, " j ", roothr_vr(c,j), "roothr(p)", roothr(p), "rootfr_vr(p,j)", rootfr_vr(p,j), "wtcol(p)", wtcol(p), "rootfraction(c,j)", rootfraction(c,j)
 		ccon_co2s_sat(c,j) = ccon_co2s_sat(c,j) + froot_r(c,j) / 12.0 + hr_vr(c,j) / 12.0
 		
                anpp = annsum_npp(p) ! g C / m^2/yr
@@ -972,7 +973,7 @@ if(j >= jwaterhead_unsat(c)) then
 	ACConcentration = 0.0
 	end if
 	
-	if(ccon_h2s_unsat(c,j) <= m_dCH4H2min) then
+!	if(ccon_h2s_unsat(c,j) <= m_dCH4H2min) then
 	! Xiaofeng replaced the following two lines code with new mechanism of CH4 production from CO2 
 	!back to orgional on 7/11/2013
 	H2AceProd = 0
@@ -983,36 +984,37 @@ if(j >= jwaterhead_unsat(c)) then
 	!	* (m_dH2CH4ProdQ10 ** ((soiltemp(c,j) - 286.65) / 10.)) * pHeffect / 10.
 	!H2AceProd = 0	
 	!print *, "HCH4Prod: ", HCH4Prod	
-	else
-	if(ccon_h2s_unsat(c,j) <= m_dAceH2min) then
+!	else
+!	if(ccon_h2s_unsat(c,j) <= m_dAceH2min) then
 	H2CH4Prod = m_dGrowRH2Methanogens / m_dYH2Methanogens * cco2bios_unsat(c,j) &
 	* ccon_h2s_unsat(c,j) / ( ccon_h2s_unsat(c,j) + m_dKH2ProdCH4) &
 		* ccon_co2s_unsat(c,j) / (ccon_co2s_unsat(c,j) + m_dKCO2ProdCH4) &
-		* (m_dH2CH4ProdQ10 ** ((soiltemp(c,j) - 286.65) / 10.)) * pHeffect
-	H2AceProd = 0
+		* (m_dH2CH4ProdQ10 ** ((soiltemp(c,j) - 286.65) / 10.)) * pHeffect &
+		* (1.0 - min(1.0, ccon_co2s_unsat(c,j) / 9.2))  !9.375 is the 21% oxgen
+!	H2AceProd = 0
 !write(iulog,*) "H2CH4Prod: ", H2CH4Prod
-	else
+!	else
 	H2AceProd = m_dH2ProdAcemax * ccon_h2s_unsat(c,j) / (ccon_h2s_unsat(c,j) + m_dKH2ProdAce) &
 	* cco2bios_unsat(c,j) / (cco2bios_unsat(c,j) + m_dKCO2ProdAce) &
 		* (m_dH2AceProdQ10 ** ((soiltemp(c,j) - 286.65) / 10.)) * pHeffect
-	H2CH4Prod = 0
-	end if
-	end if
+!	H2CH4Prod = 0
+!	end if
+!	end if
 			
 	H2Cons = 4. * (H2AceProd + H2CH4Prod)
 
 	H2Cons = max(0._r8, H2Cons)
-	H2Cons = max(0._r8, ccon_h2s_unsat(c,j))	
+	ccon_h2s_unsat(c,j) = max(0._r8, ccon_h2s_unsat(c,j))	
 	
 	if(ccon_h2s_unsat(c,j) >= H2Cons) then
 	H2Cons = H2Cons
 	ccon_h2s_unsat(c,j) = ccon_h2s_unsat(c,j) - H2Cons
-	Else
+	else
 	dTempratio = ccon_h2s_unsat(c,j) / H2Cons
 	dTempH2 = ccon_h2s_unsat(c,j)
-	H2Cons = ccon_h2s_unsat(c,j)
+!	H2Cons = ccon_h2s_unsat(c,j)
 	ccon_h2s_unsat(c,j) = 0
-	H2AceProd = 4 * H2AceProd * dTempratio * dTempH2
+	H2AceProd = H2AceProd * dTempratio
 	H2CH4Prod = dTempH2 - H2AceProd
 	end if
 		
@@ -1116,9 +1118,10 @@ if(j >= jwaterhead_unsat(c)) then
 	ccon_o2s_unsat(c,j) = 0._r8
 	end if
 
-	O2PlantFlux = m_dPlantTrans *  rootfraction(c,j) * (ccon_o2s_unsat(c,j) - c_atm(g,2)) * nppratio  !* bgnpp_timestep(c) / bgnpp_avg(c)
+	O2PlantFlux = m_dPlantTrans *  rootfraction(c,j) * (ccon_o2s_unsat(c,j) - c_atm(g,2)) * nppratio / (100. * z(c,j))  !* bgnpp_timestep(c) / bgnpp_avg(c)
+	O2PlantFlux = max(O2PlantFlux, (ccon_o2s_unsat(c,j) - c_atm(g,2))) * dz(c,j)
 	
-	ccon_o2s_unsat(c,j) = ccon_o2s_unsat(c,j) - O2PlantFlux
+	ccon_o2s_unsat(c,j) = ccon_o2s_unsat(c,j) - O2PlantFlux / dz(c,j)
 
 	PlantO2Cons = O2PlantFlux * 0.001
 	
@@ -1129,6 +1132,8 @@ if(j >= jwaterhead_unsat(c)) then
 	end if
 		
 	ccon_o2s_unsat(c,j) = ccon_o2s_unsat(c,j) - PlantO2Cons
+	
+	ccon_o2s_unsat(c,j) = max(0.0, ccon_o2s_unsat(c,j) - o2_decomp_depth_unsat(c,j))
 		
 	if(ccon_o2s_unsat(c,j) < 0._r8) then
 	ccon_o2s_unsat(c,j) = 0._r8
@@ -1158,15 +1163,16 @@ if(j >= jwaterhead_unsat(c)) then
 	!end if
 	
 !	if(ccon_o2s(c,j) < 0.0001) then
-!	AOMCH4Oxid = m_dGrowRAOMMethanotrophs / m_dYAOMMethanotrophs * canaerch4bios(c,j) * &
-!		ccon_ch4s(c,j)  / (ccon_ch4s(c,j)  + m_dKAOMCH4OxidCH4) * (m_dAOMCH4OxidQ10 ** ((soiltemp(c,j) - 13.5) / 10.)) * pHeffect
+	AOMCH4Oxid = m_dGrowRAOMMethanotrophs / m_dYAOMMethanotrophs * canaerch4bios_unsat(c,j) * &
+		ccon_ch4s_unsat(c,j)  / (ccon_ch4s_unsat(c,j)  + m_dKAOMCH4OxidCH4) * (m_dAOMCH4OxidQ10 ** ((soiltemp(c,j) - 13.5) / 10.)) &
+		* (1.0 - min(1.0, ccon_o2s_unsat(c,j) / 4.6)) * pHeffect
 !	endif
 !	
-!	if(AOMCH4Oxid < ccon_ch4s(c,j)) then
-!	AOMCH4Oxid = AOMCH4Oxid
-!	else
-!	AOMCH4Oxid = ccon_ch4s(c,j)
-!	end if	
+	if(AOMCH4Oxid < ccon_ch4s_unsat(c,j)) then
+	AOMCH4Oxid = AOMCH4Oxid
+	else
+	AOMCH4Oxid = ccon_ch4s_unsat(c,j)
+	end if	
 		
 	ccon_ch4s_unsat(c,j) = ccon_ch4s_unsat(c,j) - AOMCH4Oxid
 	ccon_ch4s_unsat(c,j) = max(0._r8, ccon_ch4s_unsat(c,j))
@@ -1330,7 +1336,7 @@ else
 	H2Cons = 4. * (H2AceProd + H2CH4Prod)
 
 	H2Cons = max(0._r8, H2Cons)
-	H2Cons = max(0._r8, ccon_h2s_unsat(c,j))	
+	ccon_h2s_unsat(c,j) = max(0._r8, ccon_h2s_unsat(c,j))	
 	
 	if(ccon_h2s_unsat(c,j) >= H2Cons) then
 	H2Cons = H2Cons
@@ -1338,9 +1344,9 @@ else
 	Else
 	dTempratio = ccon_h2s_unsat(c,j) / H2Cons
 	dTempH2 = ccon_h2s_unsat(c,j)
-	H2Cons = ccon_h2s_unsat(c,j)
+!	H2Cons = ccon_h2s_unsat(c,j)
 	ccon_h2s_unsat(c,j) = 0
-	H2AceProd = 4 * H2AceProd * dTempratio * dTempH2
+	H2AceProd = H2AceProd * dTempratio
 	H2CH4Prod = dTempH2 - H2AceProd
 	end if
 		
@@ -1421,6 +1427,8 @@ else
 	CH4O2Cons = m_drCH4Oxid * CH4Oxid
 	ccon_o2s_unsat(c,j) = ccon_o2s_unsat(c,j) - (AerO2Cons + CH4O2Cons) - OxidAce2CO2
 	
+	ccon_o2s_unsat(c,j) = max(0.0, ccon_o2s_unsat(c,j) - o2_decomp_depth_unsat(c,j))
+	
 	if(ccon_o2s_unsat(c,j) < 0) then
 	ccon_o2s_unsat(c,j) = 0
 	end if
@@ -1447,15 +1455,16 @@ else
 	!end if
 	
 !	if(ccon_o2s(c,j) < 0.0001) then
-!	AOMCH4Oxid = m_dGrowRAOMMethanotrophs / m_dYAOMMethanotrophs * canaerch4bios(c,j) * &
-!		ccon_ch4s(c,j)  / (ccon_ch4s(c,j)  + m_dKAOMCH4OxidCH4) * (m_dAOMCH4OxidQ10 ** ((soiltemp(c,j) - 13.5) / 10.)) * pHeffect
+	AOMCH4Oxid = m_dGrowRAOMMethanotrophs / m_dYAOMMethanotrophs * canaerch4bios_unsat(c,j) * &
+		ccon_ch4s_unsat(c,j)  / (ccon_ch4s_unsat(c,j)  + m_dKAOMCH4OxidCH4) * (m_dAOMCH4OxidQ10 ** ((soiltemp(c,j) - 13.5) / 10.)) &
+		* (1. - min(1.0, ccon_o2s_unsat(c,j) / 4.6)) * pHeffect
 !	endif
 !	
-!	if(AOMCH4Oxid < ccon_ch4s(c,j)) then
-!	AOMCH4Oxid = AOMCH4Oxid
-!	else
-!	AOMCH4Oxid = ccon_ch4s(c,j)
-!	end if	
+	if(AOMCH4Oxid < ccon_ch4s_unsat(c,j)) then
+	AOMCH4Oxid = AOMCH4Oxid
+	else
+	AOMCH4Oxid = ccon_ch4s_unsat(c,j)
+	end if	
 		
 	ccon_ch4s_unsat(c,j) = ccon_ch4s_unsat(c,j) - AOMCH4Oxid
 	ccon_ch4s_unsat(c,j) = max(0._r8, ccon_ch4s_unsat(c,j))
@@ -1751,7 +1760,7 @@ end if  ! end if of the frozen mechanism in trapping gases in soil
 	end if
 	
 	!print *, "H2: ", m_dH2, " ch4h2min: ", m_dCH4H2min, "CO2: ", m_dCO2
-	if(ccon_h2s_sat(c,j) <= m_dCH4H2min) then
+!	if(ccon_h2s_sat(c,j) <= m_dCH4H2min) then
 	! Xiaofeng replaced the following two lines code with new mechanism of CH4 production from CO2 
 	!back to orgional on 7/11/2013
 	H2AceProd = 0
@@ -1762,37 +1771,38 @@ end if  ! end if of the frozen mechanism in trapping gases in soil
 	!	* (m_dH2CH4ProdQ10 ** ((soiltemp(c,j) - 286.65) / 10.)) * pHeffect / 10.
 	!H2AceProd = 0	
 	!print *, "HCH4Prod: ", HCH4Prod	
-	else
-	if(ccon_h2s_sat(c,j) <= m_dAceH2min) then
+!	else
+!	if(ccon_h2s_sat(c,j) <= m_dAceH2min) then
 	H2CH4Prod = m_dGrowRH2Methanogens / m_dYH2Methanogens * cco2bios_sat(c,j) &
 	* ccon_h2s_sat(c,j) / ( ccon_h2s_sat(c,j) + m_dKH2ProdCH4) &
 		* ccon_co2s_sat(c,j) / (ccon_co2s_sat(c,j) + m_dKCO2ProdCH4) &
-		* (m_dH2CH4ProdQ10 ** ((soiltemp(c,j) - 286.65) / 10.)) * pHeffect
-	H2AceProd = 0
+		* (m_dH2CH4ProdQ10 ** ((soiltemp(c,j) - 286.65) / 10.)) * pHeffect&
+		* (1.0 - min(1.0, ccon_co2s_unsat(c,j) / 9.2))
+!	H2AceProd = 0
 	!print *, "H2CH4Prod: ", H2CH4Prod
-	else
+!	else
 	H2AceProd = m_dH2ProdAcemax * ccon_h2s_sat(c,j) / (ccon_h2s_sat(c,j) + m_dKH2ProdAce) &
 	* cco2bios_sat(c,j) / (cco2bios_sat(c,j) + m_dKCO2ProdAce) &
 		* (m_dH2AceProdQ10 ** ((soiltemp(c,j) - 286.65) / 10.)) * pHeffect
-	H2CH4Prod = 0
+!	H2CH4Prod = 0
 
-	end if
-	end if
+!	end if
+!	end if
 			
 	H2Cons = 4. * (H2AceProd + H2CH4Prod)
 
 	H2Cons = max(0._r8, H2Cons)
-	H2Cons = max(0._r8, ccon_h2s_sat(c,j))	
+	ccon_h2s_sat(c,j) = max(0._r8, ccon_h2s_sat(c,j))	
 	
 	if(ccon_h2s_sat(c,j) >= H2Cons) then
 	H2Cons = H2Cons
 	ccon_h2s_sat(c,j) = ccon_h2s_sat(c,j) - H2Cons
-	Else
+	else
 	dTempratio = ccon_h2s_sat(c,j) / H2Cons
 	dTempH2 = ccon_h2s_sat(c,j)
-	H2Cons = ccon_h2s_sat(c,j)
+!	H2Cons = ccon_h2s_sat(c,j)
 	ccon_h2s_sat(c,j) = 0
-	H2AceProd = 4 * H2AceProd * dTempratio * dTempH2
+	H2AceProd = H2AceProd * dTempratio
 	H2CH4Prod = dTempH2 - H2AceProd
 	end if
 		
@@ -1905,9 +1915,12 @@ end if  ! end if of the frozen mechanism in trapping gases in soil
 	if(ccon_o2s_sat(c,j) < 0) then
 	ccon_o2s_sat(c,j) = 0
 	end if
+	
+	O2PlantFlux = m_dPlantTrans * rootfraction(c,j) * rootfraction(c,j) * (ccon_o2s_sat(c,j) - c_atm(g,2)) * nppratio / (100. * z(c,j))  !* bgnpp_timestep(c) / bgnpp_avg(c)
+	O2PlantFlux = max(O2PlantFlux, (ccon_o2s_sat(c,j) - c_atm(g,2))) * dz(c,j)
+	
+	ccon_o2s_sat(c,j) = ccon_o2s_sat(c,j) - O2PlantFlux / dz(c,j)
 
-	O2PlantFlux = m_dPlantTrans *  rootfraction(c,j) * (ccon_o2s_sat(c,j) - c_atm(g,2)) * nppratio  !* bgnpp_timestep(c) / bgnpp_avg(c)
-	ccon_o2s_sat(c,j) = ccon_o2s_sat(c,j) - O2PlantFlux
 	PlantO2Cons = O2PlantFlux * 0.001
 	
 	if(ccon_o2s_sat(c,j) >= PlantO2Cons) then
@@ -1917,7 +1930,9 @@ end if  ! end if of the frozen mechanism in trapping gases in soil
 	end if
 	
 	ccon_o2s_sat(c,j) = ccon_o2s_sat(c,j) - PlantO2Cons
-		
+	
+	ccon_o2s_sat(c,j) = max(0.0, ccon_o2s_sat(c,j) - o2_decomp_depth_sat(c,j))
+	
 	if(ccon_o2s_sat(c,j) < 0) then
 	ccon_o2s_sat(c,j) = 0
 	end if
@@ -1945,15 +1960,16 @@ end if  ! end if of the frozen mechanism in trapping gases in soil
 	!end if
 	
 !	if(ccon_o2s(c,j) < 0.0001) then
-!	AOMCH4Oxid = m_dGrowRAOMMethanotrophs / m_dYAOMMethanotrophs * canaerch4bios(c,j) * &
-!		ccon_ch4s(c,j)  / (ccon_ch4s(c,j)  + m_dKAOMCH4OxidCH4) * (m_dAOMCH4OxidQ10 ** ((soiltemp(c,j) - 13.5) / 10.)) * pHeffect
+	AOMCH4Oxid = m_dGrowRAOMMethanotrophs / m_dYAOMMethanotrophs * canaerch4bios_sat(c,j) * &
+		ccon_ch4s_sat(c,j)  / (ccon_ch4s_sat(c,j)  + m_dKAOMCH4OxidCH4) * (m_dAOMCH4OxidQ10 ** ((soiltemp(c,j) - 13.5) / 10.)) &
+		* (1.0 - min(1.0, ccon_o2s_sat(c,j) / 4.6))* pHeffect
 !	endif
 !	
-!	if(AOMCH4Oxid < ccon_ch4s(c,j)) then
-!	AOMCH4Oxid = AOMCH4Oxid
-!	else
-!	AOMCH4Oxid = ccon_ch4s(c,j)
-!	end if	
+	if(AOMCH4Oxid < ccon_ch4s_sat(c,j)) then
+	AOMCH4Oxid = AOMCH4Oxid
+	else
+	AOMCH4Oxid = ccon_ch4s_sat(c,j)
+	end if	
 		
 	ccon_ch4s_sat(c,j) = ccon_ch4s_sat(c,j) - AOMCH4Oxid
 	ccon_ch4s_sat(c,j) = max(0._r8, ccon_ch4s_sat(c,j))
@@ -1982,7 +1998,7 @@ end if  ! end if of the frozen mechanism in trapping gases in soil
 
 	!~ cacebios_sat(c,j) 			= cacebios_sat(c,j) + min((AceMethanogenGrowth - AceMethanogenDying), 0._r8) 
 	!~ cco2bios_sat(c,j) 			= cco2bios_sat(c,j) + min((H2MethanogenGrowth - H2MethanogenDying), 0._r8)
-	!~ caerch4bios_sat(c,j) 			= caerch4bios_sat(c,j) + min((MethanotrophGrowth - MethanotrophDying), 0._r8)
+	!~ caerch4bios_sat(c,j) 		= caerch4bios_sat(c,j) + min((MethanotrophGrowth - MethanotrophDying), 0._r8)
 	!~ canaerch4bios_sat(c,j) 		= canaerch4bios_sat(c,j) + min((AOMMethanotrophGrowth - AOMMethanotrophDying), 0._r8) 
 
 	cacebios_sat(c,j) 			= cacebios_sat(c,j) + AceMethanogenGrowth - AceMethanogenDying
@@ -2003,7 +2019,7 @@ end if  ! end if of the frozen mechanism in trapping gases in soil
 	
 	ch4_prod_ace_depth_sat(c,j) 			= CH4Prod 
 	ch4_prod_co2_depth_sat(c,j) 			= H2CH4Prod
-	ch4_oxid_o2_depth_sat(c,j) 				= CH4Oxid
+	ch4_oxid_o2_depth_sat(c,j) 			= CH4Oxid
 	ch4_oxid_aom_depth_sat(c,j) 			= AOMCH4Oxid
 	ch4_aere_depth_sat(c,j) 				= CH4PlantFlux
 	ch4_dif_depth_sat(c,j) 				= 0._r8
@@ -2019,14 +2035,14 @@ end if  ! end if of the frozen mechanism in trapping gases in soil
 	o2_cons_depth_sat(c,j) 				= AerO2Cons + CH4O2Cons
 	o2_aere_depth_sat(c,j) 				= O2PlantFlux
 	o2_aere_oxid_depth_sat(c,j) 			= PlantO2Cons
-	o2_decomp_depth_sat(c,j) 				= co2_decomp_depth_sat (c,j)		! mole / m3
-	o2_dif_depth_sat(c,j) 					= 0._r8
+	o2_decomp_depth_sat(c,j) 			= co2_decomp_depth_sat (c,j)		! mole / m3
+	o2_dif_depth_sat(c,j) 				= 0._r8
 
 	h2_prod_depth_sat(c,j) 				= ACH2Prod
 	h2_cons_depth_sat(c,j) 				= H2Cons
 	h2_aere_depth_sat(c,j) 				= H2PlantFlux
-	h2_diff_depth_sat(c,j) 					= H2PlantFlux
-	h2_ebul_depth_sat(c,j) 				= H2PlantFlux
+	h2_diff_depth_sat(c,j) 				= 0.0
+	h2_ebul_depth_sat(c,j) 				= 0.0
        end do
 ! average to grid level fluxes or state variables    
 	tem1 = Henry_kHpc_w(1) * exp (Henry_C_w(1) * (1/soiltemp(c,1) - 1/kh_tbase))
@@ -2040,31 +2056,31 @@ end if  ! end if of the frozen mechanism in trapping gases in soil
 	tem4 = 1. / tem4 * atmh2 * 1000. / 2.
 	
 	ch4_surf_aere_sat(c)				= 0._r8
-	ch4_surf_ebul_sat(c) 				= 0._r8
+	ch4_surf_ebul_sat(c) 			= 0._r8
 	ch4_surf_dif_sat(c) 				= 0._r8
 	ch4_surf_netflux_sat(c)			= 0._r8
 	
 	co2_surf_aere_sat(c)				= 0._r8
-	co2_surf_ebul_sat(c) 				= 0._r8
+	co2_surf_ebul_sat(c) 			= 0._r8
 	co2_surf_dif_sat(c) 				= 0._r8
 	co2_surf_netflux_sat(c)			= 0._r8
 	
 	o2_surf_aere_sat(c)				= 0._r8
 	o2_surf_dif_sat(c) 				= 0._r8
-	o2_surf_netflux_sat(c)				= 0._r8
+	o2_surf_netflux_sat(c)			= 0._r8
 	
 	h2_surf_aere_sat(c)				= 0._r8
 	h2_surf_ebul_sat(c) 				= 0._r8
 	h2_surf_dif_sat(c) 				= 0._r8
-	h2_surf_netflux_sat(c)				= 0._r8
+	h2_surf_netflux_sat(c)			= 0._r8
 	
 if(soiltemp(c,1) < SHR_CONST_TKFRZ) then
 	ch4_surf_aere_sat(c)				= 0._r8
-	ch4_surf_ebul_sat(c) 				= 0._r8
+	ch4_surf_ebul_sat(c) 			= 0._r8
 	ch4_surf_dif_sat(c) 				= 0._r8
 		
 	co2_surf_aere_sat(c)				= 0._r8
-	co2_surf_ebul_sat(c) 				= 0._r8
+	co2_surf_ebul_sat(c) 			= 0._r8
 	co2_surf_dif_sat(c) 				= 0._r8
 		
 	o2_surf_aere_sat(c)				= 0._r8
@@ -2092,10 +2108,10 @@ else
 
 	do j = 1,nlevsoi
 	ch4_surf_aere_sat(c)				= ch4_surf_aere_sat(c) + ch4_aere_depth_sat(c,j) * dz(c,j)
-	ch4_surf_ebul_sat(c) 				= ch4_surf_ebul_sat(c) + ch4_ebul_depth_sat(c,j)  * dz(c,j)
+	ch4_surf_ebul_sat(c) 			= ch4_surf_ebul_sat(c) + ch4_ebul_depth_sat(c,j)  * dz(c,j)
 		
 	co2_surf_aere_sat(c)				= co2_surf_aere_sat(c) + co2_aere_depth_sat(c,j) * dz(c,j)
-	co2_surf_ebul_sat(c) 				= co2_surf_ebul_sat(c) + co2_ebul_depth_sat(c,j) * dz(c,j)
+	co2_surf_ebul_sat(c) 			= co2_surf_ebul_sat(c) + co2_ebul_depth_sat(c,j) * dz(c,j)
 		
 	o2_surf_aere_sat(c)				= o2_surf_aere_sat(c) + o2_aere_depth_sat(c,j) * dz(c,j)
 	
@@ -2855,11 +2871,11 @@ implicit none
 	
 	ccon_ch4s_unsat_temp 		= 0._r8
 	ccon_ch4s_sat_temp 			= 0._r8
-	ccon_o2s_unsat_temp 			= 0._r8
+	ccon_o2s_unsat_temp 		= 0._r8
 	ccon_o2s_sat_temp 			= 0._r8
 	ccon_co2s_unsat_temp 		= 0._r8
 	ccon_co2s_sat_temp 			= 0._r8
-	ccon_h2s_unsat_temp 			= 0._r8
+	ccon_h2s_unsat_temp 		= 0._r8
 	ccon_h2s_sat_temp 			= 0._r8
 
 	call get_waterhead(lbc, ubc, num_micbioc, filter_micbioc,jwaterhead_unsat)
@@ -2870,10 +2886,10 @@ implicit none
 	if (ltype(l) == istsoil .or. ltype(l) == istcrop) then 
 	do j = 2,nlevsoi
 	if(j > jwaterhead_unsat(c) .and. j < nlevsoi) then
-		ccon_ch4s_unsat_temp(c,j) = (ccon_ch4s_unsat(c,j-1) - ccon_ch4s_unsat(c,j)) * Fick_D_w(1) * m_Fick_ad * 1e-4 * (t_soisno(c,j)/298)**1.87 * get_step_size() / (z(c,j) - z(c,j-1)) !CH4_dif
-		ccon_o2s_unsat_temp(c,j) = (ccon_o2s_unsat(c,j-1) - ccon_o2s_unsat(c,j)) * Fick_D_w(2) * m_Fick_ad * 1e-4 * (t_soisno(c,j)/298)**1.87 * get_step_size() / (z(c,j) - z(c,j-1)) !O2_dif
-		ccon_co2s_unsat_temp(c,j) = (ccon_co2s_unsat(c,j-1) - ccon_co2s_unsat(c,j)) * Fick_D_w(3) * m_Fick_ad * 1e-4 *  (t_soisno(c,j)/298)**1.87 * get_step_size() / (z(c,j) - z(c,j-1)) !CO2_dif
-		ccon_h2s_unsat_temp(c,j) = (ccon_h2s_unsat(c,j-1) - ccon_h2s_unsat(c,j)) * Fick_D_w(4) * m_Fick_ad * 1e-4 * (t_soisno(c,j)/298)**1.87 * get_step_size() / (z(c,j) - z(c,j-1)) !H2_dif
+		ccon_ch4s_unsat_temp(c,j) = (ccon_ch4s_unsat(c,j-1) - ccon_ch4s_unsat(c,j)) * Fick_D_w(1) * m_Fick_ad * 1.0e-4 * (t_soisno(c,j)/298)**1.87 * get_step_size() / (z(c,j) - z(c,j-1)) !CH4_dif
+		ccon_o2s_unsat_temp(c,j) = (ccon_o2s_unsat(c,j-1) - ccon_o2s_unsat(c,j)) * Fick_D_w(2) * m_Fick_ad * 1.0e-4 * (t_soisno(c,j)/298)**1.87 * get_step_size() / (z(c,j) - z(c,j-1)) !O2_dif
+		ccon_co2s_unsat_temp(c,j) = (ccon_co2s_unsat(c,j-1) - ccon_co2s_unsat(c,j)) * Fick_D_w(3) * m_Fick_ad * 1.0e-4 *  (t_soisno(c,j)/298)**1.87 * get_step_size() / (z(c,j) - z(c,j-1)) !CO2_dif
+		ccon_h2s_unsat_temp(c,j) = (ccon_h2s_unsat(c,j-1) - ccon_h2s_unsat(c,j)) * Fick_D_w(4) * m_Fick_ad * 1.0e-4 * (t_soisno(c,j)/298)**1.87 * get_step_size() / (z(c,j) - z(c,j-1)) !H2_dif
 		
 		ccon_ch4s_unsat(c,j-1) = (ccon_ch4s_unsat(c,j-1) * dz(c,j-1) - ccon_ch4s_unsat_temp(c,j)) / dz(c,j-1)
 		ccon_ch4s_unsat(c,j) = (ccon_ch4s_unsat(c,j) * dz(c,j) + ccon_ch4s_unsat_temp(c,j)) / dz(c,j)
@@ -2889,10 +2905,10 @@ implicit none
 	end if
 	! for the saturation portion
 !	write(iulog,*) "before ", j, ccon_ch4s_sat(c,j-1), ccon_ch4s_sat(c,j)
-		ccon_ch4s_sat_temp(c,j) = (ccon_ch4s_sat(c,j-1) - ccon_ch4s_sat(c,j)) * Fick_D_w(1) * m_Fick_ad * 1e-4 * (t_soisno(c,j)/298)**1.87 * get_step_size() / (z(c,j) - z(c,j-1)) !CH4_dif
-		ccon_o2s_sat_temp(c,j) = (ccon_o2s_sat(c,j-1) - ccon_o2s_sat(c,j)) * Fick_D_w(2) * m_Fick_ad * 1e-4 * (t_soisno(c,j)/298)**1.87 * get_step_size() / (z(c,j) - z(c,j-1)) !O2_dif
-		ccon_co2s_sat_temp(c,j) = (ccon_co2s_sat(c,j-1) - ccon_co2s_sat(c,j)) * Fick_D_w(3) * m_Fick_ad * 1e-4 *  (t_soisno(c,j)/298)**1.87 * get_step_size() / (z(c,j) - z(c,j-1)) !CO2_dif
-		ccon_h2s_sat_temp(c,j) = (ccon_h2s_sat(c,j-1) - ccon_h2s_sat(c,j)) * Fick_D_w(4) * m_Fick_ad * 1e-4 * (t_soisno(c,j)/298)**1.87 * get_step_size() / (z(c,j) - z(c,j-1)) !H2_dif
+		ccon_ch4s_sat_temp(c,j) = (ccon_ch4s_sat(c,j-1) - ccon_ch4s_sat(c,j)) * Fick_D_w(1) * m_Fick_ad * 1.0e-4 * (t_soisno(c,j)/298)**1.87 * get_step_size() / (z(c,j) - z(c,j-1)) !CH4_dif
+		ccon_o2s_sat_temp(c,j) = (ccon_o2s_sat(c,j-1) - ccon_o2s_sat(c,j)) * Fick_D_w(2) * m_Fick_ad * 1.0e-4 * (t_soisno(c,j)/298)**1.87 * get_step_size() / (z(c,j) - z(c,j-1)) !O2_dif
+		ccon_co2s_sat_temp(c,j) = (ccon_co2s_sat(c,j-1) - ccon_co2s_sat(c,j)) * Fick_D_w(3) * m_Fick_ad * 1.0e-4 *  (t_soisno(c,j)/298)**1.87 * get_step_size() / (z(c,j) - z(c,j-1)) !CO2_dif
+		ccon_h2s_sat_temp(c,j) = (ccon_h2s_sat(c,j-1) - ccon_h2s_sat(c,j)) * Fick_D_w(4) * m_Fick_ad * 1.0e-4 * (t_soisno(c,j)/298)**1.87 * get_step_size() / (z(c,j) - z(c,j-1)) !H2_dif
 !	write(iulog,*) "temp ", ccon_ch4s_sat_temp(c,j)
 		ccon_ch4s_sat(c,j-1) = (ccon_ch4s_sat(c,j-1) * dz(c,j-1) - ccon_ch4s_sat_temp(c,j)) / dz(c,j-1)
 		ccon_ch4s_sat(c,j) = (ccon_ch4s_sat(c,j) * dz(c,j) + ccon_ch4s_sat_temp(c,j)) / dz(c,j)
@@ -2917,12 +2933,12 @@ implicit none
 	do j = 1,nlevsoi
 	if(j < nlevsoi) then
 !write(iulog, *) "LBGC debug 1", lxch4unsat, ccon_ch4s_unsat(1,j), ccon_ch4s_unsat(2,j),  Fick_D_w(1), t_soisno(c,j), get_step_size()
-		lxch4unsat = (ccon_ch4s_unsat(1,j) - ccon_ch4s_unsat(2,j)) * Fick_D_w(1) * m_Fick_ad * 1e-4 * (t_soisno(c,j) / 298)**1.87 * get_step_size() !CH4_dif
+		lxch4unsat = (ccon_ch4s_unsat(1,j) - ccon_ch4s_unsat(2,j)) * Fick_D_w(1) * m_Fick_ad * 1.0e-4 * (t_soisno(c,j) / 298)**1.87 * get_step_size() !CH4_dif
 !write(iulog, *) "LBGC debug 2", lxch4unsat, ccon_ch4s_unsat(1,j), ccon_ch4s_unsat(2,j),  Fick_D_w(1), t_soisno(c,j), get_step_size()
 
-		lxo2unsat = (ccon_o2s_unsat(1,j) - ccon_o2s_unsat(2,j)) * Fick_D_w(2) * m_Fick_ad * 1e-4 * (t_soisno(c,j) / 298)**1.87 * get_step_size() !O2_dif
-		lxco2unsat = (ccon_co2s_unsat(1,j) - ccon_co2s_unsat(2,j)) * Fick_D_w(3) * m_Fick_ad * 1e-4 *  (t_soisno(c,j) / 298)**1.87 * get_step_size() !CO2_dif
-		lxh2unsat = (ccon_h2s_unsat(1,j) - ccon_h2s_unsat(2,j)) * Fick_D_w(4) * m_Fick_ad * 1e-4 * (t_soisno(c,j) / 298)**1.87 * get_step_size() !H2_dif
+		lxo2unsat = (ccon_o2s_unsat(1,j) - ccon_o2s_unsat(2,j)) * Fick_D_w(2) * m_Fick_ad * 1.0e-4 * (t_soisno(c,j) / 298)**1.87 * get_step_size() !O2_dif
+		lxco2unsat = (ccon_co2s_unsat(1,j) - ccon_co2s_unsat(2,j)) * Fick_D_w(3) * m_Fick_ad * 1.0e-4 *  (t_soisno(c,j) / 298)**1.87 * get_step_size() !CO2_dif
+		lxh2unsat = (ccon_h2s_unsat(1,j) - ccon_h2s_unsat(2,j)) * Fick_D_w(4) * m_Fick_ad * 1.0e-4 * (t_soisno(c,j) / 298)**1.87 * get_step_size() !H2_dif
 		
 !write(iulog, *) "LBGC debug 3",ccon_ch4s_unsat(1,j),ccon_ch4s_unsat(2,j)
 		ccon_ch4s_unsat(1,j) = (ccon_ch4s_unsat(1,j) * hum_frac - lxch4unsat) / hum_frac
@@ -2939,10 +2955,10 @@ implicit none
 		ccon_h2s_unsat(2,j) = (ccon_h2s_unsat(2,j) * hol_frac + lxh2unsat) / hol_frac
 
 	end if
-		lxch4sat = (ccon_ch4s_sat(1,j) - ccon_ch4s_sat(2,j)) * Fick_D_w(1) * m_Fick_ad * 1e-4 * (t_soisno(c,j) / 298)**1.87 * get_step_size() !CH4_dif
-		lxo2sat = (ccon_o2s_sat(1,j) - ccon_o2s_sat(2,j)) * Fick_D_w(2) * m_Fick_ad * 1e-4 * (t_soisno(c,j) / 298)**1.87 * get_step_size() !O2_dif
-		lxco2sat = (ccon_co2s_sat(1,j) - ccon_co2s_sat(2,j)) * Fick_D_w(3) * m_Fick_ad * 1e-4 *  (t_soisno(c,j) / 298)**1.87 * get_step_size() !CO2_dif
-		lxh2sat = (ccon_h2s_sat(1,j) - ccon_h2s_sat(2,j)) * Fick_D_w(4) * m_Fick_ad * 1e-4 * (t_soisno(c,j) / 298)**1.87 * get_step_size() !H2_dif
+		lxch4sat = (ccon_ch4s_sat(1,j) - ccon_ch4s_sat(2,j)) * Fick_D_w(1) * m_Fick_ad * 1.0e-4 * (t_soisno(c,j) / 298)**1.87 * get_step_size() !CH4_dif
+		lxo2sat = (ccon_o2s_sat(1,j) - ccon_o2s_sat(2,j)) * Fick_D_w(2) * m_Fick_ad * 1.0e-4 * (t_soisno(c,j) / 298)**1.87 * get_step_size() !O2_dif
+		lxco2sat = (ccon_co2s_sat(1,j) - ccon_co2s_sat(2,j)) * Fick_D_w(3) * m_Fick_ad * 1.0e-4 *  (t_soisno(c,j) / 298)**1.87 * get_step_size() !CO2_dif
+		lxh2sat = (ccon_h2s_sat(1,j) - ccon_h2s_sat(2,j)) * Fick_D_w(4) * m_Fick_ad * 1.0e-4 * (t_soisno(c,j) / 298)**1.87 * get_step_size() !H2_dif
 		
 		ccon_ch4s_sat(1,j) = (ccon_ch4s_sat(1,j) * hum_frac - lxch4sat) / hum_frac
 		ccon_ch4s_sat(2,j) = (ccon_ch4s_sat(2,j) * hol_frac + lxch4sat) / hol_frac
