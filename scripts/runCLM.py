@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#/usr/bin/env python
 
 import os, sys, csv, time, math
 from optparse import OptionParser
@@ -82,6 +82,8 @@ parser.add_option("--cruncep", dest="cruncep", default=False, \
                   action="store_true", help = 'Use CRU-NCEP meteorology')
 parser.add_option("--csmdir", dest="csmdir", default='..', \
                   help = "base CESM directory (default = ../)")
+parser.add_option("--diags", dest="diags", default=False, \
+                  action="store_true", help = 'output for SPRUCE diagnostics')
 parser.add_option("--exeroot_case", dest="exeroot_case", default='', \
                    help = "Root for executable (do not rebuild)")
 parser.add_option("--exit_spinup", action="store_true", \
@@ -99,9 +101,9 @@ parser.add_option("--finidat_year", dest="finidat_year", default=-1, \
 parser.add_option("--harvmod", action="store_true", dest="harvmod", \
                       default=False, help = "Turn on harvest modificaton" \
                       "All harvest is performed in first timestep")
-parser.add_option("--hist_mfilt", dest="hist_mfilt", default=-1, \
+parser.add_option("--hist_mfilt", dest="hist_mfilt", default=1, \
                   help = 'number of output timesteps per file')
-parser.add_option("--hist_nhtfrq", dest="hist_nhtfrq", default=-999, \
+parser.add_option("--hist_nhtfrq", dest="hist_nhtfrq", default=-8760, \
                   help = 'output file timestep')
 parser.add_option("--hist_vars", dest="hist_vars", default='', \
                   help = 'use hist_vars file')
@@ -656,19 +658,23 @@ if (options.refcase == 'none'):
         output.write(" add_temperature = "+str(options.add_temperature)+"\n")
         output.write(" add_co2 = "+str(options.add_co2)+"\n")
 	#history file options
-        if (options.hist_mfilt != -1):
-            if ('20TR' in compset):
-              output.write(" hist_mfilt = "+ str(options.hist_mfilt)+','+str(options.hist_mfilt)+'\n')
-              output.write(' hist_dov2xy = .true., .false.\n')
-              output.write(" hist_fincl2 = 'AGNPP', 'GPP', 'NPP', 'AR', 'MR', 'GR', 'TLAI', 'DEADSTEMC', 'LIVESTEMC', 'FROOTC', 'DEADCROOTC', 'LIVECROOTC', 'LEAFC', \
+        if ('20TR' in compset and options.diags):
+            output.write(" hist_mfilt = 1, 8760, 365, 365\n")
+            output.write(' hist_dov2xy = .true., .true., .true., .false.\n')
+            output.write(" hist_fincl2 = 'NEE', 'GPP', 'NPP', 'ER', 'SR', 'EFLX_LH_TOT', 'FSH', 'FPSN', 'BTRAN', 'FPG', 'FPI', 'TV', 'FSA', 'FIRA', 'FCTR', \
+		'FCEV', 'FGEV', 'TBOT', 'FLDS', 'FSDS', 'RAIN', 'SNOW', 'WIND', 'PBOT', 'QBOT'\n")
+            output.write(" hist_fincl3 = 'NEE', 'GPP', 'NPP', 'AGNPP', 'BGNPP', 'ER', 'AR', 'HR', 'SR', 'EFLX_LH_TOT', 'FSH', 'FPSN', 'BTRAN', 'FPG', \
+            'FPI', 'TBOT', 'FLDS', 'FSDS', 'RAIN', 'SNOW', 'WIND', 'PBOT', 'QBOT', 'PFT_FIRE_CLOSS', 'LITFALL', 'TLAI', 'LEAFC' ,'FROOTC', \
+            'LIVESTEMC', 'DEADSTEMC', 'LIVECROOTC', 'DEADCROOTC', 'TOTVEGC', 'TOTSOMC', 'TOTLITC', 'CWDC', 'TOTECOSYSC', 'TOTCOLC', 'TOTSOMN', \
+            'TOTECOSYSN', 'SMINN', 'QOVER', 'QDRAI', 'QRGWL', 'QRUNOFF'\n") 
+            output.write(" hist_fincl4 = 'AGNPP', 'GPP', 'NPP', 'AR', 'MR', 'GR', 'TLAI', 'DEADSTEMC', 'LIVESTEMC', 'FROOTC', 'DEADCROOTC', 'LIVECROOTC', 'LEAFC', \
                                   'QVEGT', 'QVEGE', 'BTRAN', 'FPSN', 'FPG'\n")
-            else:
-              output.write(" hist_mfilt = "+ str(options.hist_mfilt)+"\n")
-        if (options.hist_nhtfrq != -999):
-            if ('20TR' in compset):
-              output.write(" hist_nhtfrq = "+ str(options.hist_nhtfrq)+','+ str(options.hist_nhtfrq)+"\n")
-            else:
-              output.write(" hist_nhtfrq = "+ str(options.hist_nhtfrq)+"\n")
+        else:
+            output.write(" hist_mfilt = "+ str(options.hist_mfilt)+"\n")
+        if ('20TR' in compset and options.diags):
+            output.write(" hist_nhtfrq = 0, -1, -24, -24\n")
+        else:
+            output.write(" hist_nhtfrq = "+ str(options.hist_nhtfrq)+"\n")
         if (options.hist_vars != ''):
             output.write(" hist_empty_htapes = .true.\n")
             #read hist_vars file

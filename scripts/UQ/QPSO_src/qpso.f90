@@ -1,4 +1,4 @@
-roe program qpso
+program qpso
 
 implicit none
 include "mpif.h"
@@ -35,7 +35,7 @@ npop = 64         !number of particles
 niter = 200       !number of iterations
 beta_l = 0.4d0
 beta_u = 0.7d0
-restart = .false.
+restart = .true.
 
 !---------------------------------------------------------------
 
@@ -107,18 +107,20 @@ else
       open(unit=8, file='./qpso_restart.txt')
       read(8,*) start_iter
       do j=1,npop
-         read(8,*) pbestall(1:nparms,i)
-         read(8,*) f_pbestall(i)
+         read(8,*) xall(j,1:nparms)
+         read(8,*) pbestall(j,1:nparms)
+         read(8,*) f_pbestall(j)
       end do
       read(8,*) gbest(1:nparms)
       read(8,*) f_gbest
    end if
+   xall=pbestall   
+   call mpi_bcast(xall, maxparms*maxpop, mpi_double, 0, mpi_comm_world, ierr) 
    call mpi_bcast(pbestall, maxparms*maxpop, mpi_double, 0, mpi_comm_world, ierr)
    call mpi_bcast(f_pbestall, maxpop, mpi_double, 0, mpi_comm_world, ierr)
    call mpi_bcast(gbest, maxparms, mpi_double, 0, mpi_comm_world, ierr)
    call mpi_bcast(f_gbest, 1, mpi_double, 0, mpi_comm_world, ierr)
 end if
-
 
 
 
@@ -144,7 +146,7 @@ do i=start_iter,niter
 
          isvalid=.true.
          do k=1,nparms
-            pupdate = fi(k)*pbestall(j,k) + (1-fi(k))*gbest
+            pupdate = fi(k)*pbestall(j,k) + (1-fi(k))*gbest(k)
             betapro = beta * abs(mbest(k)-xall(j,k))
 
             x(j,k) = pupdate(k)+((-1d0)**ceiling(0.5+v(k)))*betapro(k)*(-log(u(k)))
@@ -153,14 +155,13 @@ do i=start_iter,niter
             !DMR for better load balancing, instead of not running, run at the boundary.  Testing only.
             !if (x(j,k) .lt. pmin(k)) x(j,k) = pmin(k)
             !if (x(j,k) .gt. pmax(k)) x(j,k) = pmax(k)
-
          end do
       end do
 
       !run the model to get the cost function
       f_x(j) = feval(x(j,:),nparms, j)
       nfunc(j) = nfunc(j)+1
-
+    
 20 continue
       if (f_x(j) .lt. f_pbestall(j)) then 
          pbest(j,:) = x(j,:)
@@ -213,11 +214,12 @@ do i=start_iter,niter
      open(unit=11, file = 'qpso_restart.txt')
      write(11,'(I4)') i        !current iteration number
      do j=1,npop
-        write(11,fmt=trim(thisfmt)) pbestall(j,1:nparms)  !current parameters for all population members
-        write(11,'(g13.6)') f_pbestall(j)
+        write(11,fmt=trim(thisfmt)) xall(j,1:nparms)      !current parameters for each population
+        write(11,fmt=trim(thisfmt)) pbestall(j,1:nparms)  !best parameters for each population 
+        write(11,'(g13.6)') f_pbestall(j)                 !best objective function for each population
      end do
-     write(11,fmt=trim(thisfmt)) gbest(:)
-     write(11,'(g13.6)') f_gbest
+     write(11,fmt=trim(thisfmt)) gbest(1:nparms)          !overall best parameters
+     write(11,'(g13.6)') f_gbest                          !overall best objectivefunction
      close(11)
   end if
 end do
