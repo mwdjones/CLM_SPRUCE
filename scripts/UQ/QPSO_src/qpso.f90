@@ -27,7 +27,7 @@ double precision pmin(maxparms), pmax(maxparms)
 double precision fi(maxparms), u(maxparms), v(maxparms)
 logical isvalid, restart
 character(len=4) popst
-character(len=100) dummy, parm_name(maxparms), case_name, thisfmt
+character(len=100) mymachine, dummy, parm_name(maxparms), case_name, thisfmt
 
 !------- user-tunable QPSO algorithm parameters ----------------
 
@@ -35,7 +35,8 @@ npop = 64         !number of particles
 niter = 200       !number of iterations
 beta_l = 0.4d0
 beta_u = 0.7d0
-restart = .true.
+restart = .false.
+!mymachine = 'oic'   !Fill in correct machine and uncomment this line
 
 !---------------------------------------------------------------
 
@@ -78,7 +79,7 @@ if (restart .eqv. .false.) then
       call init_random_seed
       call random_number(u)
       x(i,:) = pmin + (pmax-pmin) * u
-      f_x(i) = feval(x(i,:), nparms, i)
+      f_x(i) = feval(x(i,:), nparms, i, mymachine)
       nfunc(i) = nfunc(i)+1
       f_pbest(i) = f_x(i)
    end do
@@ -159,7 +160,7 @@ do i=start_iter,niter
       end do
 
       !run the model to get the cost function
-      f_x(j) = feval(x(j,:),nparms, j)
+      f_x(j) = feval(x(j,:),nparms, j, mymachine)
       nfunc(j) = nfunc(j)+1
     
 20 continue
@@ -229,13 +230,14 @@ end program qpso
 
 
 !Function to evaluate the CLM/ALM model
-double precision function feval(parms, nparms, thispop)
+double precision function feval(parms, nparms, thispop, mymachine)
 
 integer nparms, i, thispop
 double precision parms(500), trueparms(4)
 double precision mydata(1000), model(1000), sse(1000)
 double precision temp(1000), par(1000)
 character(len=6) thispopst
+character(len=100) mymachine
 
 
 write(thispopst, '(I6)') 100000+thispop
@@ -250,7 +252,8 @@ close(9)
 !Call python workflow to set up and launch model simulation
 call system('python UQ_runens.py --ens_num ' // thispopst(2:6) // &
      ' --parm_list ' // 'parm_list --parm_data ./parm_data_files/' // &
-     'parm_data_' // thispopst(2:6) // ' --constraints constraints')
+     'parm_data_' // thispopst(2:6) // ' --constraints constraints' // &
+     ' --machine ' // trim(mymachine))
 
 !get the sum of squared errors
 open(unit=9, file='./ssedata/mysse_' // thispopst(2:6) // '.txt')
