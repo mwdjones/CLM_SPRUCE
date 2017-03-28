@@ -121,7 +121,6 @@ subroutine microbech4 (lbg, ubg, lbl, ubl, lbc, ubc, lbp, ubp, num_soilc, filter
 	use clmtype
 	use filterMod,  only : filter
 	use shr_const_mod, only: SHR_CONST_TKFRZ, SHR_CONST_RGAS
-	use clm_varpar, only:
 !
 ! !ARGUMENTS:
 implicit none
@@ -132,7 +131,7 @@ implicit none
 	integer, intent(in) :: num_soilc          			! number of column soil points in column filter
 	integer, intent(in) :: filter_soilc(ubc-lbc+1)    	! column filter for soil points
 	integer, intent(in) :: num_soilp          			! number of soil points in pft filter
-	integer, intent(in) :: filter_soilp(ubp-lbp+1) 	! pft filter for soil points
+	integer, intent(in) :: filter_soilp(ubp-lbp+1) 		! pft filter for soil points
 ! !CALLED FROM:
 ! driver.F90
 !
@@ -140,24 +139,24 @@ implicit none
 ! !LOCAL VARIABLES:
 ! local pointers to implicit in variables
 	real(r8), pointer :: gmicbios(:)				! grid-level biomass of microbes molC/m2
-	real(r8), pointer :: gdocs(:)				! grid-level doc concentration molC/m2
-	real(r8), pointer :: gaces(:)				! grid-level acetate concentration molC/m2
+	real(r8), pointer :: gdocs(:)					! grid-level doc concentration molC/m2
+	real(r8), pointer :: gaces(:)					! grid-level acetate concentration molC/m2
 	real(r8), pointer :: gacebios(:)				! grid-level biomass of methanogen based on acetate molC/m2
 	real(r8), pointer :: gco2bios(:)				! grid-level biomass of methanogen based on CO2 and H2 molC/m2
-	real(r8), pointer :: gaerch4bios(:)			! grid-level biomass of aerobix methanotrophy molC/m2
+	real(r8), pointer :: gaerch4bios(:)				! grid-level biomass of aerobix methanotrophy molC/m2
 	real(r8), pointer :: ganaerch4bios(:)			! grid-level biomass of anaerobic methanotrophy molC/m2
    
-	real(r8), pointer :: cmicbiocs(:,:)			! column-level biomass of all microbes molC/m3
-	real(r8), pointer :: cdocs_pre(:,:)			! column-level concentration of DOC molC/m3 
-	real(r8), pointer :: cdocs(:,:)				! column-level concentration of DOC molC/m3 
+	real(r8), pointer :: cmicbiocs(:,:)				! column-level biomass of all microbes molC/m3
+	real(r8), pointer :: cdocs_pre(:,:)				! column-level concentration of DOC molC/m3 
+	real(r8), pointer :: cdocs(:,:)					! column-level concentration of DOC molC/m3 
 	real(r8), pointer :: cdocs_unsat(:,:)			! column-level concentration of DOC molC/m3 in unsaturated fraction
-	real(r8), pointer :: cdocs_sat(:,:)			! column-level concentration of DOC molC/m3 in saturated fraction
-	real(r8), pointer :: cmicbions(:,:)			! column-level biomass of all microbes molN/m3
-	real(r8), pointer :: cdons(:,:)				! column-level concentration of DON molN/m3 
+	real(r8), pointer :: cdocs_sat(:,:)				! column-level concentration of DOC molC/m3 in saturated fraction
+	real(r8), pointer :: cmicbions(:,:)				! column-level biomass of all microbes molN/m3
+	real(r8), pointer :: cdons(:,:)					! column-level concentration of DON molN/m3 
 	real(r8), pointer :: cdons_unsat(:,:)			! column-level concentration of DON molN/m3 in unsaturated fraction
-	real(r8), pointer :: cdons_sat(:,:)			! column-level concentration of DON molN/m3 in saturated fraction
-	real(r8), pointer :: cdons_min(:,:)			! minteralization of DON
-	real(r8), pointer :: caces(:,:)				! column-level concentration of acetate molC/m3
+	real(r8), pointer :: cdons_sat(:,:)				! column-level concentration of DON molN/m3 in saturated fraction
+	real(r8), pointer :: cdons_min(:,:)				! minteralization of DON
+	real(r8), pointer :: caces(:,:)					! column-level concentration of acetate molC/m3
 	real(r8), pointer :: cacebios(:,:)				! column-level biomass of methanogen based on acetate molC/m3
 	real(r8), pointer :: cco2bios(:,:)				! column-level biomass of methanogen based on CO2/H2 molC/m3
 	real(r8), pointer :: caerch4bios(:,:)			! column-level biomass of aerobix methanotrophy molC/m3
@@ -192,19 +191,19 @@ implicit none
 	real(r8), pointer :: ccon_h2s_sat(:,:)			! column-level concentration of H2 in saturated fraction  mol H2/m3
 	
 	integer, pointer :: ltype(:)					! type of land unit
-	integer, pointer :: ptype(:)				! type of plant functional type
+	integer, pointer :: ptype(:)					! type of plant functional type
 	integer, pointer :: clandunit(:)				! index of land nnit in column
 	real(r8), pointer :: soilpH_unsat(:,:)			! soil pH for unsaturated fraction soil column
-	real(r8), pointer :: soilpH_sat(:,:)			! soil pH for saturated fraction soil column
+	real(r8), pointer :: soilpH_sat(:,:)				! soil pH for saturated fraction soil column
 	real(r8), pointer :: soiltemp(:,:)				! soil temperature
 	real(r8), pointer :: sand(:)					! sand
 	real(r8), pointer :: silt(:)					! silt
-!	real(r8), pointer :: psi(:)					! water potential
-!	real(r8), pointer :: psisat(:)					! water potential at saturated
-	real(r8), pointer :: vwc(:,:)				! volumetic water content
+!	real(r8), pointer :: psi(:)						! water potential
+!	real(r8), pointer :: psisat(:)						! water potential at saturated
+	real(r8), pointer :: vwc(:,:)					! volumetic water content
 	real(r8), pointer :: vwcsat(:,:)				! volumetic water content at saturation
 
-	real(r8), pointer :: fsat_pre(:)    			! finundated from previous timestep
+	real(r8), pointer :: fsat_pre(:)    				! finundated from previous timestep
 	real(r8), pointer :: c_atm(:,:)     			! CH4, O2, CO2 atmospheric conc  (mol/m3)
 	real(r8), pointer :: flux_ch4(:)    			! gridcell CH4 flux to atm. (kg C/m**2/s)
 
@@ -434,7 +433,7 @@ implicit none
 	real(r8) :: HCH4Prod = 0.
 	real(r8):: sumdoc = 0.
 	real(r8):: sumace = 0.
-	integer :: IsH2Production
+	integer :: IsH2Production = 1
 !EOP
 
 	real(r8):: minpsi, maxpsi                		! limits for soil water scalar for decomp
@@ -725,13 +724,13 @@ implicit none
 		micfinundated = finundated(c)
 	end if  
       
-      cdocs(c,j)		= decomp_cpools_vr(c,j,i_dom) 
-      cdocs_unsat(c,j) 	= cdocs(c,j) !* (1. - micfinundated) ! concentration
-      cdocs_sat(c,j) 	= cdocs(c,j) !* micfinundated ! concentration
-      cdons(c,j) 		= decomp_npools_vr(c,j,i_dom)
+      cdocs(c,j)			= decomp_cpools_vr(c,j,i_dom) 
+      cdocs_unsat(c,j) 		= cdocs(c,j) !* (1. - micfinundated) ! concentration
+      cdocs_sat(c,j) 		= cdocs(c,j) !* micfinundated ! concentration
+      cdons(c,j) 			= decomp_npools_vr(c,j,i_dom)
       cdons_unsat(c,j) 	= cdons(c,j) !* (1. - micfinundated)  ! concentration
-      cdons_sat(c,j) 	= cdons(c,j) !* micfinundated ! concentration
-      cdons_min(c,j) 	= 0_r8
+      cdons_sat(c,j) 		= cdons(c,j) !* micfinundated ! concentration
+      cdons_min(c,j) 		= 0_r8
            end do
       end do
       
@@ -753,6 +752,7 @@ implicit none
 	ccon_ch4s_unsat(c,j) 			= ccon_ch4s_unsat(c,j) / 12. 		!/ dz(c,j)
 	ccon_h2s_unsat(c,j) 			= ccon_h2s_unsat(c,j) / 2. 			!/ dz(c,j)
 	ccon_co2s_unsat(c,j) 			= ccon_co2s_unsat(c,j) / 12. 		!/ dz(c,j)
+!	write(iulog,*)"c ", c, " j ",j," ", ccon_o2s_unsat(c,j), " ",ccon_o2s_sat(c,j)
 	
 	cdocs_sat(c,j) 				= cdocs_sat(c,j) / 12. 			!/ dz(c,j)
 	caces_sat(c,j) 				= caces_sat(c,j) / 12. 			!/ dz(c,j)
@@ -785,7 +785,7 @@ implicit none
 		roothr_vr(c,j) = roothr_vr(c,j) + roothr(p)*rootfr_vr(p,j)*wtcol(p)
 		froot_r(c,j) = froot_r(c,j) + froot_mr(p)*rootfr_vr(p,j)*wtcol(p)
 		rootfraction(c,j) = rootfraction(c,j) + rootfr_vr(p,j)*wtcol(p)
-!write(iulog,*) "roothr_vr(c,j)", roothr_vr(c,j), "roothr(p)", roothr(p), "rootfr_vr(p,j)", rootfr_vr(p,j), "wtcol(p)", wtcol(p), "rootfraction(c,j)", rootfraction(c,j)
+		!write(iulog,*) "roothr_vr(c,j)",j, " j ", roothr_vr(c,j), "roothr(p)", roothr(p), "rootfr_vr(p,j)", rootfr_vr(p,j), "wtcol(p)", wtcol(p), "rootfraction(c,j)", rootfraction(c,j)
 		ccon_co2s_sat(c,j) = ccon_co2s_sat(c,j) + froot_r(c,j) / 12.0 + hr_vr(c,j) / 12.0
 		
                anpp = annsum_npp(p) ! g C / m^2/yr
@@ -813,7 +813,7 @@ implicit none
 
 !	call seasonality(lbc, ubc, lbp, ubp, num_soilc, filter_soilc, num_soilp, filter_soilp)
 	call get_waterhead(lbc, ubc, num_soilc, filter_soilc,jwaterhead_unsat)
-!	call gas_diffusion(lbc, ubc, num_soilc, filter_soilc)
+	call gas_diffusion(lbc, ubc, num_soilc, filter_soilc)
 #if (defined HUM_HOL)
 	call lateral_bgc(lbc, ubc, num_soilc, filter_soilc)
 #endif
@@ -973,7 +973,7 @@ if(j >= jwaterhead_unsat(c)) then
 	ACConcentration = 0.0
 	end if
 	
-	if(ccon_h2s_unsat(c,j) <= m_dCH4H2min) then
+!	if(ccon_h2s_unsat(c,j) <= m_dCH4H2min) then
 	! Xiaofeng replaced the following two lines code with new mechanism of CH4 production from CO2 
 	!back to orgional on 7/11/2013
 	H2AceProd = 0
@@ -984,36 +984,37 @@ if(j >= jwaterhead_unsat(c)) then
 	!	* (m_dH2CH4ProdQ10 ** ((soiltemp(c,j) - 286.65) / 10.)) * pHeffect / 10.
 	!H2AceProd = 0	
 	!print *, "HCH4Prod: ", HCH4Prod	
-	else
-	if(ccon_h2s_unsat(c,j) <= m_dAceH2min) then
+!	else
+!	if(ccon_h2s_unsat(c,j) <= m_dAceH2min) then
 	H2CH4Prod = m_dGrowRH2Methanogens / m_dYH2Methanogens * cco2bios_unsat(c,j) &
 	* ccon_h2s_unsat(c,j) / ( ccon_h2s_unsat(c,j) + m_dKH2ProdCH4) &
 		* ccon_co2s_unsat(c,j) / (ccon_co2s_unsat(c,j) + m_dKCO2ProdCH4) &
-		* (m_dH2CH4ProdQ10 ** ((soiltemp(c,j) - 286.65) / 10.)) * pHeffect
-	H2AceProd = 0
+		* (m_dH2CH4ProdQ10 ** ((soiltemp(c,j) - 286.65) / 10.)) * pHeffect &
+		* (1.0 - min(1.0, ccon_co2s_unsat(c,j) / 9.2))  !9.375 is the 21% oxgen
+!	H2AceProd = 0
 !write(iulog,*) "H2CH4Prod: ", H2CH4Prod
-	else
+!	else
 	H2AceProd = m_dH2ProdAcemax * ccon_h2s_unsat(c,j) / (ccon_h2s_unsat(c,j) + m_dKH2ProdAce) &
 	* cco2bios_unsat(c,j) / (cco2bios_unsat(c,j) + m_dKCO2ProdAce) &
 		* (m_dH2AceProdQ10 ** ((soiltemp(c,j) - 286.65) / 10.)) * pHeffect
-	H2CH4Prod = 0
-	end if
-	end if
+!	H2CH4Prod = 0
+!	end if
+!	end if
 			
 	H2Cons = 4. * (H2AceProd + H2CH4Prod)
 
 	H2Cons = max(0._r8, H2Cons)
-	H2Cons = max(0._r8, ccon_h2s_unsat(c,j))	
+	ccon_h2s_unsat(c,j) = max(0._r8, ccon_h2s_unsat(c,j))	
 	
 	if(ccon_h2s_unsat(c,j) >= H2Cons) then
 	H2Cons = H2Cons
 	ccon_h2s_unsat(c,j) = ccon_h2s_unsat(c,j) - H2Cons
-	Else
+	else
 	dTempratio = ccon_h2s_unsat(c,j) / H2Cons
 	dTempH2 = ccon_h2s_unsat(c,j)
-	H2Cons = ccon_h2s_unsat(c,j)
+!	H2Cons = ccon_h2s_unsat(c,j)
 	ccon_h2s_unsat(c,j) = 0
-	H2AceProd = 4 * H2AceProd * dTempratio * dTempH2
+	H2AceProd = H2AceProd * dTempratio
 	H2CH4Prod = dTempH2 - H2AceProd
 	end if
 		
@@ -1036,7 +1037,7 @@ if(j >= jwaterhead_unsat(c)) then
 	!	// For acetate dyndamics
 	AceCons = m_dGrowRAceMethanogens / m_dYAceMethanogens * cacebios_unsat(c,j) &
 	* caces_unsat(c,j)  / (caces_unsat(c,j)  + m_dKCH4ProdAce) &
-		* (m_dCH4ProdQ10 ** ((soiltemp(c,j) - 286.65) / 10.)) * pHeffect * 1. / (1. + ccon_co2s_unsat(c,j))
+		* (m_dCH4ProdQ10 ** ((soiltemp(c,j) - 286.65) / 10.)) * pHeffect !* 1. / (1. + ccon_co2s_unsat(c,j))
 	!else
 !write(iulog,*)"acecons: ", m_dGrowRAceMethanogens, m_dYAceMethanogens, cacebios(c,j), caces(c,j), m_dKCH4ProdAce, m_dCH4ProdQ10, AceCons, ccon_co2s(c,j) 
 	!endif
@@ -1117,9 +1118,10 @@ if(j >= jwaterhead_unsat(c)) then
 	ccon_o2s_unsat(c,j) = 0._r8
 	end if
 
-	O2PlantFlux = m_dPlantTrans *  rootfraction(c,j) * (ccon_o2s_unsat(c,j) - c_atm(g,2)) * nppratio  !* bgnpp_timestep(c) / bgnpp_avg(c)
+	O2PlantFlux = m_dPlantTrans *  rootfraction(c,j) * (ccon_o2s_unsat(c,j) - c_atm(g,2)) * nppratio / (100. * z(c,j))  !* bgnpp_timestep(c) / bgnpp_avg(c)
+	O2PlantFlux = max(O2PlantFlux, (ccon_o2s_unsat(c,j) - c_atm(g,2))) * dz(c,j)
 	
-	ccon_o2s_unsat(c,j) = ccon_o2s_unsat(c,j) - O2PlantFlux
+	ccon_o2s_unsat(c,j) = ccon_o2s_unsat(c,j) - O2PlantFlux / dz(c,j)
 
 	PlantO2Cons = O2PlantFlux * 0.001
 	
@@ -1130,6 +1132,8 @@ if(j >= jwaterhead_unsat(c)) then
 	end if
 		
 	ccon_o2s_unsat(c,j) = ccon_o2s_unsat(c,j) - PlantO2Cons
+	
+	ccon_o2s_unsat(c,j) = max(0.0, ccon_o2s_unsat(c,j) - o2_decomp_depth_unsat(c,j))
 		
 	if(ccon_o2s_unsat(c,j) < 0._r8) then
 	ccon_o2s_unsat(c,j) = 0._r8
@@ -1159,15 +1163,16 @@ if(j >= jwaterhead_unsat(c)) then
 	!end if
 	
 !	if(ccon_o2s(c,j) < 0.0001) then
-!	AOMCH4Oxid = m_dGrowRAOMMethanotrophs / m_dYAOMMethanotrophs * canaerch4bios(c,j) * &
-!		ccon_ch4s(c,j)  / (ccon_ch4s(c,j)  + m_dKAOMCH4OxidCH4) * (m_dAOMCH4OxidQ10 ** ((soiltemp(c,j) - 13.5) / 10.)) * pHeffect
+	AOMCH4Oxid = m_dGrowRAOMMethanotrophs / m_dYAOMMethanotrophs * canaerch4bios_unsat(c,j) * &
+		ccon_ch4s_unsat(c,j)  / (ccon_ch4s_unsat(c,j)  + m_dKAOMCH4OxidCH4) * (m_dAOMCH4OxidQ10 ** ((soiltemp(c,j) - 13.5) / 10.)) &
+		* (1.0 - min(1.0, ccon_o2s_unsat(c,j) / 4.6)) * pHeffect
 !	endif
 !	
-!	if(AOMCH4Oxid < ccon_ch4s(c,j)) then
-!	AOMCH4Oxid = AOMCH4Oxid
-!	else
-!	AOMCH4Oxid = ccon_ch4s(c,j)
-!	end if	
+	if(AOMCH4Oxid < ccon_ch4s_unsat(c,j)) then
+	AOMCH4Oxid = AOMCH4Oxid
+	else
+	AOMCH4Oxid = ccon_ch4s_unsat(c,j)
+	end if	
 		
 	ccon_ch4s_unsat(c,j) = ccon_ch4s_unsat(c,j) - AOMCH4Oxid
 	ccon_ch4s_unsat(c,j) = max(0._r8, ccon_ch4s_unsat(c,j))
@@ -1331,7 +1336,7 @@ else
 	H2Cons = 4. * (H2AceProd + H2CH4Prod)
 
 	H2Cons = max(0._r8, H2Cons)
-	H2Cons = max(0._r8, ccon_h2s_unsat(c,j))	
+	ccon_h2s_unsat(c,j) = max(0._r8, ccon_h2s_unsat(c,j))	
 	
 	if(ccon_h2s_unsat(c,j) >= H2Cons) then
 	H2Cons = H2Cons
@@ -1339,9 +1344,9 @@ else
 	Else
 	dTempratio = ccon_h2s_unsat(c,j) / H2Cons
 	dTempH2 = ccon_h2s_unsat(c,j)
-	H2Cons = ccon_h2s_unsat(c,j)
+!	H2Cons = ccon_h2s_unsat(c,j)
 	ccon_h2s_unsat(c,j) = 0
-	H2AceProd = 4 * H2AceProd * dTempratio * dTempH2
+	H2AceProd = H2AceProd * dTempratio
 	H2CH4Prod = dTempH2 - H2AceProd
 	end if
 		
@@ -1422,6 +1427,8 @@ else
 	CH4O2Cons = m_drCH4Oxid * CH4Oxid
 	ccon_o2s_unsat(c,j) = ccon_o2s_unsat(c,j) - (AerO2Cons + CH4O2Cons) - OxidAce2CO2
 	
+	ccon_o2s_unsat(c,j) = max(0.0, ccon_o2s_unsat(c,j) - o2_decomp_depth_unsat(c,j))
+	
 	if(ccon_o2s_unsat(c,j) < 0) then
 	ccon_o2s_unsat(c,j) = 0
 	end if
@@ -1448,15 +1455,16 @@ else
 	!end if
 	
 !	if(ccon_o2s(c,j) < 0.0001) then
-!	AOMCH4Oxid = m_dGrowRAOMMethanotrophs / m_dYAOMMethanotrophs * canaerch4bios(c,j) * &
-!		ccon_ch4s(c,j)  / (ccon_ch4s(c,j)  + m_dKAOMCH4OxidCH4) * (m_dAOMCH4OxidQ10 ** ((soiltemp(c,j) - 13.5) / 10.)) * pHeffect
+	AOMCH4Oxid = m_dGrowRAOMMethanotrophs / m_dYAOMMethanotrophs * canaerch4bios_unsat(c,j) * &
+		ccon_ch4s_unsat(c,j)  / (ccon_ch4s_unsat(c,j)  + m_dKAOMCH4OxidCH4) * (m_dAOMCH4OxidQ10 ** ((soiltemp(c,j) - 13.5) / 10.)) &
+		* (1. - min(1.0, ccon_o2s_unsat(c,j) / 4.6)) * pHeffect
 !	endif
 !	
-!	if(AOMCH4Oxid < ccon_ch4s(c,j)) then
-!	AOMCH4Oxid = AOMCH4Oxid
-!	else
-!	AOMCH4Oxid = ccon_ch4s(c,j)
-!	end if	
+	if(AOMCH4Oxid < ccon_ch4s_unsat(c,j)) then
+	AOMCH4Oxid = AOMCH4Oxid
+	else
+	AOMCH4Oxid = ccon_ch4s_unsat(c,j)
+	end if	
 		
 	ccon_ch4s_unsat(c,j) = ccon_ch4s_unsat(c,j) - AOMCH4Oxid
 	ccon_ch4s_unsat(c,j) = max(0._r8, ccon_ch4s_unsat(c,j))
@@ -1622,16 +1630,16 @@ end if  ! end if of the frozen mechanism in trapping gases in soil
 	l = clandunit(c)     
 	if (ltype(l) == istsoil .or. ltype(l) == istcrop) then 
 	do j = 1,nlevsoi
-	cdocs_unsat(c,j) 				= cdocs_unsat(c,j) * 12.	! convert from mmol/m3 to gC/m3
-	caces_unsat(c,j) 				= caces_unsat(c,j) * 12.	! convert from mmol/m3 to gC/m3
-	cacebios_unsat(c,j) 				= cacebios_unsat(c,j) * 12.	! convert from mmol/m3 to gC/m3
-	cco2bios_unsat(c,j) 				= cco2bios_unsat(c,j) * 12. 	! convert from mmol/m3 to gC/m3
-	caerch4bios_unsat(c,j) 			= caerch4bios_unsat(c,j) * 12.	! convert from mmol/m3 to gC/m3
+	cdocs_unsat(c,j) 				= cdocs_unsat(c,j) * 12.			! convert from mmol/m3 to gC/m3
+	caces_unsat(c,j) 				= caces_unsat(c,j) * 12.			! convert from mmol/m3 to gC/m3
+	cacebios_unsat(c,j) 				= cacebios_unsat(c,j) * 12.		! convert from mmol/m3 to gC/m3
+	cco2bios_unsat(c,j) 				= cco2bios_unsat(c,j) * 12. 		! convert from mmol/m3 to gC/m3
+	caerch4bios_unsat(c,j) 			= caerch4bios_unsat(c,j) * 12.		! convert from mmol/m3 to gC/m3
 	canaerch4bios_unsat(c,j) 			= canaerch4bios_unsat(c,j) * 12.	! convert from mmol/m3 to gC/m3
-	ccon_o2s_unsat(c,j) 				= ccon_o2s_unsat(c,j) * 32.	! convert from mmol/m3 to gC/m3
-	ccon_ch4s_unsat(c,j) 				= ccon_ch4s_unsat(c,j) * 12.	! convert from mmol/m3 to gC/m3
-	ccon_h2s_unsat(c,j) 				= ccon_h2s_unsat(c,j) * 2.	! convert from mmol/m3 to gC/m3
-	ccon_co2s_unsat(c,j) 				= ccon_co2s_unsat(c,j) * 12.	! convert from mmol/m3 to gC/m3
+	ccon_o2s_unsat(c,j) 				= ccon_o2s_unsat(c,j) * 32.		! convert from mmol/m3 to gC/m3
+	ccon_ch4s_unsat(c,j) 			= ccon_ch4s_unsat(c,j) * 12.		! convert from mmol/m3 to gC/m3
+	ccon_h2s_unsat(c,j) 				= ccon_h2s_unsat(c,j) * 2.		! convert from mmol/m3 to gC/m3
+	ccon_co2s_unsat(c,j) 			= ccon_co2s_unsat(c,j) * 12.		! convert from mmol/m3 to gC/m3
 	end do
 	end if
 	end do
@@ -1752,7 +1760,7 @@ end if  ! end if of the frozen mechanism in trapping gases in soil
 	end if
 	
 	!print *, "H2: ", m_dH2, " ch4h2min: ", m_dCH4H2min, "CO2: ", m_dCO2
-	if(ccon_h2s_sat(c,j) <= m_dCH4H2min) then
+!	if(ccon_h2s_sat(c,j) <= m_dCH4H2min) then
 	! Xiaofeng replaced the following two lines code with new mechanism of CH4 production from CO2 
 	!back to orgional on 7/11/2013
 	H2AceProd = 0
@@ -1763,37 +1771,38 @@ end if  ! end if of the frozen mechanism in trapping gases in soil
 	!	* (m_dH2CH4ProdQ10 ** ((soiltemp(c,j) - 286.65) / 10.)) * pHeffect / 10.
 	!H2AceProd = 0	
 	!print *, "HCH4Prod: ", HCH4Prod	
-	else
-	if(ccon_h2s_sat(c,j) <= m_dAceH2min) then
+!	else
+!	if(ccon_h2s_sat(c,j) <= m_dAceH2min) then
 	H2CH4Prod = m_dGrowRH2Methanogens / m_dYH2Methanogens * cco2bios_sat(c,j) &
 	* ccon_h2s_sat(c,j) / ( ccon_h2s_sat(c,j) + m_dKH2ProdCH4) &
 		* ccon_co2s_sat(c,j) / (ccon_co2s_sat(c,j) + m_dKCO2ProdCH4) &
-		* (m_dH2CH4ProdQ10 ** ((soiltemp(c,j) - 286.65) / 10.)) * pHeffect
-	H2AceProd = 0
+		* (m_dH2CH4ProdQ10 ** ((soiltemp(c,j) - 286.65) / 10.)) * pHeffect&
+		* (1.0 - min(1.0, ccon_co2s_unsat(c,j) / 9.2))
+!	H2AceProd = 0
 	!print *, "H2CH4Prod: ", H2CH4Prod
-	else
+!	else
 	H2AceProd = m_dH2ProdAcemax * ccon_h2s_sat(c,j) / (ccon_h2s_sat(c,j) + m_dKH2ProdAce) &
 	* cco2bios_sat(c,j) / (cco2bios_sat(c,j) + m_dKCO2ProdAce) &
 		* (m_dH2AceProdQ10 ** ((soiltemp(c,j) - 286.65) / 10.)) * pHeffect
-	H2CH4Prod = 0
+!	H2CH4Prod = 0
 
-	end if
-	end if
+!	end if
+!	end if
 			
 	H2Cons = 4. * (H2AceProd + H2CH4Prod)
 
 	H2Cons = max(0._r8, H2Cons)
-	H2Cons = max(0._r8, ccon_h2s_sat(c,j))	
+	ccon_h2s_sat(c,j) = max(0._r8, ccon_h2s_sat(c,j))	
 	
 	if(ccon_h2s_sat(c,j) >= H2Cons) then
 	H2Cons = H2Cons
 	ccon_h2s_sat(c,j) = ccon_h2s_sat(c,j) - H2Cons
-	Else
+	else
 	dTempratio = ccon_h2s_sat(c,j) / H2Cons
 	dTempH2 = ccon_h2s_sat(c,j)
-	H2Cons = ccon_h2s_sat(c,j)
+!	H2Cons = ccon_h2s_sat(c,j)
 	ccon_h2s_sat(c,j) = 0
-	H2AceProd = 4 * H2AceProd * dTempratio * dTempH2
+	H2AceProd = H2AceProd * dTempratio
 	H2CH4Prod = dTempH2 - H2AceProd
 	end if
 		
@@ -1829,7 +1838,7 @@ end if  ! end if of the frozen mechanism in trapping gases in soil
 	!	// For acetate dyndamics
 	AceCons = m_dGrowRAceMethanogens / m_dYAceMethanogens * cacebios_sat(c,j) &
 	* caces_sat(c,j)  / (caces_sat(c,j)  + m_dKCH4ProdAce) &
-		* (m_dCH4ProdQ10 ** ((soiltemp(c,j) - 286.65) / 10.)) * pHeffect * 1. / (1. + ccon_co2s_sat(c,j))
+		* (m_dCH4ProdQ10 ** ((soiltemp(c,j) - 286.65) / 10.)) * pHeffect !* 1. / (1. + ccon_co2s_sat(c,j))
 	!else
 !	write(iulog,*)"acecons: ", m_dGrowRAceMethanogens, m_dYAceMethanogens, cacebios(c,j), caces(c,j), m_dKCH4ProdAce, m_dCH4ProdQ10, AceCons, ccon_co2s(c,j) 
 	!endif
@@ -1906,9 +1915,12 @@ end if  ! end if of the frozen mechanism in trapping gases in soil
 	if(ccon_o2s_sat(c,j) < 0) then
 	ccon_o2s_sat(c,j) = 0
 	end if
+	
+	O2PlantFlux = m_dPlantTrans * rootfraction(c,j) * rootfraction(c,j) * (ccon_o2s_sat(c,j) - c_atm(g,2)) * nppratio / (100. * z(c,j))  !* bgnpp_timestep(c) / bgnpp_avg(c)
+	O2PlantFlux = max(O2PlantFlux, (ccon_o2s_sat(c,j) - c_atm(g,2))) * dz(c,j)
+	
+	ccon_o2s_sat(c,j) = ccon_o2s_sat(c,j) - O2PlantFlux / dz(c,j)
 
-	O2PlantFlux = m_dPlantTrans *  rootfraction(c,j) * (ccon_o2s_sat(c,j) - c_atm(g,2)) * nppratio  !* bgnpp_timestep(c) / bgnpp_avg(c)
-	ccon_o2s_sat(c,j) = ccon_o2s_sat(c,j) - O2PlantFlux
 	PlantO2Cons = O2PlantFlux * 0.001
 	
 	if(ccon_o2s_sat(c,j) >= PlantO2Cons) then
@@ -1918,7 +1930,9 @@ end if  ! end if of the frozen mechanism in trapping gases in soil
 	end if
 	
 	ccon_o2s_sat(c,j) = ccon_o2s_sat(c,j) - PlantO2Cons
-		
+	
+	ccon_o2s_sat(c,j) = max(0.0, ccon_o2s_sat(c,j) - o2_decomp_depth_sat(c,j))
+	
 	if(ccon_o2s_sat(c,j) < 0) then
 	ccon_o2s_sat(c,j) = 0
 	end if
@@ -1946,15 +1960,16 @@ end if  ! end if of the frozen mechanism in trapping gases in soil
 	!end if
 	
 !	if(ccon_o2s(c,j) < 0.0001) then
-!	AOMCH4Oxid = m_dGrowRAOMMethanotrophs / m_dYAOMMethanotrophs * canaerch4bios(c,j) * &
-!		ccon_ch4s(c,j)  / (ccon_ch4s(c,j)  + m_dKAOMCH4OxidCH4) * (m_dAOMCH4OxidQ10 ** ((soiltemp(c,j) - 13.5) / 10.)) * pHeffect
+	AOMCH4Oxid = m_dGrowRAOMMethanotrophs / m_dYAOMMethanotrophs * canaerch4bios_sat(c,j) * &
+		ccon_ch4s_sat(c,j)  / (ccon_ch4s_sat(c,j)  + m_dKAOMCH4OxidCH4) * (m_dAOMCH4OxidQ10 ** ((soiltemp(c,j) - 13.5) / 10.)) &
+		* (1.0 - min(1.0, ccon_o2s_sat(c,j) / 4.6))* pHeffect
 !	endif
 !	
-!	if(AOMCH4Oxid < ccon_ch4s(c,j)) then
-!	AOMCH4Oxid = AOMCH4Oxid
-!	else
-!	AOMCH4Oxid = ccon_ch4s(c,j)
-!	end if	
+	if(AOMCH4Oxid < ccon_ch4s_sat(c,j)) then
+	AOMCH4Oxid = AOMCH4Oxid
+	else
+	AOMCH4Oxid = ccon_ch4s_sat(c,j)
+	end if	
 		
 	ccon_ch4s_sat(c,j) = ccon_ch4s_sat(c,j) - AOMCH4Oxid
 	ccon_ch4s_sat(c,j) = max(0._r8, ccon_ch4s_sat(c,j))
@@ -1983,7 +1998,7 @@ end if  ! end if of the frozen mechanism in trapping gases in soil
 
 	!~ cacebios_sat(c,j) 			= cacebios_sat(c,j) + min((AceMethanogenGrowth - AceMethanogenDying), 0._r8) 
 	!~ cco2bios_sat(c,j) 			= cco2bios_sat(c,j) + min((H2MethanogenGrowth - H2MethanogenDying), 0._r8)
-	!~ caerch4bios_sat(c,j) 			= caerch4bios_sat(c,j) + min((MethanotrophGrowth - MethanotrophDying), 0._r8)
+	!~ caerch4bios_sat(c,j) 		= caerch4bios_sat(c,j) + min((MethanotrophGrowth - MethanotrophDying), 0._r8)
 	!~ canaerch4bios_sat(c,j) 		= canaerch4bios_sat(c,j) + min((AOMMethanotrophGrowth - AOMMethanotrophDying), 0._r8) 
 
 	cacebios_sat(c,j) 			= cacebios_sat(c,j) + AceMethanogenGrowth - AceMethanogenDying
@@ -2004,7 +2019,7 @@ end if  ! end if of the frozen mechanism in trapping gases in soil
 	
 	ch4_prod_ace_depth_sat(c,j) 			= CH4Prod 
 	ch4_prod_co2_depth_sat(c,j) 			= H2CH4Prod
-	ch4_oxid_o2_depth_sat(c,j) 				= CH4Oxid
+	ch4_oxid_o2_depth_sat(c,j) 			= CH4Oxid
 	ch4_oxid_aom_depth_sat(c,j) 			= AOMCH4Oxid
 	ch4_aere_depth_sat(c,j) 				= CH4PlantFlux
 	ch4_dif_depth_sat(c,j) 				= 0._r8
@@ -2020,14 +2035,14 @@ end if  ! end if of the frozen mechanism in trapping gases in soil
 	o2_cons_depth_sat(c,j) 				= AerO2Cons + CH4O2Cons
 	o2_aere_depth_sat(c,j) 				= O2PlantFlux
 	o2_aere_oxid_depth_sat(c,j) 			= PlantO2Cons
-	o2_decomp_depth_sat(c,j) 				= co2_decomp_depth_sat (c,j)		! mole / m3
-	o2_dif_depth_sat(c,j) 					= 0._r8
+	o2_decomp_depth_sat(c,j) 			= co2_decomp_depth_sat (c,j)		! mole / m3
+	o2_dif_depth_sat(c,j) 				= 0._r8
 
 	h2_prod_depth_sat(c,j) 				= ACH2Prod
 	h2_cons_depth_sat(c,j) 				= H2Cons
 	h2_aere_depth_sat(c,j) 				= H2PlantFlux
-	h2_diff_depth_sat(c,j) 					= H2PlantFlux
-	h2_ebul_depth_sat(c,j) 				= H2PlantFlux
+	h2_diff_depth_sat(c,j) 				= 0.0
+	h2_ebul_depth_sat(c,j) 				= 0.0
        end do
 ! average to grid level fluxes or state variables    
 	tem1 = Henry_kHpc_w(1) * exp (Henry_C_w(1) * (1/soiltemp(c,1) - 1/kh_tbase))
@@ -2041,31 +2056,31 @@ end if  ! end if of the frozen mechanism in trapping gases in soil
 	tem4 = 1. / tem4 * atmh2 * 1000. / 2.
 	
 	ch4_surf_aere_sat(c)				= 0._r8
-	ch4_surf_ebul_sat(c) 				= 0._r8
+	ch4_surf_ebul_sat(c) 			= 0._r8
 	ch4_surf_dif_sat(c) 				= 0._r8
 	ch4_surf_netflux_sat(c)			= 0._r8
 	
 	co2_surf_aere_sat(c)				= 0._r8
-	co2_surf_ebul_sat(c) 				= 0._r8
+	co2_surf_ebul_sat(c) 			= 0._r8
 	co2_surf_dif_sat(c) 				= 0._r8
 	co2_surf_netflux_sat(c)			= 0._r8
 	
 	o2_surf_aere_sat(c)				= 0._r8
 	o2_surf_dif_sat(c) 				= 0._r8
-	o2_surf_netflux_sat(c)				= 0._r8
+	o2_surf_netflux_sat(c)			= 0._r8
 	
 	h2_surf_aere_sat(c)				= 0._r8
 	h2_surf_ebul_sat(c) 				= 0._r8
 	h2_surf_dif_sat(c) 				= 0._r8
-	h2_surf_netflux_sat(c)				= 0._r8
+	h2_surf_netflux_sat(c)			= 0._r8
 	
 if(soiltemp(c,1) < SHR_CONST_TKFRZ) then
 	ch4_surf_aere_sat(c)				= 0._r8
-	ch4_surf_ebul_sat(c) 				= 0._r8
+	ch4_surf_ebul_sat(c) 			= 0._r8
 	ch4_surf_dif_sat(c) 				= 0._r8
 		
 	co2_surf_aere_sat(c)				= 0._r8
-	co2_surf_ebul_sat(c) 				= 0._r8
+	co2_surf_ebul_sat(c) 			= 0._r8
 	co2_surf_dif_sat(c) 				= 0._r8
 		
 	o2_surf_aere_sat(c)				= 0._r8
@@ -2093,10 +2108,10 @@ else
 
 	do j = 1,nlevsoi
 	ch4_surf_aere_sat(c)				= ch4_surf_aere_sat(c) + ch4_aere_depth_sat(c,j) * dz(c,j)
-	ch4_surf_ebul_sat(c) 				= ch4_surf_ebul_sat(c) + ch4_ebul_depth_sat(c,j)  * dz(c,j)
+	ch4_surf_ebul_sat(c) 			= ch4_surf_ebul_sat(c) + ch4_ebul_depth_sat(c,j)  * dz(c,j)
 		
 	co2_surf_aere_sat(c)				= co2_surf_aere_sat(c) + co2_aere_depth_sat(c,j) * dz(c,j)
-	co2_surf_ebul_sat(c) 				= co2_surf_ebul_sat(c) + co2_ebul_depth_sat(c,j) * dz(c,j)
+	co2_surf_ebul_sat(c) 			= co2_surf_ebul_sat(c) + co2_ebul_depth_sat(c,j) * dz(c,j)
 		
 	o2_surf_aere_sat(c)				= o2_surf_aere_sat(c) + o2_aere_depth_sat(c,j) * dz(c,j)
 	
@@ -2856,11 +2871,11 @@ implicit none
 	
 	ccon_ch4s_unsat_temp 		= 0._r8
 	ccon_ch4s_sat_temp 			= 0._r8
-	ccon_o2s_unsat_temp 			= 0._r8
+	ccon_o2s_unsat_temp 		= 0._r8
 	ccon_o2s_sat_temp 			= 0._r8
 	ccon_co2s_unsat_temp 		= 0._r8
 	ccon_co2s_sat_temp 			= 0._r8
-	ccon_h2s_unsat_temp 			= 0._r8
+	ccon_h2s_unsat_temp 		= 0._r8
 	ccon_h2s_sat_temp 			= 0._r8
 
 	call get_waterhead(lbc, ubc, num_micbioc, filter_micbioc,jwaterhead_unsat)
@@ -2871,10 +2886,10 @@ implicit none
 	if (ltype(l) == istsoil .or. ltype(l) == istcrop) then 
 	do j = 2,nlevsoi
 	if(j > jwaterhead_unsat(c) .and. j < nlevsoi) then
-		ccon_ch4s_unsat_temp(c,j) = (ccon_ch4s_unsat(c,j-1) - ccon_ch4s_unsat(c,j)) * Fick_D_w(1) * m_Fick_ad * 1e-4 * (t_soisno(c,j)/298)**1.87 * get_step_size() / (z(c,j) - z(c,j-1)) !CH4_dif
-		ccon_o2s_unsat_temp(c,j) = (ccon_o2s_unsat(c,j-1) - ccon_o2s_unsat(c,j)) * Fick_D_w(2) * m_Fick_ad * 1e-4 * (t_soisno(c,j)/298)**1.87 * get_step_size() / (z(c,j) - z(c,j-1)) !O2_dif
-		ccon_co2s_unsat_temp(c,j) = (ccon_co2s_unsat(c,j-1) - ccon_co2s_unsat(c,j)) * Fick_D_w(3) * m_Fick_ad * 1e-4 *  (t_soisno(c,j)/298)**1.87 * get_step_size() / (z(c,j) - z(c,j-1)) !CO2_dif
-		ccon_h2s_unsat_temp(c,j) = (ccon_h2s_unsat(c,j-1) - ccon_h2s_unsat(c,j)) * Fick_D_w(4) * m_Fick_ad * 1e-4 * (t_soisno(c,j)/298)**1.87 * get_step_size() / (z(c,j) - z(c,j-1)) !H2_dif
+		ccon_ch4s_unsat_temp(c,j) = (ccon_ch4s_unsat(c,j-1) - ccon_ch4s_unsat(c,j)) * Fick_D_w(1) * m_Fick_ad * 1.0e-4 * (t_soisno(c,j)/298)**1.87 * get_step_size() / (z(c,j) - z(c,j-1)) !CH4_dif
+		ccon_o2s_unsat_temp(c,j) = (ccon_o2s_unsat(c,j-1) - ccon_o2s_unsat(c,j)) * Fick_D_w(2) * m_Fick_ad * 1.0e-4 * (t_soisno(c,j)/298)**1.87 * get_step_size() / (z(c,j) - z(c,j-1)) !O2_dif
+		ccon_co2s_unsat_temp(c,j) = (ccon_co2s_unsat(c,j-1) - ccon_co2s_unsat(c,j)) * Fick_D_w(3) * m_Fick_ad * 1.0e-4 *  (t_soisno(c,j)/298)**1.87 * get_step_size() / (z(c,j) - z(c,j-1)) !CO2_dif
+		ccon_h2s_unsat_temp(c,j) = (ccon_h2s_unsat(c,j-1) - ccon_h2s_unsat(c,j)) * Fick_D_w(4) * m_Fick_ad * 1.0e-4 * (t_soisno(c,j)/298)**1.87 * get_step_size() / (z(c,j) - z(c,j-1)) !H2_dif
 		
 		ccon_ch4s_unsat(c,j-1) = (ccon_ch4s_unsat(c,j-1) * dz(c,j-1) - ccon_ch4s_unsat_temp(c,j)) / dz(c,j-1)
 		ccon_ch4s_unsat(c,j) = (ccon_ch4s_unsat(c,j) * dz(c,j) + ccon_ch4s_unsat_temp(c,j)) / dz(c,j)
@@ -2890,10 +2905,10 @@ implicit none
 	end if
 	! for the saturation portion
 !	write(iulog,*) "before ", j, ccon_ch4s_sat(c,j-1), ccon_ch4s_sat(c,j)
-		ccon_ch4s_sat_temp(c,j) = (ccon_ch4s_sat(c,j-1) - ccon_ch4s_sat(c,j)) * Fick_D_w(1) * m_Fick_ad * 1e-4 * (t_soisno(c,j)/298)**1.87 * get_step_size() / (z(c,j) - z(c,j-1)) !CH4_dif
-		ccon_o2s_sat_temp(c,j) = (ccon_o2s_sat(c,j-1) - ccon_o2s_sat(c,j)) * Fick_D_w(2) * m_Fick_ad * 1e-4 * (t_soisno(c,j)/298)**1.87 * get_step_size() / (z(c,j) - z(c,j-1)) !O2_dif
-		ccon_co2s_sat_temp(c,j) = (ccon_co2s_sat(c,j-1) - ccon_co2s_sat(c,j)) * Fick_D_w(3) * m_Fick_ad * 1e-4 *  (t_soisno(c,j)/298)**1.87 * get_step_size() / (z(c,j) - z(c,j-1)) !CO2_dif
-		ccon_h2s_sat_temp(c,j) = (ccon_h2s_sat(c,j-1) - ccon_h2s_sat(c,j)) * Fick_D_w(4) * m_Fick_ad * 1e-4 * (t_soisno(c,j)/298)**1.87 * get_step_size() / (z(c,j) - z(c,j-1)) !H2_dif
+		ccon_ch4s_sat_temp(c,j) = (ccon_ch4s_sat(c,j-1) - ccon_ch4s_sat(c,j)) * Fick_D_w(1) * m_Fick_ad * 1.0e-4 * (t_soisno(c,j)/298)**1.87 * get_step_size() / (z(c,j) - z(c,j-1)) !CH4_dif
+		ccon_o2s_sat_temp(c,j) = (ccon_o2s_sat(c,j-1) - ccon_o2s_sat(c,j)) * Fick_D_w(2) * m_Fick_ad * 1.0e-4 * (t_soisno(c,j)/298)**1.87 * get_step_size() / (z(c,j) - z(c,j-1)) !O2_dif
+		ccon_co2s_sat_temp(c,j) = (ccon_co2s_sat(c,j-1) - ccon_co2s_sat(c,j)) * Fick_D_w(3) * m_Fick_ad * 1.0e-4 *  (t_soisno(c,j)/298)**1.87 * get_step_size() / (z(c,j) - z(c,j-1)) !CO2_dif
+		ccon_h2s_sat_temp(c,j) = (ccon_h2s_sat(c,j-1) - ccon_h2s_sat(c,j)) * Fick_D_w(4) * m_Fick_ad * 1.0e-4 * (t_soisno(c,j)/298)**1.87 * get_step_size() / (z(c,j) - z(c,j-1)) !H2_dif
 !	write(iulog,*) "temp ", ccon_ch4s_sat_temp(c,j)
 		ccon_ch4s_sat(c,j-1) = (ccon_ch4s_sat(c,j-1) * dz(c,j-1) - ccon_ch4s_sat_temp(c,j)) / dz(c,j-1)
 		ccon_ch4s_sat(c,j) = (ccon_ch4s_sat(c,j) * dz(c,j) + ccon_ch4s_sat_temp(c,j)) / dz(c,j)
@@ -2918,12 +2933,12 @@ implicit none
 	do j = 1,nlevsoi
 	if(j < nlevsoi) then
 !write(iulog, *) "LBGC debug 1", lxch4unsat, ccon_ch4s_unsat(1,j), ccon_ch4s_unsat(2,j),  Fick_D_w(1), t_soisno(c,j), get_step_size()
-		lxch4unsat = (ccon_ch4s_unsat(1,j) - ccon_ch4s_unsat(2,j)) * Fick_D_w(1) * m_Fick_ad * 1e-4 * (t_soisno(c,j) / 298)**1.87 * get_step_size() !CH4_dif
+		lxch4unsat = (ccon_ch4s_unsat(1,j) - ccon_ch4s_unsat(2,j)) * Fick_D_w(1) * m_Fick_ad * 1.0e-4 * (t_soisno(c,j) / 298)**1.87 * get_step_size() !CH4_dif
 !write(iulog, *) "LBGC debug 2", lxch4unsat, ccon_ch4s_unsat(1,j), ccon_ch4s_unsat(2,j),  Fick_D_w(1), t_soisno(c,j), get_step_size()
 
-		lxo2unsat = (ccon_o2s_unsat(1,j) - ccon_o2s_unsat(2,j)) * Fick_D_w(2) * m_Fick_ad * 1e-4 * (t_soisno(c,j) / 298)**1.87 * get_step_size() !O2_dif
-		lxco2unsat = (ccon_co2s_unsat(1,j) - ccon_co2s_unsat(2,j)) * Fick_D_w(3) * m_Fick_ad * 1e-4 *  (t_soisno(c,j) / 298)**1.87 * get_step_size() !CO2_dif
-		lxh2unsat = (ccon_h2s_unsat(1,j) - ccon_h2s_unsat(2,j)) * Fick_D_w(4) * m_Fick_ad * 1e-4 * (t_soisno(c,j) / 298)**1.87 * get_step_size() !H2_dif
+		lxo2unsat = (ccon_o2s_unsat(1,j) - ccon_o2s_unsat(2,j)) * Fick_D_w(2) * m_Fick_ad * 1.0e-4 * (t_soisno(c,j) / 298)**1.87 * get_step_size() !O2_dif
+		lxco2unsat = (ccon_co2s_unsat(1,j) - ccon_co2s_unsat(2,j)) * Fick_D_w(3) * m_Fick_ad * 1.0e-4 *  (t_soisno(c,j) / 298)**1.87 * get_step_size() !CO2_dif
+		lxh2unsat = (ccon_h2s_unsat(1,j) - ccon_h2s_unsat(2,j)) * Fick_D_w(4) * m_Fick_ad * 1.0e-4 * (t_soisno(c,j) / 298)**1.87 * get_step_size() !H2_dif
 		
 !write(iulog, *) "LBGC debug 3",ccon_ch4s_unsat(1,j),ccon_ch4s_unsat(2,j)
 		ccon_ch4s_unsat(1,j) = (ccon_ch4s_unsat(1,j) * hum_frac - lxch4unsat) / hum_frac
@@ -2940,10 +2955,10 @@ implicit none
 		ccon_h2s_unsat(2,j) = (ccon_h2s_unsat(2,j) * hol_frac + lxh2unsat) / hol_frac
 
 	end if
-		lxch4sat = (ccon_ch4s_sat(1,j) - ccon_ch4s_sat(2,j)) * Fick_D_w(1) * m_Fick_ad * 1e-4 * (t_soisno(c,j) / 298)**1.87 * get_step_size() !CH4_dif
-		lxo2sat = (ccon_o2s_sat(1,j) - ccon_o2s_sat(2,j)) * Fick_D_w(2) * m_Fick_ad * 1e-4 * (t_soisno(c,j) / 298)**1.87 * get_step_size() !O2_dif
-		lxco2sat = (ccon_co2s_sat(1,j) - ccon_co2s_sat(2,j)) * Fick_D_w(3) * m_Fick_ad * 1e-4 *  (t_soisno(c,j) / 298)**1.87 * get_step_size() !CO2_dif
-		lxh2sat = (ccon_h2s_sat(1,j) - ccon_h2s_sat(2,j)) * Fick_D_w(4) * m_Fick_ad * 1e-4 * (t_soisno(c,j) / 298)**1.87 * get_step_size() !H2_dif
+		lxch4sat = (ccon_ch4s_sat(1,j) - ccon_ch4s_sat(2,j)) * Fick_D_w(1) * m_Fick_ad * 1.0e-4 * (t_soisno(c,j) / 298)**1.87 * get_step_size() !CH4_dif
+		lxo2sat = (ccon_o2s_sat(1,j) - ccon_o2s_sat(2,j)) * Fick_D_w(2) * m_Fick_ad * 1.0e-4 * (t_soisno(c,j) / 298)**1.87 * get_step_size() !O2_dif
+		lxco2sat = (ccon_co2s_sat(1,j) - ccon_co2s_sat(2,j)) * Fick_D_w(3) * m_Fick_ad * 1.0e-4 *  (t_soisno(c,j) / 298)**1.87 * get_step_size() !CO2_dif
+		lxh2sat = (ccon_h2s_sat(1,j) - ccon_h2s_sat(2,j)) * Fick_D_w(4) * m_Fick_ad * 1.0e-4 * (t_soisno(c,j) / 298)**1.87 * get_step_size() !H2_dif
 		
 		ccon_ch4s_sat(1,j) = (ccon_ch4s_sat(1,j) * hum_frac - lxch4sat) / hum_frac
 		ccon_ch4s_sat(2,j) = (ccon_ch4s_sat(2,j) * hol_frac + lxch4sat) / hol_frac
@@ -3300,10 +3315,15 @@ end do
 		!~ ho_h2o(j) = h2osoi_liq(2,ho_soil_id(j)) * ho_soil_tk(j) / dz(2,ho_soil_id(j))
 !~ end do
 
-!write(iulog,*) "herebefore hummock 20", cdocs_sat_spruce1(1), cdocs_sat_spruce1(2), cdocs_sat_spruce1(3), cdocs_sat_spruce1(4), cdocs_sat_spruce1(5), cdocs_sat_spruce1(6), cdocs_sat_spruce1(7), cdocs_sat_spruce1(8), cdocs_sat_spruce1(9), cdocs_sat_spruce1(10), cdocs_sat_spruce1(11), cdocs_sat_spruce1(12), cdocs_sat_spruce1(13), cdocs_sat_spruce1(14), cdocs_sat_spruce1(15), cdocs_sat_spruce1(16), cdocs_sat_spruce1(17), cdocs_sat_spruce1(18), cdocs_sat_spruce1(19), cdocs_sat_spruce1(20)
-!write(iulog,*) "herebefore hollow 14", cdocs_sat_spruce2(1), cdocs_sat_spruce2(2), cdocs_sat_spruce2(3), cdocs_sat_spruce2(4), cdocs_sat_spruce2(5), cdocs_sat_spruce2(6), cdocs_sat_spruce2(7), cdocs_sat_spruce2(8), cdocs_sat_spruce2(9), cdocs_sat_spruce2(10), cdocs_sat_spruce2(11), cdocs_sat_spruce2(12), cdocs_sat_spruce2(13), cdocs_sat_spruce2(14)
+!write(iulog,*) "herebefore hummock 20", cdocs_sat_spruce1(1), cdocs_sat_spruce1(2), cdocs_sat_spruce1(3), cdocs_sat_spruce1(4), cdocs_sat_spruce1(5), cdocs_sat_spruce1(6), &
+!cdocs_sat_spruce1(7), cdocs_sat_spruce1(8), cdocs_sat_spruce1(9), cdocs_sat_spruce1(10), cdocs_sat_spruce1(11), cdocs_sat_spruce1(12), cdocs_sat_spruce1(13), cdocs_sat_spruce1(14), &
+!cdocs_sat_spruce1(15), cdocs_sat_spruce1(16), cdocs_sat_spruce1(17), cdocs_sat_spruce1(18), cdocs_sat_spruce1(19), cdocs_sat_spruce1(20)
+!write(iulog,*) "herebefore hollow 14", cdocs_sat_spruce2(1), cdocs_sat_spruce2(2), cdocs_sat_spruce2(3), cdocs_sat_spruce2(4), cdocs_sat_spruce2(5), cdocs_sat_spruce2(6), &
+!cdocs_sat_spruce2(7), cdocs_sat_spruce2(8), cdocs_sat_spruce2(9), cdocs_sat_spruce2(10), cdocs_sat_spruce2(11), cdocs_sat_spruce2(12), cdocs_sat_spruce2(13), cdocs_sat_spruce2(14), &
 
-!write(iulog,*) "herebefore", cdocs_sat_spruce2(1)+cdocs_sat_spruce2(2)+cdocs_sat_spruce2(3)+cdocs_sat_spruce2(4)+cdocs_sat_spruce2(5)+cdocs_sat_spruce2(6)+cdocs_sat_spruce2(7)+cdocs_sat_spruce2(8)+cdocs_sat_spruce2(9)+cdocs_sat_spruce2(10)+cdocs_sat_spruce2(11)+cdocs_sat_spruce2(12)+cdocs_sat_spruce2(13)+cdocs_sat_spruce2(14)
+!write(iulog,*) "herebefore", cdocs_sat_spruce2(1)+cdocs_sat_spruce2(2)+cdocs_sat_spruce2(3)+cdocs_sat_spruce2(4)+cdocs_sat_spruce2(5)+cdocs_sat_spruce2(6)+&
+!cdocs_sat_spruce2(7)+cdocs_sat_spruce2(8)+cdocs_sat_spruce2(9)+cdocs_sat_spruce2(10)+cdocs_sat_spruce2(11)+cdocs_sat_spruce2(12)+cdocs_sat_spruce2(13)+&
+!cdocs_sat_spruce2(14)
 
 ! lateral transport
 !~ if(jwt(c) >= nlevsoi) then
@@ -3384,8 +3404,12 @@ end do
 	end do	
 !~ end if
 
-!~ write(iulog,*) "after laterer transport hummock", cdocs_sat_spruce1(1), cdocs_sat_spruce1(2), cdocs_sat_spruce1(3), cdocs_sat_spruce1(4), cdocs_sat_spruce1(5), cdocs_sat_spruce1(6), cdocs_sat_spruce1(7), cdocs_sat_spruce1(8), cdocs_sat_spruce1(9), cdocs_sat_spruce1(10), cdocs_sat_spruce1(11), cdocs_sat_spruce1(12), cdocs_sat_spruce1(13), cdocs_sat_spruce1(14), cdocs_sat_spruce1(15), cdocs_sat_spruce1(16), cdocs_sat_spruce1(17), cdocs_sat_spruce1(18), cdocs_sat_spruce1(19), cdocs_sat_spruce1(20)
-!~ write(iulog,*) "after lateral transport hollow", cdocs_sat_spruce2(1), cdocs_sat_spruce2(2), cdocs_sat_spruce2(3), cdocs_sat_spruce2(4), cdocs_sat_spruce2(5), cdocs_sat_spruce2(6), cdocs_sat_spruce2(7), cdocs_sat_spruce2(8), cdocs_sat_spruce2(9), cdocs_sat_spruce2(10), cdocs_sat_spruce2(11), cdocs_sat_spruce2(12), cdocs_sat_spruce2(13), cdocs_sat_spruce2(14)
+!~ write(iulog,*) "after laterer transport hummock", cdocs_sat_spruce1(1), cdocs_sat_spruce1(2), cdocs_sat_spruce1(3), cdocs_sat_spruce1(4), cdocs_sat_spruce1(5), &
+!cdocs_sat_spruce1(6), cdocs_sat_spruce1(7), cdocs_sat_spruce1(8), cdocs_sat_spruce1(9), cdocs_sat_spruce1(10), cdocs_sat_spruce1(11), cdocs_sat_spruce1(12), &
+!cdocs_sat_spruce1(13), cdocs_sat_spruce1(14), cdocs_sat_spruce1(15), cdocs_sat_spruce1(16), cdocs_sat_spruce1(17), cdocs_sat_spruce1(18), cdocs_sat_spruce1(19), cdocs_sat_spruce1(20)
+!~ write(iulog,*) "after lateral transport hollow", cdocs_sat_spruce2(1), cdocs_sat_spruce2(2), cdocs_sat_spruce2(3), cdocs_sat_spruce2(4), cdocs_sat_spruce2(5), &
+!cdocs_sat_spruce2(6), cdocs_sat_spruce2(7), cdocs_sat_spruce2(8), cdocs_sat_spruce2(9), cdocs_sat_spruce2(10), cdocs_sat_spruce2(11), cdocs_sat_spruce2(12), &
+!cdocs_sat_spruce2(13), cdocs_sat_spruce2(14)
 
 ! lateral diffusion
 do j = 1, 14
@@ -3471,8 +3495,12 @@ do j = 1, 14
 		ccon_h2s_sat_spruce2(j) 	= (ccon_h2s_sat_spruce2(j) + lx_h2s_sat_temp * sqrt(lat_flux_factor2)) !* hu_h2o(j+6) 
 end do
 
-!write(iulog,*) "hereafter hummock 20", cdocs_sat_spruce1(1), cdocs_sat_spruce1(2), cdocs_sat_spruce1(3), cdocs_sat_spruce1(4), cdocs_sat_spruce1(5), cdocs_sat_spruce1(6), cdocs_sat_spruce1(7), cdocs_sat_spruce1(8), cdocs_sat_spruce1(9), cdocs_sat_spruce1(10), cdocs_sat_spruce1(11), cdocs_sat_spruce1(12), cdocs_sat_spruce1(13), cdocs_sat_spruce1(14), cdocs_sat_spruce1(15), cdocs_sat_spruce1(16), cdocs_sat_spruce1(17), cdocs_sat_spruce1(18), cdocs_sat_spruce1(19), cdocs_sat_spruce1(20)
-!write(iulog,*) "hereafter holow 14", cdocs_sat_spruce2(1), cdocs_sat_spruce2(2), cdocs_sat_spruce2(3), cdocs_sat_spruce2(4), cdocs_sat_spruce2(5), cdocs_sat_spruce2(6), cdocs_sat_spruce2(7), cdocs_sat_spruce2(8), cdocs_sat_spruce2(9), cdocs_sat_spruce2(10), cdocs_sat_spruce2(11), cdocs_sat_spruce2(12), cdocs_sat_spruce2(13), cdocs_sat_spruce2(14)
+!write(iulog,*) "hereafter hummock 20", cdocs_sat_spruce1(1), cdocs_sat_spruce1(2), cdocs_sat_spruce1(3), cdocs_sat_spruce1(4), cdocs_sat_spruce1(5), cdocs_sat_spruce1(6), &
+!cdocs_sat_spruce1(7), cdocs_sat_spruce1(8), cdocs_sat_spruce1(9), cdocs_sat_spruce1(10), cdocs_sat_spruce1(11), cdocs_sat_spruce1(12), cdocs_sat_spruce1(13), &
+!cdocs_sat_spruce1(14), cdocs_sat_spruce1(15), cdocs_sat_spruce1(16), cdocs_sat_spruce1(17), cdocs_sat_spruce1(18), cdocs_sat_spruce1(19), cdocs_sat_spruce1(20)
+!write(iulog,*) "hereafter holow 14", cdocs_sat_spruce2(1), cdocs_sat_spruce2(2), cdocs_sat_spruce2(3), cdocs_sat_spruce2(4), cdocs_sat_spruce2(5), cdocs_sat_spruce2(6), &
+!cdocs_sat_spruce2(7), cdocs_sat_spruce2(8), cdocs_sat_spruce2(9), cdocs_sat_spruce2(10), cdocs_sat_spruce2(11), cdocs_sat_spruce2(12), cdocs_sat_spruce2(13), &
+!cdocs_sat_spruce2(14)
 
 	!~ cdocs_sat(1,1) = cdocs_sat_spruce1(1)
 	!~ cdocs_sat(1,2) = cdocs_sat_spruce1(2)
@@ -3634,7 +3662,9 @@ end do
 	cdocs_sat(1,3) = cdocs_sat_spruce1(3)
 	cdocs_sat(1,4) = cdocs_sat_spruce1(4)
 	cdocs_sat(1,5) = cdocs_sat_spruce1(5)
-	cdocs_sat(1,6) = (cdocs_sat_spruce1(6)*hu_soil_tk(6)+cdocs_sat_spruce1(7)*hu_soil_tk(7)+cdocs_sat_spruce1(8)*hu_soil_tk(8)+cdocs_sat_spruce1(9)*hu_soil_tk(9)+cdocs_sat_spruce1(10)*hu_soil_tk(10)+cdocs_sat_spruce1(11)*hu_soil_tk(11)) / dz(1,6)
+	cdocs_sat(1,6) = (cdocs_sat_spruce1(6)*hu_soil_tk(6)+cdocs_sat_spruce1(7)*hu_soil_tk(7)+cdocs_sat_spruce1(8)*hu_soil_tk(8)+cdocs_sat_spruce1(9)*hu_soil_tk(9)+&
+	cdocs_sat_spruce1(10)*hu_soil_tk(10)+cdocs_sat_spruce1(11)*hu_soil_tk(11)) / dz(1,6)
+	
 	cdocs_sat(1,7) = (cdocs_sat_spruce1(12)*hu_soil_tk(12)+cdocs_sat_spruce1(13)*hu_soil_tk(13)+cdocs_sat_spruce1(14)*hu_soil_tk(14)) / dz(1,7)
 	cdocs_sat(1,8) = (cdocs_sat_spruce1(15)*hu_soil_tk(15)+cdocs_sat_spruce1(16)*hu_soil_tk(16)) / dz(1,8)
 	cdocs_sat(1,9) = (cdocs_sat_spruce1(17)*hu_soil_tk(17)+cdocs_sat_spruce1(18)*hu_soil_tk(18)) / dz(1,9)
@@ -3666,7 +3696,9 @@ end do
 	cdons_sat(1,3) = cdons_sat_spruce1(1)
 	cdons_sat(1,4) = cdons_sat_spruce1(1)
 	cdons_sat(1,5) = cdons_sat_spruce1(1)
-	cdons_sat(1,6) = (cdons_sat_spruce1(6)*hu_soil_tk(6)+cdons_sat_spruce1(7)*hu_soil_tk(7)+cdons_sat_spruce1(8)*hu_soil_tk(8)+cdons_sat_spruce1(9)*hu_soil_tk(9)+cdons_sat_spruce1(10)*hu_soil_tk(10)+cdons_sat_spruce1(11)*hu_soil_tk(11)) / dz(1,6)
+	cdons_sat(1,6) = (cdons_sat_spruce1(6)*hu_soil_tk(6)+cdons_sat_spruce1(7)*hu_soil_tk(7)+cdons_sat_spruce1(8)*hu_soil_tk(8)+cdons_sat_spruce1(9)*hu_soil_tk(9)+&
+	cdons_sat_spruce1(10)*hu_soil_tk(10)+cdons_sat_spruce1(11)*hu_soil_tk(11)) / dz(1,6)
+	
 	cdons_sat(1,7) = (cdons_sat_spruce1(12)*hu_soil_tk(12)+cdons_sat_spruce1(13)*hu_soil_tk(13)+cdons_sat_spruce1(14)*hu_soil_tk(14)) / dz(1,7)
 	cdons_sat(1,8) = (cdons_sat_spruce1(15)*hu_soil_tk(15)+cdons_sat_spruce1(16)*hu_soil_tk(16)) / dz(1,8)
 	cdons_sat(1,9) = (cdons_sat_spruce1(17)*hu_soil_tk(17)+cdons_sat_spruce1(18)*hu_soil_tk(18)) / dz(1,9)
@@ -3688,7 +3720,9 @@ end do
 	caces_sat(1,3) = caces_sat_spruce1(3)
 	caces_sat(1,4) = caces_sat_spruce1(4)
 	caces_sat(1,5) = caces_sat_spruce1(5)
-	caces_sat(1,6) = (caces_sat_spruce1(6)*hu_soil_tk(6)+caces_sat_spruce1(7)*hu_soil_tk(7)+caces_sat_spruce1(8)*hu_soil_tk(8)+caces_sat_spruce1(9)*hu_soil_tk(9)+caces_sat_spruce1(10)*hu_soil_tk(10)+caces_sat_spruce1(11)*hu_soil_tk(11)) / dz(1,6)
+	caces_sat(1,6) = (caces_sat_spruce1(6)*hu_soil_tk(6)+caces_sat_spruce1(7)*hu_soil_tk(7)+caces_sat_spruce1(8)*hu_soil_tk(8)+caces_sat_spruce1(9)*hu_soil_tk(9)+&
+	caces_sat_spruce1(10)*hu_soil_tk(10)+caces_sat_spruce1(11)*hu_soil_tk(11)) / dz(1,6)
+	
 	caces_sat(1,7) = (caces_sat_spruce1(12)*hu_soil_tk(12)+caces_sat_spruce1(13)*hu_soil_tk(13)+caces_sat_spruce1(14)*hu_soil_tk(14))	/ dz(1,7)
 	caces_sat(1,8) = (caces_sat_spruce1(15)*hu_soil_tk(15)+caces_sat_spruce1(16)*hu_soil_tk(16)) / dz(1,8)
 	caces_sat(1,9) = (caces_sat_spruce1(17)*hu_soil_tk(17)+caces_sat_spruce1(18)*hu_soil_tk(18)) / dz(1,9)
@@ -3710,7 +3744,9 @@ end do
 	ccon_o2s_sat(1,3) = ccon_o2s_sat_spruce1(3)
 	ccon_o2s_sat(1,4) = ccon_o2s_sat_spruce1(4)
 	ccon_o2s_sat(1,5) = ccon_o2s_sat_spruce1(5)
-	ccon_o2s_sat(1,6) = (ccon_o2s_sat_spruce1(6)*hu_soil_tk(6)+ccon_o2s_sat_spruce1(7)*hu_soil_tk(7)+ccon_o2s_sat_spruce1(8)*hu_soil_tk(8)+ccon_o2s_sat_spruce1(9)*hu_soil_tk(9)+ccon_o2s_sat_spruce1(10)*hu_soil_tk(10)+ccon_o2s_sat_spruce1(11)*hu_soil_tk(11)) / dz(1,6)
+	ccon_o2s_sat(1,6) = (ccon_o2s_sat_spruce1(6)*hu_soil_tk(6)+ccon_o2s_sat_spruce1(7)*hu_soil_tk(7)+ccon_o2s_sat_spruce1(8)*hu_soil_tk(8)+ccon_o2s_sat_spruce1(9)*hu_soil_tk(9)+&
+	ccon_o2s_sat_spruce1(10)*hu_soil_tk(10)+ccon_o2s_sat_spruce1(11)*hu_soil_tk(11)) / dz(1,6)
+	
 	ccon_o2s_sat(1,7) = (ccon_o2s_sat_spruce1(12)*hu_soil_tk(12)+ccon_o2s_sat_spruce1(13)*hu_soil_tk(13)+ccon_o2s_sat_spruce1(14)*hu_soil_tk(14)) / dz(1,7)
 	ccon_o2s_sat(1,8) = (ccon_o2s_sat_spruce1(15)*hu_soil_tk(15)+ccon_o2s_sat_spruce1(16)*hu_soil_tk(16)) / dz(1,8)
 	ccon_o2s_sat(1,9) = (ccon_o2s_sat_spruce1(17)*hu_soil_tk(17)+ccon_o2s_sat_spruce1(18)*hu_soil_tk(18)) / dz(1,9)
@@ -3732,7 +3768,9 @@ end do
 	ccon_h2s_sat(1,3) = ccon_h2s_sat_spruce1(3)
 	ccon_h2s_sat(1,4) = ccon_h2s_sat_spruce1(4)
 	ccon_h2s_sat(1,5) = ccon_h2s_sat_spruce1(5)
-	ccon_h2s_sat(1,6) = (ccon_h2s_sat_spruce1(6)*hu_soil_tk(6)+ccon_h2s_sat_spruce1(7)*hu_soil_tk(7)+ccon_h2s_sat_spruce1(8)*hu_soil_tk(8)+ccon_h2s_sat_spruce1(9)*hu_soil_tk(9)+ccon_h2s_sat_spruce1(10)*hu_soil_tk(10)+ccon_h2s_sat_spruce1(11)*hu_soil_tk(11)) / dz(1,6)
+	ccon_h2s_sat(1,6) = (ccon_h2s_sat_spruce1(6)*hu_soil_tk(6)+ccon_h2s_sat_spruce1(7)*hu_soil_tk(7)+ccon_h2s_sat_spruce1(8)*hu_soil_tk(8)+ccon_h2s_sat_spruce1(9)*hu_soil_tk(9)+&
+	ccon_h2s_sat_spruce1(10)*hu_soil_tk(10)+ccon_h2s_sat_spruce1(11)*hu_soil_tk(11)) / dz(1,6)
+	
 	ccon_h2s_sat(1,7) = (ccon_h2s_sat_spruce1(12)*hu_soil_tk(12)+ccon_h2s_sat_spruce1(13)*hu_soil_tk(13)+ccon_h2s_sat_spruce1(14)*hu_soil_tk(14)) / dz(1,7)
 	ccon_h2s_sat(1,8) = (ccon_h2s_sat_spruce1(15)*hu_soil_tk(15)+ccon_h2s_sat_spruce1(16)*hu_soil_tk(16)) / dz(1,8)
 	ccon_h2s_sat(1,9) = (ccon_h2s_sat_spruce1(17)*hu_soil_tk(17)+ccon_h2s_sat_spruce1(18)*hu_soil_tk(18)) / dz(1,9)
@@ -3754,7 +3792,9 @@ end do
 	ccon_co2s_sat(1,3) = ccon_co2s_sat_spruce1(3)
 	ccon_co2s_sat(1,4) = ccon_co2s_sat_spruce1(4)
 	ccon_co2s_sat(1,5) = ccon_co2s_sat_spruce1(5)
-	ccon_co2s_sat(1,6) = (ccon_co2s_sat_spruce1(6)*hu_soil_tk(6)+ccon_co2s_sat_spruce1(7)*hu_soil_tk(7)+ccon_co2s_sat_spruce1(8)*hu_soil_tk(8)+ccon_co2s_sat_spruce1(9)*hu_soil_tk(9)+ccon_co2s_sat_spruce1(10)*hu_soil_tk(10)+ccon_co2s_sat_spruce1(11)*hu_soil_tk(11)) / dz(1,6)
+	ccon_co2s_sat(1,6) = (ccon_co2s_sat_spruce1(6)*hu_soil_tk(6)+ccon_co2s_sat_spruce1(7)*hu_soil_tk(7)+ccon_co2s_sat_spruce1(8)*hu_soil_tk(8)+ccon_co2s_sat_spruce1(9)*hu_soil_tk(9)+&
+	ccon_co2s_sat_spruce1(10)*hu_soil_tk(10)+ccon_co2s_sat_spruce1(11)*hu_soil_tk(11)) / dz(1,6)
+	
 	ccon_co2s_sat(1,7) = (ccon_co2s_sat_spruce1(12)*hu_soil_tk(12)+ccon_co2s_sat_spruce1(13)*hu_soil_tk(13)+ccon_co2s_sat_spruce1(14)*hu_soil_tk(14)) / dz(1,7)
 	ccon_co2s_sat(1,8) = (ccon_co2s_sat_spruce1(15)*hu_soil_tk(15)+ccon_co2s_sat_spruce1(16)*hu_soil_tk(16)) / dz(1,8)
 	ccon_co2s_sat(1,9) = (ccon_co2s_sat_spruce1(17)*hu_soil_tk(17)+ccon_co2s_sat_spruce1(18)*hu_soil_tk(18)) / dz(1,9)
@@ -3776,7 +3816,9 @@ end do
 	ccon_ch4s_sat(1,3) = ccon_ch4s_sat_spruce1(3)
 	ccon_ch4s_sat(1,4) = ccon_ch4s_sat_spruce1(4)
 	ccon_ch4s_sat(1,5) = ccon_ch4s_sat_spruce1(5)
-	ccon_ch4s_sat(1,6) = (ccon_ch4s_sat_spruce1(6)*hu_soil_tk(6)+ccon_ch4s_sat_spruce1(7)*hu_soil_tk(7)+ccon_ch4s_sat_spruce1(8)*hu_soil_tk(8)+ccon_ch4s_sat_spruce1(9)*hu_soil_tk(9)+ccon_ch4s_sat_spruce1(10)*hu_soil_tk(10)+ccon_ch4s_sat_spruce1(11)*hu_soil_tk(11)) / dz(1,6)
+	ccon_ch4s_sat(1,6) = (ccon_ch4s_sat_spruce1(6)*hu_soil_tk(6)+ccon_ch4s_sat_spruce1(7)*hu_soil_tk(7)+ccon_ch4s_sat_spruce1(8)*hu_soil_tk(8)+ccon_ch4s_sat_spruce1(9)*hu_soil_tk(9)+&
+	ccon_ch4s_sat_spruce1(10)*hu_soil_tk(10)+ccon_ch4s_sat_spruce1(11)*hu_soil_tk(11)) / dz(1,6)
+	
 	ccon_ch4s_sat(1,7) = (ccon_ch4s_sat_spruce1(12)*hu_soil_tk(12)+ccon_ch4s_sat_spruce1(13)*hu_soil_tk(13)+ccon_ch4s_sat_spruce1(14)*hu_soil_tk(14)) / dz(1,7)
 	ccon_ch4s_sat(1,8) = (ccon_ch4s_sat_spruce1(15)*hu_soil_tk(15)+ccon_ch4s_sat_spruce1(16)*hu_soil_tk(16)) / dz(1,8)
 	ccon_ch4s_sat(1,9) = (ccon_ch4s_sat_spruce1(17)*hu_soil_tk(17)+ccon_ch4s_sat_spruce1(18)*hu_soil_tk(18)) / dz(1,9)
