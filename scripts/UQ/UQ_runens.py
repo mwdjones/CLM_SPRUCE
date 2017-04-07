@@ -229,7 +229,7 @@ for casename in casenames:
                                     moutput.write(s2)
                             minput.close()
                             moutput.close()
-                            #os.system('cp '+microbefile+' '+microbefile+'_orig')
+                            os.system('cp '+microbefile+' '+microbefile+'_orig')
                         else:
                             if (pnum == 0):
                                 stem_leaf = getvar(pftfile, 'stem_leaf')
