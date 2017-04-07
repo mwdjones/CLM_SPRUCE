@@ -147,7 +147,7 @@ for casename in casenames:
     os.system('cp '+orig_dir+'/*_in* '+ens_dir)
     os.system('cp '+orig_dir+'/*nml '+ens_dir)
     os.system('cp '+orig_dir+'/*stream* '+ens_dir)
-    #os.system('cp '+orig_dir+'/*.r.*.nc '+ens_dir)
+    os.system('cp '+orig_dir+'/*.r.*.nc '+ens_dir)
     os.system('cp '+orig_dir+'/*.rc '+ens_dir)
     os.system('cp '+orig_dir+'/*para*.nc '+ens_dir)
     os.system('cp '+orig_dir+'/*initial* '+ens_dir)
@@ -218,7 +218,7 @@ for casename in casenames:
                     microbefile = ens_dir+'/microbepar_in'
                     pnum = 0
                     for p in parm_names:
-                        if (p[0:2] == 'm_' or p[0:2] == 'k_'):   #Assume this is a microbe_par parameter
+                        if (p[0:4] == 'dom_' or p[0:2] == 'm_' or p[0:2] == 'k_'):   #Assume this is a microbe_par parameter
                             moutput = open(microbefile,'w')
                             minput = open(microbefile+'_orig','r')
                             for s2 in minput:
@@ -229,7 +229,7 @@ for casename in casenames:
                                     moutput.write(s2)
                             minput.close()
                             moutput.close()
-                            os.system('cp '+microbefile+' '+microbefile+'_orig')
+                            #os.system('cp '+microbefile+' '+microbefile+'_orig')
                         else:
                             if (pnum == 0):
                                 stem_leaf = getvar(pftfile, 'stem_leaf')
@@ -242,7 +242,7 @@ for casename in casenames:
                                 param = parm_values[pnum]
                             else:
                                 param[:] = parm_values[pnum]
-                        ierr = putvar(pftfile, p, param)
+                            ierr = putvar(pftfile, p, param)
                         pnum = pnum+1
                 #elif ('logfile =' in s):
                 #    myoutput.write(s.replace('`date +%y%m%d-%H%M%S`',timestr))
@@ -278,7 +278,7 @@ for filename in os.listdir(UQdir+'/'+options.constraints):
     for s in myinput:
         if (lnum == 0):
             header = s.split()
-        else:
+        elif (len(header) == len(s.split())):
             hnum = 0
             PFT=-1      #default:  don't use PFT-specific info 
                         #  if specified, use h1 file (PFT-specific)
@@ -305,7 +305,7 @@ for filename in os.listdir(UQdir+'/'+options.constraints):
                 hnum = hnum+1
             #get the relevant variable/dataset
             #Assumes annual file with daily output
-            if (year != year_last and year <= 2013):
+            if (year != year_last and year <= 2015):
                 if (PFT == -1):
                     myfile = casename+'.clm2.h0.'+str(year)+'-01-01-00000.nc'
                 else:
