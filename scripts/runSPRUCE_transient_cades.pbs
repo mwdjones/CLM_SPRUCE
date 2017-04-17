@@ -17,9 +17,9 @@ cd $scriptsdir
 
 #run transient simulation from 1850-2010
 #Comment this section out if the 2011 restart file already exists.
-python runCLM.py --caseidprefix $prefix\_T0.00 --runroot $rundir --nofire --harvmod --humhol --rmold --compset I20TRCLM45CN --mach cades --MICROBE --tstep 1 --run_n 161 --cpl_bypass --finidat $scriptsdir/../inputdata/lnd/clm2/inidata/SPRUCE-finalspinup-peatland-carbon-initial.nc  --site US-SPR --add_temperature 0.0 --no_submit --runroot $rundir
-cd $prefix\_T0.00_US-SPR_I20TRCLM45CN
-./$prefix\_T0.00_US-SPR_I20TRCLM45CN.run
+#python runCLM.py --caseidprefix $prefix\_T0.00 --runroot $rundir --nofire --harvmod --humhol --rmold --compset I20TRCLM45CN --mach cades --MICROBE --tstep 1 --run_n 161 --cpl_bypass --finidat $scriptsdir/../inputdata/lnd/clm2/inidata/SPRUCE-finalspinup-peatland-carbon-initial.nc  --site US-SPR --add_temperature 0.0 --no_submit --runroot $rundir
+#cd $prefix\_T0.00_US-SPR_I20TRCLM45CN
+#./$prefix\_T0.00_US-SPR_I20TRCLM45CN.run
  
 #loop over 10 cases 2011-2030 (treatments begin in 2015)
 foreach t (0.00 2.25 4.50 6.75 9.00)

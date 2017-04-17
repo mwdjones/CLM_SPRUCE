@@ -222,7 +222,7 @@ for casename in casenames:
                             moutput = open(microbefile,'w')
                             minput = open(microbefile+'_orig','r')
                             for s2 in minput:
-                                if (p.lower() in s2.lower()):
+                                if (p.lower() == (s2.split()[0]).lower()):
                                     moutput.write(p+'   '+str(parm_values[pnum]) \
                                                   +'\n')
                                 else:

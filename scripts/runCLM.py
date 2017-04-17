@@ -660,7 +660,7 @@ if (options.refcase == 'none'):
 	#history file options
 
         #outputs for SPRUCE MiP and Jiafu's diagnostics code:
-        var_list_hourly = ['GPP', 'NEE', 'NEP', 'NPP', 'LEAFC_ALLOC', 'AGNPP', \
+        var_list_hourly = ['GPP', 'FPSN', 'NEE', 'NEP', 'NPP', 'LEAFC_ALLOC', 'AGNPP', 'MR' \
                 'CPOOL_TO_DEADSTEMC', 'LIVECROOTC_XFER_TO_LIVECROOTC', 'DEADCROOTC_XFER_TO_DEADCROOTC', \
                 'CPOOL_TO_LIVECROOTC', 'CPOOL_TO_DEADCROOTC', 'FROOTC_ALLOC', 'AR', 'LEAF_MR', 'CPOOL_LEAF_GR',
                 'TRANSFER_LEAF_GR', 'CPOOL_LEAF_STORAGE_GR', 'LIVESTEM_MR', 'CPOOL_LIVESTEM_GR', \
@@ -679,9 +679,9 @@ if (options.refcase == 'none'):
                 'TOTSOMC', 'CCON_CH4S', 'ZWT', 'SNOWDP', 'TLAI']
         var_list_daily = ['TOTLITC', 'TOTSOMC', 'CWDC', 'LITR1C_vr', 'LITR2C_vr', 'LITR3C_vr', 'SOIL1C_vr', 'SOIL2C_vr', \
                           'SOIL3C_vr', 'SOIL4C_vr', 'CDOCS', 'CCON_CH4S', 'H2OSFC', 'ZWT', 'SNOWDP', 'TLAI'] 
-        var_list_pft = ['GPP', 'NPP', 'LEAFC_ALLOC', 'AGNPP', 'CPOOL_TO_DEADSTEMC', 'LIVECROOTC_XFER_TO_LIVECROOTC', \
+        var_list_pft = ['GPP', 'NPP', 'FPSN', 'LEAFC_ALLOC', 'AGNPP', 'CPOOL_TO_DEADSTEMC', 'LIVECROOTC_XFER_TO_LIVECROOTC', \
 	        'DEADCROOTC_XFER_TO_DEADCROOTC', 'CPOOL_TO_LIVECROOTC', 'CPOOL_TO_DEADCROOTC', 'FROOTC_ALLOC', \
-                'AR', 'LEAF_MR', 'CPOOL_LEAF_GR', 'TRANSFER_LEAF_GR', 'CPOOL_LEAF_STORAGE_GR', 'LIVESTEM_MR', \
+                'AR', 'MR', 'LEAF_MR', 'CPOOL_LEAF_GR', 'TRANSFER_LEAF_GR', 'CPOOL_LEAF_STORAGE_GR', 'LIVESTEM_MR', \
                 'CPOOL_LIVESTEM_GR', 'TRANSFER_LIVESTEM_GR', 'CPOOL_LIVESTEM_STORAGE_GR', 'CPOOL_DEADSTEM_GR', \
                 'TRANSFER_DEADSTEM_GR', 'CPOOL_DEADSTEM_STORAGE_GR', 'LIVECROOT_MR', 'CPOOL_LIVECROOT_GR', 'TRANSFER_LIVECROOT_GR', \
                 'CPOOL_LIVECROOT_STORAGE_GR', 'CPOOL_DEADCROOT_GR', 'TRANSFER_DEADCROOT_GR', 'CPOOL_DEADCROOT_STORAGE_GR', \
@@ -690,7 +690,7 @@ if (options.refcase == 'none'):
                 'LIVESTEMC_STORAGE', 'DEADCROOTC_STORAGE', 'LIVECROOTC_STORAGE', 'CPOOL_TO_DEADSTEMC_STORAGE', \
                 'CPOOL_TO_LIVESTEMC_STORAGE', 'CPOOL_TO_DEADCROOTC_STORAGE', 'CPOOL_TO_LIVECROOTC_STORAGE', \
                 'FROOTC_STORAGE', 'LEAFC_STORAGE', 'LEAFC_XFER', 'FROOTC_XFER', 'LIVESTEMC_XFER', \
-                'DEADSTEMC_XFER', 'LIVECROOTC_XFER', 'DEADCROOTC_XFER', 'TLAI']
+                'DEADSTEMC_XFER', 'LIVECROOTC_XFER', 'DEADCROOTC_XFER', 'TLAI', 'CPOOL_TO_LIVESTEMC']
 
         if ('20TR' in compset and options.diags):
             output.write(" hist_mfilt = 1, 8760, 365, 365\n")

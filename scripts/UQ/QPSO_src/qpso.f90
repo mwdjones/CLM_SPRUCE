@@ -28,16 +28,35 @@ double precision fi(maxparms), u(maxparms), v(maxparms)
 logical isvalid, restart
 character(len=4) popst
 character(len=100) mymachine, dummy, parm_name(maxparms), case_name, thisfmt
+character(len=100) parm_list, constraints, qpso_in(4)
 
 !------- user-tunable QPSO algorithm parameters ----------------
 
-npop = 64         !number of particles
-niter = 200       !number of iterations
-beta_l = 0.4d0
-beta_u = 0.7d0
-restart = .false.
-!mymachine = 'oic'   !Fill in correct machine and uncomment this line
+open(unit = 8, file='qpso_input.txt')
+do i = 1,100
+    read(8,*, end=5), qpso_in
+    if (trim(qpso_in(1)) == 'npop')    read(qpso_in(3),*) npop 
+    if (trim(qpso_in(1)) == 'niter')   read(qpso_in(3),*) niter
+    if (trim(qpso_in(1)) == 'beta_l')  read(qpso_in(3),*) beta_l
+    if (trim(qpso_in(1)) == 'beta_u')  read(qpso_in(3),*) beta_u
+    if (trim(qpso_in(1)) == 'restart') read(qpso_in(3),*) restart
+    if (trim(qpso_in(1)) == 'machine')     mymachine=trim(qpso_in(3))
+    if (trim(qpso_in(1)) == 'case')        case_name=trim(qpso_in(3))
+    if (trim(qpso_in(1)) == 'parm_list')   parm_list=trim(qpso_in(3))
+    if (trim(qpso_in(1)) == 'constraints') constraints=trim(qpso_in(3))
+end do
 
+5 continue
+close(8)
+print*, '# of particles:  ', npop
+print*, '# of iterations: ', niter
+print*, 'beta_l:          ', beta_l
+print*, 'beta_u:          ', beta_u
+print*, 'Is a restart run:', restart
+print*, 'Machine:         ', mymachine
+print*, 'Case:            ', case_name
+print*, 'Parameter file:  ', parm_list
+print*, 'Constraints dir: ', constraints
 !---------------------------------------------------------------
 
 call mpi_init(ierr)
@@ -46,8 +65,7 @@ call mpi_comm_rank(mpi_comm_world, myid, ierr)
 
 !get parameter information from the parm_list file
 if (myid .eq. 0) then 
-  open(unit = 8, status='old', file = './parm_list')
-  read(8,*) case_name 
+  open(unit = 8, status='old', file = trim(parm_list))
   nparms=0
   do i=1,maxparms
      read(8,*, end=10) parm_name(i), pft(i), pmin(i), pmax(i)
@@ -79,7 +97,8 @@ if (restart .eqv. .false.) then
       call init_random_seed
       call random_number(u)
       x(i,:) = pmin + (pmax-pmin) * u
-      f_x(i) = feval(x(i,:), nparms, i, mymachine)
+      f_x(i) = feval(x(i,:), nparms, i, mymachine, parm_list, constraints, &
+                    case_name)
       nfunc(i) = nfunc(i)+1
       f_pbest(i) = f_x(i)
    end do
@@ -105,7 +124,7 @@ if (restart .eqv. .false.) then
 else
    !load restart information 
    if (myid .eq. 0) then 
-      open(unit=8, file='./qpso_restart.txt')
+      open(unit=8, file='./qpso_restart_' // trim(case_name) // '.txt')
       read(8,*) start_iter
       do j=1,npop
          read(8,*) xall(j,1:nparms)
@@ -154,13 +173,13 @@ do i=start_iter,niter
 
             if (x(j,k) .lt. pmin(k) .or. x(j,k) .gt. pmax(k)) isvalid=.false.
             !DMR for better load balancing, instead of not running, run at the boundary.  Testing only.
-            !if (x(j,k) .lt. pmin(k)) x(j,k) = pmin(k)
-            !if (x(j,k) .gt. pmax(k)) x(j,k) = pmax(k)
+            if (x(j,k) .lt. pmin(k)) x(j,k) = pmin(k)
+            if (x(j,k) .gt. pmax(k)) x(j,k) = pmax(k)
          end do
       end do
 
       !run the model to get the cost function
-      f_x(j) = feval(x(j,:),nparms, j, mymachine)
+      f_x(j) = feval(x(j,:),nparms, j, mymachine, parm_list, constraints, case_name)
       nfunc(j) = nfunc(j)+1
     
 20 continue
@@ -194,7 +213,7 @@ do i=start_iter,niter
    call mpi_allreduce(nfunc,nfuncall, maxpop, mpi_integer, mpi_sum, &
         mpi_comm_world, ierr)
    if (myid .eq. 0) then 
-     open(unit=8, file='qpso_best.txt')
+     open(unit=8, file='qpso_best_' // trim(case_name) // '.txt')
      write(8,*), 'Iteration', i
      write(8,*), 'Objective function:', gobj(i)
      do k=1,nparms
@@ -202,9 +221,10 @@ do i=start_iter,niter
      end do
      close(8)
      if (i .eq. 1) then
-        open(unit=10, file='qpso_costfunc.txt')
+        open(unit=10, file='qpso_costfunc_' // trim(case_name) // '.txt')
      else
-        open(unit=10, file='qpso_costfunc.txt', status='old', position='append', action='write')
+        open(unit=10, file='qpso_costfunc_' // trim(case_name) // '.txt', & 
+             status='old', position='append', action='write')
      end if
      write(10,*) i, sum(nfuncall) , gobj(i)
      close(10)
@@ -212,7 +232,7 @@ do i=start_iter,niter
      !write the restart file
      write(popst, '(I4)') nparms
      thisfmt = '(' // trim(popst) // '(g13.6,1x))'
-     open(unit=11, file = 'qpso_restart.txt')
+     open(unit=11, file = 'qpso_restart_' // trim(case_name) // '.txt')
      write(11,'(I4)') i        !current iteration number
      do j=1,npop
         write(11,fmt=trim(thisfmt)) xall(j,1:nparms)      !current parameters for each population
@@ -230,14 +250,15 @@ end program qpso
 
 
 !Function to evaluate the CLM/ALM model
-double precision function feval(parms, nparms, thispop, mymachine)
+double precision function feval(parms, nparms, thispop, mymachine, parm_list, &
+                       constraints, case_name)
 
 integer nparms, i, thispop
 double precision parms(500), trueparms(4)
 double precision mydata(1000), model(1000), sse(1000)
 double precision temp(1000), par(1000)
 character(len=6) thispopst
-character(len=100) mymachine
+character(len=100) mymachine, parm_list, constraints, case_name
 
 
 write(thispopst, '(I6)') 100000+thispop
@@ -251,9 +272,9 @@ close(9)
 
 !Call python workflow to set up and launch model simulation
 call system('python UQ_runens.py --ens_num ' // thispopst(2:6) // &
-     ' --parm_list ' // 'parm_list --parm_data ./parm_data_files/' // &
-     'parm_data_' // thispopst(2:6) // ' --constraints constraints' // &
-     ' --machine ' // trim(mymachine))
+     ' --parm_list ' // trim(parm_list) // ' --parm_data ./parm_data_files/' // &
+     'parm_data_' // thispopst(2:6) // ' --constraints ' // trim(constraints) // &
+     ' --machine ' // trim(mymachine) // ' --case ' // trim(case_name))
 
 !get the sum of squared errors
 open(unit=9, file='./ssedata/mysse_' // thispopst(2:6) // '.txt')
