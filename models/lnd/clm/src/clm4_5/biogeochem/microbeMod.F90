@@ -1642,7 +1642,7 @@ else
 !end if
 end if  ! end if of the frozen mechanism in trapping gases in soil
 
-	ch4_surf_netflux_unsat(c) 			= ch4_surf_netflux_unsat(c) + (ch4_surf_dif_unsat(c) + ch4_surf_aere_unsat(c) + ch4_surf_ebul_unsat(c)) / 3.0
+	ch4_surf_netflux_unsat(c) 			= ch4_surf_netflux_unsat(c) + ch4_surf_dif_unsat(c) + ch4_surf_aere_unsat(c) + ch4_surf_ebul_unsat(c)
 	co2_surf_netflux_unsat(c) 			= co2_surf_netflux_unsat(c) + co2_surf_dif_unsat(c) + co2_surf_aere_unsat(c) + co2_surf_ebul_unsat(c)
 	o2_surf_netflux_unsat(c) 			= o2_surf_netflux_unsat(c) + o2_surf_dif_unsat(c) + o2_surf_aere_unsat(c)
 	h2_surf_netflux_unsat(c) 			= h2_surf_netflux_unsat(c) + h2_surf_dif_unsat(c) + h2_surf_aere_unsat(c) + h2_surf_ebul_unsat(c)
