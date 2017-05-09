@@ -10,7 +10,7 @@ parameter (maxparms = 512)
 
 integer i, j,k, npop, nparms, niter, gInx, nfunc(maxpop)
 integer nfuncall(maxpop)
-integer np, myid, ierr, start_iter
+integer ntries, np, myid, ierr, start_iter
 integer pft(maxparms)
 double precision gbest(maxparms)
 double precision mbest(maxparms)
@@ -159,7 +159,8 @@ do i=start_iter,niter
    f_pbest(:) = 0d0
    do j = myid+1,npop,np
       isvalid = .false.
-      do while (isvalid .eqv. .false.)   !Force a set of parameters within the bounds
+      ntries = 0 
+      do while (isvalid .eqv. .false.)   
          call random_number(fi)
          call random_number(u)
          call random_number(v)
@@ -171,18 +172,20 @@ do i=start_iter,niter
 
             x(j,k) = pupdate(k)+((-1d0)**ceiling(0.5+v(k)))*betapro(k)*(-log(u(k)))
 
-            if (x(j,k) .lt. pmin(k) .or. x(j,k) .gt. pmax(k)) isvalid=.false.
-            !DMR for better load balancing, instead of not running, run at the boundary.  Testing only.
-            if (x(j,k) .lt. pmin(k)) x(j,k) = pmin(k)
-            if (x(j,k) .gt. pmax(k)) x(j,k) = pmax(k)
+            if (ntries .le. 1e5) then 
+                if (x(j,k) .lt. pmin(k) .or. x(j,k) .gt. pmax(k)) isvalid=.false.
+            else 
+                if (x(j,k) .lt. pmin(k)) x(j,k) = pmin(k)
+                if (x(j,k) .gt. pmax(k)) x(j,k) = pmax(k)
+            end if
          end do
+         ntries = ntries+1 
       end do
 
       !run the model to get the cost function
       f_x(j) = feval(x(j,:),nparms, j, mymachine, parm_list, constraints, case_name)
       nfunc(j) = nfunc(j)+1
     
-20 continue
       if (f_x(j) .lt. f_pbestall(j)) then 
          pbest(j,:) = x(j,:)
          f_pbest(j) = f_x(j)
@@ -258,7 +261,7 @@ double precision parms(500), trueparms(4)
 double precision mydata(1000), model(1000), sse(1000)
 double precision temp(1000), par(1000)
 character(len=6) thispopst
-character(len=100) mymachine, parm_list, constraints, case_name
+character(len=100) mymachine, parm_list, constraints, case_name, thisline
 
 
 write(thispopst, '(I6)') 100000+thispop
@@ -271,6 +274,7 @@ end do
 close(9)
 
 !Call python workflow to set up and launch model simulation
+call system('sleep ' // thispopst(2:6))   !do not start all at once
 call system('python UQ_runens.py --ens_num ' // thispopst(2:6) // &
      ' --parm_list ' // trim(parm_list) // ' --parm_data ./parm_data_files/' // &
      'parm_data_' // thispopst(2:6) // ' --constraints ' // trim(constraints) // &
@@ -280,6 +284,7 @@ call system('python UQ_runens.py --ens_num ' // thispopst(2:6) // &
 open(unit=9, file='./ssedata/mysse_' // thispopst(2:6) // '.txt')
 read(9,*) feval
 close(9)
+call system('sleep 20')
 
 return 
 

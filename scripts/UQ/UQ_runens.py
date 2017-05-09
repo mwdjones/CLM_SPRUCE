@@ -18,6 +18,8 @@ parser = OptionParser()
 
 parser.add_option("--runroot", dest="runroot", default="", \
                   help="Directory where the run would be created")
+parser.add_option("--case", dest="case", default="", \
+                  help="Name of case directory")
 parser.add_option("--best", dest="best", default=False, action= \
                   "store_true", help="Run best parameter set only")
 parser.add_option("--ens_num", dest="ensnum", default=1, \
@@ -84,8 +86,6 @@ UQdir = os.getcwd()
 parm_names=[]
 parm_indices=[]
 parm_values=[]
-myinput = open(options.parm_list, 'r')
-lnum=0
 
 username = getpass.getuser()
 if (options.machine == 'cades' and options.runroot == ''):
@@ -93,38 +93,35 @@ if (options.machine == 'cades' and options.runroot == ''):
 elif (options.runroot == ''):
     options.runroot = '../../run'
 
-
-#get parameter names and PFT information
-casenames = []
-for s in myinput:
-    if (lnum == 0):
-        if ('20TR' in s or '1850' in s):
-            casenames.append(s.strip())
-            isfullrun = False
-        else:
-            casenames.append(s.strip()+'_I1850CLM45CN_ad_spinup')
-            casenames.append(s.strip()+'_I1850CLM45CN')
-            casenames.append(s.strip()+'_I20TRCLM45CN')
-            #for now, hard-code the number of years for ad_spinup and final spinup
-            isfullrun = True
-    else:
-        pdata = s.split()
-        #print pdata
-        parm_names.append(pdata[0])
-        parm_indices.append(int(pdata[1]))
-    lnum = lnum+1
-myinput.close()
-
 #get parameter values
 if (options.best):
-    myinput = open('qpso_best.txt', 'r')
+    if (options.case == ''):
+        #get information from qpso_input
+        casenames=[]
+        myinput = open('qpso_input.txt','r')
+        for s in myinput:
+            if ('case' in s.split()[0]):
+                options.case = s.split()[2]
+            if ('constraints' in s.split()[0]):
+                options.constraints = s.split()[2]
+        myinput.close()
+    myinput = open('qpso_best_'+options.case.strip()+'.txt', 'r')
     lnum = 0
     for s in myinput:
         if (lnum >= 2):
+            parm_names.append(s.split()[0])
+            parm_indices.append(int(s.split()[1]))
             parm_values.append(float(s.split()[2]))
         lnum=lnum+1
     myinput.close()
 else:
+    #get parameter names and PFT information
+    myinput = open(options.parm_list, 'r')
+    for s in myinput:
+        pdata = s.split()
+        parm_names.append(pdata[0])
+        parm_indices.append(int(pdata[1]))
+    myinput.close()
     myinput = open(options.parm_data, 'r')
     for s in myinput:    
         parm_values.append(float(s))
@@ -136,13 +133,25 @@ if (options.best):
 else:
     gst=str(100000+int(options.ensnum))
 
+#get case information
+casenames = []
+if ('20TR' in options.case or '1850' in options.case):
+    casenames.append(options.case.strip())
+    isfullrun=False
+else:
+    casenames.append(options.case.strip()+'_I1850CLM45CN_ad_spinup')
+    casenames.append(options.case.strip()+'_I1850CLM45CN')
+    casenames.append(options.case.strip()+'_I20TRCLM45CN')
+    isfullrun = True
+
+
+
 #create ensemble directories from original case(s)
 isfirstcase = True
 workdir = os.path.abspath('.')
 for casename in casenames: 
     orig_dir = str(os.path.abspath(options.runroot)+'/'+casename+'/run')
     ens_dir  = os.path.abspath(options.runroot)+'/UQ/'+casename+'/g'+gst[1:]
-    print 'test1'
     os.system('mkdir -p '+options.runroot+'/UQ/'+casename+'/g'+gst[1:]+'/timing/checkpoints')
     os.system('cp '+orig_dir+'/*_in* '+ens_dir)
     os.system('cp '+orig_dir+'/*nml '+ens_dir)
@@ -152,12 +161,13 @@ for casename in casenames:
     os.system('cp '+orig_dir+'/*para*.nc '+ens_dir)
     os.system('cp '+orig_dir+'/*initial* '+ens_dir)
     os.system('cp '+orig_dir+'/*pftdyn* '+ens_dir)
-    print casename, 'test2'
     os.system('cp '+ens_dir+'/microbepar_in '+ens_dir+'/microbepar_in_orig')
     username = getpass.getuser()
     os.system('cp /home/'+username+'/models/CLM_SPRUCE/inputdata/lnd/clm2/paramdata/'+ \
                'clm_params_spruce_calveg.nc '+ens_dir+'/clm_params_'+ \
                gst[1:]+".nc")	
+    os.system('rm '+ens_dir+'/*constraint*.nc')
+
     if (isfullrun):     #Full spinup simulation
         mydrv_in = open(orig_dir+'/drv_in','r')
         for s in mydrv_in:
@@ -176,7 +186,19 @@ for casename in casenames:
             yst = str(10000+nyears_final_spinup+1)
             inifile = ens_dir_last+'/'+casename_last+'.clm2.r.'+yst[1:]+'-01-01-00000.nc'
     else:                #Trasient case only
-        inifile = ens_dir+'/'+casename+'.clm2.r.1974-01-01-00000.nc'
+        mylnd_in = open(orig_dir+'/lnd_in', 'r')
+        for s in mylnd_in:
+            if ('finidat' in s):
+               inifile = (s.split()[2])[1:-1]
+        mylnd_in.close()
+        #ensure all PFTS are growing 
+        #leafc = getvar(inifile, 'leafc')
+        #leafn = getvar(inifile, 'leafn')
+        #for c in range(0,len(leafc)):
+        #   leafc[c] = max(leafc[c],10.0)
+        #   leafn[c] = max(leafn[c],0.02)
+        #ierr = putvar(inifile, 'leafc')
+        #ierr = putvar(inifile, 'leafn') 
     casename_last = casename
     ens_dir_last = ens_dir
 
@@ -252,10 +274,10 @@ for casename in casenames:
             myinput.close()
             os.system(' mv '+ens_dir+'/'+f+'.tmp '+ens_dir+'/'+f)
 
-    os.chdir(ens_dir)
     if (isfirstcase):
         exedir = os.path.abspath(orig_dir+'/../bld/')
     if (options.norun == False):
+        os.chdir(ens_dir)
         os.system(exedir+'/cesm.exe > ccsm_log.txt')
     isfirstcase=False
 
@@ -305,26 +327,28 @@ for filename in os.listdir(UQdir+'/'+options.constraints):
                 hnum = hnum+1
             #get the relevant variable/dataset
             #Assumes annual file with daily output
-            if (year != year_last and year <= 2015):
+            if (year <= 2015):
                 if (PFT == -1):
-                    myfile = casename+'.clm2.h0.'+str(year)+'-01-01-00000.nc'
+                    myfile  = casename+'.clm2.h0.'+str(year)+'-01-01-00000_constraint.nc' 
+                    myfileo = casename+'.clm2.h0.'+str(year)+'-01-01-00000.nc'
                 else:
-                    myfile = casename+'.clm2.h1.'+str(year)+'-01-01-00000.nc'
-                #post processing of model output with nco to match constraining variables 
-                if (myvarname == 'STEMC'):
-                    os.system('ncap -s "STEMC=DEADSTEMC+LIVESTEMC" '+myfile+' '+myfile+'.tmp')
-                    os.system('mv '+myfile+'.tmp '+myfile)
-                if (myvarname == 'WTHT'):
-                    os.system('ncap -s "WTHT=(ZWT*-1+0.3)*1000 " '+myfile+' '+myfile+'.tmp')
-                    os.system('mv '+myfile+'.tmp '+myfile)         
-                if (myvarname == 'AGBIOMASS'):
-                    os.system('ncap -s "AGBIOMASS=DEADSTEMC+LIVESTEMC+LEAFC" '+myfile+' '+myfile+'.tmp')
-                    os.system('mv '+myfile+'.tmp '+myfile)
-
+                    myfile  = casename+'.clm2.h1.'+str(year)+'-01-01-00000_constraint.nc'
+                    myfileo = casename+'.clm2.h1.'+str(year)+'-01-01-00000.nc'
+                #post processing of model output with nco to match constraining variables
+                if (not os.path.isfile(myfile)):
+                    os.system('cp '+myfileo+' '+myfile)
+                    if ('h1' in myfile):	
+                        os.system('ncap -3 -s "STEMC=DEADSTEMC+LIVESTEMC" '+myfile+' '+myfile+'.tmp')
+                        os.system('mv '+myfile+'.tmp '+myfile)
+                        os.system('ncap -3 -s "AGBIOMASS=DEADSTEMC+LIVESTEMC+LEAFC" '+myfile+' '+myfile+'.tmp')
+                        os.system('mv '+myfile+'.tmp '+myfile)
+                    if ('h0' in myfile):
+                        os.system('ncap -3 -s "WTHT=(ZWT*-1+0.3)*1000 " '+myfile+' '+myfile+'.tmp')
+                        os.system('mv '+myfile+'.tmp '+myfile)         
                 myvals = getvar(myfile, myvarname)
             if (doy > 0 and value > -900):
                 if (myvarname == 'WTHT'):
-                    unc = 30.0   #no uncertainty given for water table height.
+                    unc = 100.0   #no uncertainty given for water table height.
                 if (PFT > 0):
                     #PFT-specific constraints (daily)
                     if (myvarname == 'AGBIOMASS' and PFT == 3):

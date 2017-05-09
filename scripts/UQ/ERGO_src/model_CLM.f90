@@ -112,9 +112,9 @@ SUBROUTINE model_size()
    real input(4)
 
    !get the nubmer of CLM parameters
-   fname = './parm_list'
+   fname = './parm_list_biomass'
    open(unit=8, file=fname, status='old')
-   read(8,*) dummy
+   !read(8,*) dummy
 
    n_param=0
    do i=1,500
@@ -163,9 +163,9 @@ SUBROUTINE model_init(eval_index, prereq_in)
   !integer lst, npd, mypft, startyr, nyears
 
   !get the nubmer of CLM parameters
-  fname = './parm_list'
+  fname = './parm_list_biomass'
   open(unit=8, file=fname)
-  read(8,*) dummy
+  !read(8,*) dummy
   n_param=0
   do i=1,200
      read(8,*,end=10) dummy
@@ -195,7 +195,7 @@ SUBROUTINE model_init(eval_index, prereq_in)
   end if
 
   open(unit=8, file=fname)
-  read(8,*) dummy
+  !read(8,*) dummy
   do i=1,nop
      islog(i) = .false.
      read(8,*) dummy, useparm(i), x_lower(i), x_upper(i)
@@ -267,10 +267,18 @@ SUBROUTINE model_objf(x,f,g)
     end do
     close(9)
 
+    !Call python workflow to set up and launch model simulation
+    call system('sleep ' // grouptag(2:6))   !do not start all at once
     call system('python UQ_runens.py --ens_num ' // grouptag(2:6) // &
-     ' --parm_list ' // 'parm_list --parm_data ./parm_data_files/' // &
-     'parm_data_' // grouptag(2:6) // ' --constraints constraints')
+         ' --parm_list parm_list_biomass --parm_data ./parm_data_files/' // &
+         'parm_data_' // grouptag(2:6) // ' --constraints constraints_biomass' // &
+         ' --machine cades  --case BIOM_T0.00_US-SPR_I20TRCLM45CN')
 
+    !get the sum of squared errors
+    open(unit=9, file='./ssedata/mysse_' // grouptag(2:6) // '.txt')
+    read(9,*) f
+    close(9)
+    call system('sleep 20')
 
     !Call python script to manage simulation
     !call system('python UQ_runens.py --ens_num ' // grouptag(2:6) // &
@@ -279,9 +287,9 @@ SUBROUTINE model_objf(x,f,g)
     !     '/home/zdr/models/CLM_SPRUCE/scripts/UQ/constraints')
 
     !get the sum of squared errors
-    open(unit=9, file='./ssedata/mysse_' // grouptag(2:6) // '.txt')
-    read(9,*) f
-    close(9)
+    !open(unit=9, file='./ssedata/mysse_' // grouptag(2:6) // '.txt')
+    !read(9,*) f
+    !close(9)
 
     !keep track of number of function evals
     nfeval = nfeval + nfe

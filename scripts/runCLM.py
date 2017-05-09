@@ -660,7 +660,7 @@ if (options.refcase == 'none'):
 	#history file options
 
         #outputs for SPRUCE MiP and Jiafu's diagnostics code:
-        var_list_hourly = ['GPP', 'FPSN', 'NEE', 'NEP', 'NPP', 'LEAFC_ALLOC', 'AGNPP', 'MR' \
+        var_list_hourly = ['GPP', 'FPSN', 'NEE', 'NEP', 'NPP', 'LEAFC_ALLOC', 'AGNPP', 'MR', \
                 'CPOOL_TO_DEADSTEMC', 'LIVECROOTC_XFER_TO_LIVECROOTC', 'DEADCROOTC_XFER_TO_DEADCROOTC', \
                 'CPOOL_TO_LIVECROOTC', 'CPOOL_TO_DEADCROOTC', 'FROOTC_ALLOC', 'AR', 'LEAF_MR', 'CPOOL_LEAF_GR',
                 'TRANSFER_LEAF_GR', 'CPOOL_LEAF_STORAGE_GR', 'LIVESTEM_MR', 'CPOOL_LIVESTEM_GR', \
@@ -679,7 +679,7 @@ if (options.refcase == 'none'):
                 'TOTSOMC', 'CCON_CH4S', 'ZWT', 'SNOWDP', 'TLAI']
         var_list_daily = ['TOTLITC', 'TOTSOMC', 'CWDC', 'LITR1C_vr', 'LITR2C_vr', 'LITR3C_vr', 'SOIL1C_vr', 'SOIL2C_vr', \
                           'SOIL3C_vr', 'SOIL4C_vr', 'CDOCS', 'CCON_CH4S', 'H2OSFC', 'ZWT', 'SNOWDP', 'TLAI'] 
-        var_list_pft = ['GPP', 'NPP', 'FPSN', 'LEAFC_ALLOC', 'AGNPP', 'CPOOL_TO_DEADSTEMC', 'LIVECROOTC_XFER_TO_LIVECROOTC', \
+        var_list_pft = ['BTRAN', 'FPG', 'TV', 'GPP', 'NPP', 'FPSN', 'LEAFC_ALLOC', 'AGNPP', 'CPOOL_TO_DEADSTEMC', 'LIVECROOTC_XFER_TO_LIVECROOTC', \
 	        'DEADCROOTC_XFER_TO_DEADCROOTC', 'CPOOL_TO_LIVECROOTC', 'CPOOL_TO_DEADCROOTC', 'FROOTC_ALLOC', \
                 'AR', 'MR', 'LEAF_MR', 'CPOOL_LEAF_GR', 'TRANSFER_LEAF_GR', 'CPOOL_LEAF_STORAGE_GR', 'LIVESTEM_MR', \
                 'CPOOL_LIVESTEM_GR', 'TRANSFER_LIVESTEM_GR', 'CPOOL_LIVESTEM_STORAGE_GR', 'CPOOL_DEADSTEM_GR', \
@@ -693,13 +693,17 @@ if (options.refcase == 'none'):
                 'DEADSTEMC_XFER', 'LIVECROOTC_XFER', 'DEADCROOTC_XFER', 'TLAI', 'CPOOL_TO_LIVESTEMC']
 
         if ('20TR' in compset and options.diags):
-            output.write(" hist_mfilt = 1, 8760, 365, 365\n")
-            output.write(' hist_dov2xy = .true., .true., .true., .false.\n')
+            output.write(" hist_mfilt = 1, 8760, 365, 365, 8760, 1\n")
+            output.write(" hist_nhtfrq = 0, -1, -24, -24, -1, 0\n")
+            output.write(' hist_dov2xy = .true., .true., .true., .false., .false., .false.\n')
             output.write(' hist_empty_htapes = .true.\n')
             h0st = ' hist_fincl1 = '
             h1st = ' hist_fincl2 = '
             h2st = ' hist_fincl3 = ' 
             h3st = ' hist_fincl4 = '
+            h4st = ' hist_fincl5 = '
+            h5st = ' hist_fincl6 = '
+
             for v in var_list_hourly:
 	       h0st = h0st+"'"+v+"',"
                h1st = h1st+"'"+v+"',"          
@@ -709,15 +713,16 @@ if (options.refcase == 'none'):
                h2st = h2st+"'"+v+"',"
             for v in var_list_pft:
                h3st = h3st+"'"+v+"',"
+               h4st = h4st+"'"+v+"',"
+               h5st = h5st+"'"+v+"',"
             output.write(h0st[:-1]+'\n')
             output.write(h1st[:-1]+'\n')
             output.write(h2st[:-1]+'\n')
             output.write(h3st[:-1]+'\n')
+            output.write(h4st[:-1]+'\n')
+            output.write(h5st[:-1]+'\n')
         else:
             output.write(" hist_mfilt = "+ str(options.hist_mfilt)+"\n")
-        if ('20TR' in compset and options.diags):
-            output.write(" hist_nhtfrq = 0, -1, -24, -24\n")
-        else:
             output.write(" hist_nhtfrq = "+ str(options.hist_nhtfrq)+"\n")
         if (options.hist_vars != ''):
             output.write(" hist_empty_htapes = .true.\n")
