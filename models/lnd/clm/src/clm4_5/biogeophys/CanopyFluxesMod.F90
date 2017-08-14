@@ -654,7 +654,8 @@ contains
       dayl = 2.0_r8 * 13750.9871_r8 * acos(temp)
       ! calculate dayl_factor as the ratio of (current:max dayl)^2
       ! set a minimum of 0.01 (1%) for the dayl_factor
-      dayl_factor(p)=min(1._r8,max(0.01_r8,(dayl*dayl)/(max_dayl(c)*max_dayl(c))))
+ 
+     dayl_factor(p)= 1.0  !min(1._r8,max(0.01_r8,(dayl*dayl)/(max_dayl(c)*max_dayl(c))))
    end do
 
    rb1(lbp:ubp) = 0._r8
@@ -1445,6 +1446,7 @@ contains
 
    !!! C13
    real(r8), pointer :: alphapsn(:) ! 13C fractionation factor for PSN ()
+   real(r8), pointer :: h2osfc(:)      ! surface water 
 
 ! local pointers to implicit out variables
    real(r8), pointer :: psn_z(:,:)  ! canopy layer: foliage photosynthesis (umol co2 /m**2/ s) [always +]
@@ -1588,6 +1590,8 @@ contains
    ! Assign local pointers to derived type members (gridcell-level)
    forc_pbot => clm_a2l%forc_pbot
 
+   !Column pointers
+   h2osfc    =>cws%h2osfc
    ! Assign local pointers to derived type members (pft-level)
    pgridcell =>pft%gridcell
    ivt       =>pft%itype
@@ -1991,6 +1995,9 @@ contains
       
       if (ivt(p) == 12)then
        wcscaler = (-0.656_r8 + 1.654_r8 *log10(h2o_moss_wc (p)))
+       !DMR 05/11/17 - add scaler for submergence effect
+       wcscaler = wcscaler * (1.0_r8 - min(h2osfc(c),50.0_r8)/50.0_r8)
+
        wcscaler = max(0._r8, min(1.0_r8, wcscaler))
       endif
       do iv = 1, nrad(p)
@@ -2215,6 +2222,7 @@ contains
    real(r8),pointer :: kp_z(:,:)             ! initial slope of CO2 response curve (C4 plants)
    real(r8),pointer :: theta_cj(:)           ! empirical curvature parameter for ac, aj photosynthesis co-limitation
    real(r8),pointer :: forc_pbot(:)          ! atmospheric pressure (Pa)
+   real(r8),pointer :: h2osfc(:)
    real(r8),pointer :: bbb(:)                ! Ball-Berry minimum leaf conductance (umol H2O/m**2/s)
    real(r8),pointer :: mbb(:)                ! Ball-Berry slope of conductance-photosynthesis relationship
    integer , pointer :: ivt(:)               ! pft vegetation type
@@ -2234,6 +2242,7 @@ contains
    !grid level
    forc_pbot => clm_a2l%forc_pbot
 
+   h2osfc => cws%h2osfc
    !pft level
    c3flag => ppsyns%c3flag
    ac     => ppsyns%ac
@@ -2307,9 +2316,12 @@ contains
    !   end if
    !end if
    if (ivt(p) == 12)then
-      wcscaler = (-0.656_r8 + 1.654_r8 *log10(h2o_moss_wc (p)))
-      wcscaler = max(0._r8, min(1.0_r8, wcscaler))
+       wcscaler = (-0.656_r8 + 1.654_r8 *log10(h2o_moss_wc (p)))
+       !DMR 05/11/17 - add scaler for submergence effect
+       wcscaler = wcscaler * (1.0_r8 - min(h2osfc(c),50.0_r8)/50.0_r8)
+       wcscaler = max(0._r8, min(1.0_r8, wcscaler))
       ag(p,iv) = ag(p,iv) * wcscaler
+      if (h2osfc(c) > 0) print*, 'AG', c, h2osfc(c), wcscaler
    endif
    an(p,iv) = ag(p,iv) - lmr_z 
    !if (ivt(p) == 12)then

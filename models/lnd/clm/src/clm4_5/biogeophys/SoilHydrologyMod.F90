@@ -825,7 +825,7 @@ contains
             !harmonic mean 
             zwt_ho = zwt_ho - h2osfc(2)/1000._r8   !DMR 4/29/13
             !DMR 12/4/2015
-            if (maxval(icefrac(:,:)) .ge. 0.01_r8) then 
+            if (maxval(icefrac(:,:)) .ge. 0.01_r8) then
               !turn off lateral transport if any ice is present
               qflx_lat_aqu(:) = 0._r8
             else

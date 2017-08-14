@@ -821,7 +821,6 @@ subroutine CNAllocation (lbp, ubp, lbc, ubc, &
 
 
       !DMR - for NPOOLmod, retransn is no longer a separate pool - goes to plant npool
-#ifndef NPOOLMOD  
       !Note this will not work for crops
       if (ivt(p) >= npcropmin .and. grain_flag(p) == 1._r8) then
          avail_retransn(p) = plant_ndemand(p)
@@ -845,7 +844,6 @@ subroutine CNAllocation (lbp, ubp, lbc, ubc, &
          retransn_to_npool(p) = plant_ndemand(p)
       end if
       plant_ndemand(p) = plant_ndemand(p) - retransn_to_npool(p)
-#endif
 
    end do ! end pft loop
 
