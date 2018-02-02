@@ -1,9 +1,8 @@
 #!/usr/bin/python
 
 import os, csv, time, math
-import Scientific.IO
-from Scientific.IO import NetCDF
 import numpy
+from scipy.io import netcdf
 
 site_code  = 'US-SPR'  #AmeriFlux/FLUXNET identifier
 
@@ -28,7 +27,7 @@ site_lat = 47.563
 site_lon = 266.512
 lst = 0
 startyear = 2011
-endyear  = 2015
+endyear  = 2017
 
 print 'Site code is '+site_code
 print 'Site latitude is  '+str(site_lat)
@@ -55,27 +54,39 @@ long_names.append('observational height')
 alldata = numpy.zeros((8,1000000), dtype=numpy.float)-9999
 alldata_ncep = alldata
 
-fname =  'SPRUCE_all_GF_met.csv'
-vnum = 0
+fname = 'NOAH_US-SPR_2016-2017.csv'
+myinput = open(fname,'r')
+prcpNOAH = []
+for s in myinput:
+    prcpNOAH.append(float(s))
+myinput.close()
+
+fname  =  'SPRUCE_all_GF_met.csv' 
 npd = 48
-for v in range(0,7):
-    myinput = open(fname, 'r')
-    lnum = 0
-    thisind=0
-    for s in myinput:
-        myval =  s.split(',')[vars_ind[vnum]] 
-        if (lnum == 3):
-            for l in range(0,12):
-                alldata[7,thisind] = 10.	
-                alldata[vnum,thisind] = float(myval)
-                thisind = thisind+1
-        if (lnum > 3):
-            alldata[7,thisind] = 10.
-            alldata[vnum,thisind] = float(myval)
+noahind = 0
+
+myinput = open(fname, 'r')
+lnum = 0
+thisind=0
+for s in myinput:
+    year  =  s.split(',')[0]
+    if (lnum == 3):
+        for l in range(0,12):
+            alldata[7,thisind] = 10.	
+            for v in range(0,7):
+                alldata[v,thisind] = float(s.split(',')[vars_ind[v]])
             thisind = thisind+1
-        lnum = lnum+1
-    vnum = vnum+1
-    myinput.close()
+    if (lnum > 3):
+        alldata[7,thisind] = 10.
+        for v in range(0,7):
+            alldata[v,thisind] = float(s.split(',')[vars_ind[v]])
+        if (int(year) >= 2016):
+            print noahind
+            alldata[6,thisind] = float(sum(prcpNOAH[noahind:noahind+2]))*25.4/1800.
+            noahind=noahind+2
+        thisind = thisind+1
+    lnum = lnum+1
+myinput.close()
 npoints = thisind-10       
 
 # ------------create CLM-style output variables -----------------
@@ -90,11 +101,24 @@ for v in vars_out:
     if (vnum == 3):  #convert PAR to W/m2
         alldata[vnum,0:npoints] = \
         alldata[vnum,0:npoints] / 0.48 / 4.6 
+        alldata[vnum,npoints-17520*2:npoints] = \
+        alldata[vnum,npoints-17520*2:npoints]*1.25
+    if (vnum == 2):
+        for i in range(0,npoints):
+            if (alldata[vnum,i] > 20):
+                alldata[vnum,i] = alldata[vnum,i-1]
     if (vnum == 1):
         #RH to QBOT
         for i in range(0,npoints):
+            if alldata[5,i] < 85000 or alldata[5,i] > 108000:
+                alldata[5,i] = alldata[5,i-1]
             alldata[vnum,i] = qsat(alldata[0,i],alldata[5,i]) * \
             alldata[vnum,i] /100.0
+    if (vnum == 6):
+        for i in range(0,npoints):
+            if (alldata[vnum,i]*1800 > 50):
+                alldata[vnum,i] = 0.
+
     vnum = vnum+1
 
 for ftype in range(0,2):
@@ -109,7 +133,7 @@ for ftype in range(0,2):
         if (ftype == 0):
             yst = str(startyear+n/12)
             mst = str((n % 12)+101)
-            out_nc = NetCDF.NetCDFFile(outdirname+'/'+yst+'-'+mst[1:]+'.nc','w')
+            out_nc = netcdf.netcdf_file(outdirname+'/'+yst+'-'+mst[1:]+'.nc','w')
             out_nc.createDimension('lon', 2)
             out_nc.createDimension('lat', 1)
             npoints_out =  ndaysm[n % 12]*npd
@@ -117,7 +141,7 @@ for ftype in range(0,2):
         else:
             yst = str(startyear)
             mst = str(101)
-            out_nc = NetCDF.NetCDFFile(outdirname+'/all_hourly.nc','w')
+            out_nc = netcdf.netcdf_file(outdirname+'/all_hourly.nc','w')
             out_nc.createDimension('lon', 2)
             out_nc.createDimension('lat', 1)
             npoints_out = npoints
