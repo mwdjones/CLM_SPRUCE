@@ -95,7 +95,7 @@ subroutine CNNDeposition( lbc, ubc )
    do c = lbc, ubc
       g = gridcell(c)
 
-      ndep_to_sminn(c) = forc_ndep(g) * 5.0
+      ndep_to_sminn(c) = forc_ndep(g)
      !write(*,*) "nitrogen deposition ",ndep_to_sminn(c)," column: ",c 
    end do
 
@@ -192,7 +192,7 @@ subroutine CNNFixation(num_soilc, filter_soilc)
          nfix_to_sminn(c) = max(0._r8,t)
          ! PET 2/14/05: commenting out the dependence on NPP, and
          ! forcing Nfix to global constant = 0.4 gN/m2/yr
-         nfix_to_sminn(c) = 1.25 / (secspday*dayspyr)
+         !nfix_to_sminn(c) = 1.25 / (secspday*dayspyr)
 
       end do
    endif
