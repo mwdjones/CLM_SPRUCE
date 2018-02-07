@@ -1107,7 +1107,7 @@ contains
           !figure out which year to start with (assuming spinups always use
           !integer multiple of met cycles)
           mystart = 2011
-          nyears_spinup = 5
+          nyears_spinup = 7
           do while (mystart > 1850)
              mystart = mystart - nyears_spinup
           end do
@@ -1148,23 +1148,34 @@ contains
         end if
 
         a2l%forc_pbot(g)    = a2l%atm_input(2,1,1,tindex(1))*wt1 + a2l%atm_input(2,1,1,tindex(2))*wt2        
+        !Compute q from RH input
         !if (a2l%forc_t(g) .gt. 273.15) then 
         !   e                 =(a2l%atm_input(3,1,1,tindex(1))*wt1 + a2l%atm_input(3,1,1,tindex(2))*wt2) &
-	!                          * 0.01_R8 * esatw(tdc(tbot))
- 	!else
+        !                          * 0.01_R8 * esatw(tdc(tbot))
+        !else
         !  e                 =(a2l%atm_input(3,1,1,tindex(1))*wt1 + a2l%atm_input(3,1,1,tindex(2))*wt2) &
-	!                          * 0.01_R8 * esati(tdc(tbot))
+        !                          * 0.01_R8 * esati(tdc(tbot))
         !end if
         !q = (0.622_R8 * e)/(a2l%forc_pbot(g) - 0.378_R8 * e)	
+        !
+        !q from input file
         q = a2l%atm_input(3,1,1,tindex(1))*wt1 + a2l%atm_input(3,1,1,tindex(2))*wt2
         a2l%forc_q(g) = q
-        a2l%forc_lwrad(g)   =(a2l%atm_input(4,1,1,tindex(1))*wt1 + a2l%atm_input(4,1,1,tindex(2))*wt2)     
-        swndr               =(a2l%atm_input(5,1,1,tindex(1))*wt1 + a2l%atm_input(5,1,1,tindex(2))*wt2) * 0.50_R8
+
+        !Longwave from input file
+        !a2l%forc_lwrad(g)   =(a2l%atm_input(4,1,1,tindex(1))*wt1 + a2l%atm_input(4,1,1,tindex(2))*wt2)     
+        !
+        !Longwave radiation (calculated from air temperature, humidity)
+        e =  a2l%forc_pbot(g) * a2l%forc_q(g) / (0.622_R8 + 0.378_R8 * a2l%forc_q(g) )
+        ea = 0.70_R8 + 5.95e-05_R8 * 0.01_R8 * e * exp(1500.0_R8/tbot)
+        a2l%forc_lwrad(g) = ea * SHR_CONST_STEBOL * tbot**4
 
         !Longwave changes due to enclosure
         if (yr .ge. startyear_experiment .and. yr .le. endyear_experiment .and. add_temperature .ge. 0) then
             a2l%forc_lwrad(g) = 0.33_r8*a2l%forc_lwrad(g) + 0.67_r8*(0.95_r8*5.670373e-8_r8*tbot**4) 
         end if
+
+        swndr               =(a2l%atm_input(5,1,1,tindex(1))*wt1 + a2l%atm_input(5,1,1,tindex(2))*wt2) * 0.50_R8
         ratio_rvrf =   min(0.99_R8,max(0.29548_R8 + 0.00504_R8*swndr  &
                         -1.4957e-05_R8*swndr**2 + 1.4881e-08_R8*swndr**3,0.01_R8))
         !NOTE - CURRENTLY USING LINEAR INTERPOLATION FOR SOLAR RADIATION.
