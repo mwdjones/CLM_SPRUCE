@@ -71,15 +71,15 @@
          <MAX_TASKS_PER_NODE>32</MAX_TASKS_PER_NODE>
 </machine>
 
-<machine MACH="ornl-oic">
+<machine MACH="ubuntu">
          <DESC>ORNL XE6, os is Linux, 32 pes/node, batch system is PBS</DESC>
-         <COMPILERS>pgi</COMPILERS>
+         <COMPILERS>gnu</COMPILERS>
          <MPILIBS>mpich,mpi-serial</MPILIBS>
-         <RUNDIR>/home/u9x/output/$CASE/run</RUNDIR>
-         <EXEROOT>/home/u9x/output/$CASE</EXEROOT>
-         <DIN_LOC_ROOT>/home/u9x/ccsm_inputdata</DIN_LOC_ROOT>
-         <DIN_LOC_ROOT_CLMFORC>/home/u9x/ccsm_inputdata</DIN_LOC_ROOT_CLMFORC>
-         <DOUT_S_ROOT>/home/u9x/output</DOUT_S_ROOT>
+         <RUNDIR>/home/clm/CLM_SPRUCE/run/$CASE/run</RUNDIR>
+         <EXEROOT>/home/clm/CLM_SPRUCE/run/$CASE/bld</EXEROOT>
+         <DIN_LOC_ROOT>/home/clm/CLM_SPRUCE/inputdata</DIN_LOC_ROOT>
+         <DIN_LOC_ROOT_CLMFORC>/home/clm/CLM_SPURCE/inputdata</DIN_LOC_ROOT_CLMFORC>
+         <DOUT_S_ROOT>/home/clm/CLM_SPRUCE/run/archive</DOUT_S_ROOT>
          <OS>Linux</OS>
          <BATCHQUERY>qstat -f</BATCHQUERY>
          <BATCHSUBMIT>qsub</BATCHSUBMIT>

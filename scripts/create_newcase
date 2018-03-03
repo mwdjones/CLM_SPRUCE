@@ -711,7 +711,7 @@ if ($print>=2) { print "Machine mpilib specifier: $mpilib.$eol"; }
 #     the dollar and check the next value.  continue until a
 #     non dollar value is found up to max depths.
 
-my @xvars = qw(NTASKS_ATM NTHRDS_ATM ROOTPE_ATM NINST_ATM
+my @xvars = (qw(NTASKS_ATM NTHRDS_ATM ROOTPE_ATM NINST_ATM
 	       NTASKS_LND NTHRDS_LND ROOTPE_LND NINST_LND
 	       NTASKS_ICE NTHRDS_ICE ROOTPE_ICE NINST_ICE
 	       NTASKS_OCN NTHRDS_OCN ROOTPE_OCN NINST_OCN
@@ -726,7 +726,7 @@ my @xvars = qw(NTASKS_ATM NTHRDS_ATM ROOTPE_ATM NINST_ATM
                CPL_PIO_NUMTASKS CPL_PIO_STRIDE CPL_PIO_TYPENAME CPL_PIO_ROOT
                GLC_PIO_NUMTASKS GLC_PIO_STRIDE GLC_PIO_TYPENAME GLC_PIO_ROOT
                WAV_PIO_NUMTASKS WAV_PIO_STRIDE WAV_PIO_TYPENAME WAV_PIO_ROOT
-               ROF_PIO_NUMTASKS ROF_PIO_STRIDE ROF_PIO_TYPENAME ROF_PIO_ROOT);
+               ROF_PIO_NUMTASKS ROF_PIO_STRIDE ROF_PIO_TYPENAME ROF_PIO_ROOT));
 my $xvarf;
 my $xvar1;
 my $xvar2;
@@ -795,7 +795,7 @@ my $scriptsroot = "$ccsmroot/scripts";
 print "Creating $caseroot $eol";
 
 # Create relevant directories in $caseroot
-my @mkdirs = qw(. SourceMods LockedFiles Buildconf Tools/XML/Lite);
+my @mkdirs = (qw(. SourceMods LockedFiles Buildconf Tools/XML/Lite));
 foreach my $mkdir ( @mkdirs ) {
     $sysmod = "mkdir -p $caseroot/$mkdir"; 
     system($sysmod) == 0 or die "ERROR: $sysmod failed: $?\n";
@@ -843,7 +843,7 @@ system($sysmod) == 0 or die "ERROR: $sysmod failed: $?\n";
 	  "$scriptsroot/ccsm_utils/Tools/compare_namelists.pl",
 	  "$scriptsroot/ccsm_utils/Machines/Makefile",
 	  "$scriptsroot/ccsm_utils/Machines/mkSrcfiles", 
-	  "$scriptsroot/ccsm_utils/Machines/mkDepends", 
+	  "$scriptsroot/ccsm_utils/Machines/mkDepends",
 	  "$scriptsroot/ccsm_utils/Machines/mkbatch.$mach");
 foreach my $file (@files) {
     $sysmod = "cp -p $file $caseroot/Tools/."; 
@@ -890,7 +890,7 @@ system($sysmod) == 0 or die "ERROR: $sysmod failed: $?\n";
 
 # Create relevant files in the $caseroot/Buildconf
 my $buildconf  = "$caseroot/Buildconf";
-my @models     = qw(COMP_ATM COMP_LND COMP_ICE COMP_OCN COMP_GLC COMP_ROF COMP_WAV);
+my @models     = (qw(COMP_ATM COMP_LND COMP_ICE COMP_OCN COMP_GLC COMP_ROF COMP_WAV));
 my @comps_atm  = $cfg_ref->get_valid_values("COMP_ATM"); 
 my @comps_lnd  = $cfg_ref->get_valid_values("COMP_LND"); 
 my @comps_ocn  = $cfg_ref->get_valid_values("COMP_OCN"); 

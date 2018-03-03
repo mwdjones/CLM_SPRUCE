@@ -2321,7 +2321,7 @@ contains
        wcscaler = wcscaler * (1.0_r8 - min(h2osfc(c),50.0_r8)/50.0_r8)
        wcscaler = max(0._r8, min(1.0_r8, wcscaler))
       ag(p,iv) = ag(p,iv) * wcscaler
-      if (h2osfc(c) > 0) print*, 'AG', c, h2osfc(c), wcscaler
+      !if (h2osfc(c) > 0) print*, 'AG', c, h2osfc(c), wcscaler
    endif
    an(p,iv) = ag(p,iv) - lmr_z 
    !if (ivt(p) == 12)then

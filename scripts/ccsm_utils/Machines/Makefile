@@ -199,7 +199,7 @@ ifeq ($(strip $(MPILIB)), mpi-serial)
   MPIFC   := $(SFC)
   MPICC   := $(SCC)
   MPICXX  := $(SCXX)
-  CONFIG_ARGS += --disable-netcdf4 --enable-mpiserial MCT_PATH=$(EXEROOT)/mct/mpi-serial
+  CONFIG_ARGS += --enable-mpiserial MCT_PATH=$(EXEROOT)/mct/mpi-serial
   INC_MPI := $(EXEROOT)/mct/mpi-serial
 else
   CC  := $(MPICC)
