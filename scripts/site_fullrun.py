@@ -24,6 +24,8 @@ parser.add_option("--runroot", dest="runroot", default="../run", \
 parser.add_option("--ccsm_input", dest="ccsm_input", \
                   default='../inputdata', \
                   help = "input data directory for CESM (required)")
+parser.add_option("--diags", dest="diags", default=False, \
+                  action="store_true", help = 'output for SPRUCE diagnostics')
 parser.add_option("--srcmods_loc", dest="srcmods_loc", default='', \
                   help = 'Copy sourcemods from this location')
 parser.add_option("--nyears_final_spinup", dest="nyears_final_spinup", default='1000', \
@@ -228,8 +230,10 @@ for row in AFdatareader:
             str(year_align+1850)+' --hist_nhtfrq '+ \
             options.hist_nhtfrq+' --hist_mfilt '+options.hist_mfilt + \
             ' --compset I20TRCLM45CN --exeroot_case '+ad_case
-        if (options.spinup_vars):
-               cmd_trns = cmd_trns + ' --spinup_vars'
+        #if (options.spinup_vars):
+        #       cmd_trns = cmd_trns + ' --spinup_vars'
+        if (options.diags):
+            cmd_trns = cmd_trns+' --diags'
         #transient phase 2 (CRU-NCEP only)
         if (options.cruncep):
             basecase=basecase.replace('1850','20TR')+'_phase1'

@@ -1,6 +1,6 @@
 #!/bin/csh -f
 
-#PBS -N ERGO_CLM
+#PBS -N UQ_runbest
 #PBS -q batch
 #PBS -M ricciutodm@ornl.gov
 #PBS -l nodes=1:ppn=1

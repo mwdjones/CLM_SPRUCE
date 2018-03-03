@@ -667,9 +667,9 @@ if (options.refcase == 'none'):
                 'TRANSFER_LIVESTEM_GR', 'CPOOL_LIVESTEM_STORAGE_GR', 'CPOOL_DEADSTEM_GR', 'TRANSFER_DEADSTEM_GR', \
                 'CPOOL_DEADSTEM_STORAGE_GR', 'LIVECROOT_MR', 'CPOOL_LIVECROOT_GR', 'TRANSFER_LIVECROOT_GR', \
                 'CPOOL_LIVECROOT_STORAGE_GR', 'CPOOL_DEADCROOT_GR', 'TRANSFER_DEADCROOT_GR', 'CPOOL_DEADCROOT_STORAGE_GR', \
-                'FROOT_MR', 'CPOOL_FROOT_GR', 'TRANSFER_FROOT_GR', 'CPOOL_FROOT_STORAGE_GR', 'FSH', 'EFLX_LH_TOT', \
+                'FROOT_MR', 'CPOOL_FROOT_GR', 'TRANSFER_FROOT_GR', 'CPOOL_FROOT_STORAGE_GR', 'FSH', 'EFLX_LH_TOT','EFLX_LH_TOT_R', \
                 'Rnet', 'FCTR', 'FGEV', 'FCEV', 'SOILLIQ', 'QOVER', 'QDRAI', 'TOTVEGC', 'LEAFC', 'LIVESTEMC', 'DEADSTEMC', \
-                'FROOTC', 'LIVECROOTC', 'DEADCROOTC', 'TG', 'TV', 'TSA', 'TSOI', 'DEADSTEMC_STORAGE', \
+                'FROOTC', 'LIVECROOTC', 'DEADCROOTC', 'TG', 'TV', 'TSA', 'TSOI', 'DEADSTEMC_STORAGE', 'FSH_R', \
                 'LIVESTEMC_STORAGE', 'DEADCROOTC_STORAGE', 'LIVECROOTC_STORAGE', 'CPOOL_TO_DEADSTEMC_STORAGE', \
                 'CPOOL_TO_LIVESTEMC_STORAGE', 'CPOOL_TO_DEADCROOTC_STORAGE', 'CPOOL_TO_LIVECROOTC_STORAGE', \
                 'ER', 'HR', 'FROOTC_STORAGE', 'LEAFC_STORAGE', 'LEAFC_XFER', 'FROOTC_XFER', 'LIVESTEMC_XFER', \
@@ -688,15 +688,16 @@ if (options.refcase == 'none'):
                 'FROOT_MR', 'CPOOL_FROOT_GR', 'TRANSFER_FROOT_GR', 'CPOOL_FROOT_STORAGE_GR', 'FCTR', 'FCEV', 'TOTVEGC', 'LEAFC', \
                 'LIVESTEMC', 'DEADSTEMC', 'FROOTC', 'LIVECROOTC', 'DEADCROOTC', 'DEADSTEMC_STORAGE', \
                 'LIVESTEMC_STORAGE', 'DEADCROOTC_STORAGE', 'LIVECROOTC_STORAGE', 'CPOOL_TO_DEADSTEMC_STORAGE', \
-                'CPOOL_TO_LIVESTEMC_STORAGE', 'CPOOL_TO_DEADCROOTC_STORAGE', 'CPOOL_TO_LIVECROOTC_STORAGE', \
-                'FROOTC_STORAGE', 'LEAFC_STORAGE', 'LEAFC_XFER', 'FROOTC_XFER', 'LIVESTEMC_XFER', \
-                'DEADSTEMC_XFER', 'LIVECROOTC_XFER', 'DEADCROOTC_XFER', 'TLAI', 'CPOOL_TO_LIVESTEMC']
+                'CPOOL_TO_LIVESTEMC_STORAGE', 'CPOOL_TO_DEADCROOTC_STORAGE', 'CPOOL_TO_LIVECROOTC_STORAGE','EFLX_LH_TOT_R', \
+                'FROOTC_STORAGE', 'LEAFC_STORAGE', 'LEAFC_XFER', 'FROOTC_XFER', 'LIVESTEMC_XFER', 'H2O_MOSS_WC', \
+                'DEADSTEMC_XFER', 'LIVECROOTC_XFER', 'DEADCROOTC_XFER', 'TLAI', 'CPOOL_TO_LIVESTEMC', 'QVEGT','QVEGE','RSSUN','RSSHA', \
+                'LEAFN','FROOTN','DEADSTEMN','LIVESTEMN','LIVECROOTN','DEADCROOTN','LEAFN_TO_LITTER','FROOTN_TO_LITTER','FSH_R']
 
         if ('20TR' in compset and options.diags):
             output.write(" hist_mfilt = 1, 8760, 365, 365, 8760, 1\n")
             output.write(" hist_nhtfrq = 0, -1, -24, -24, -1, 0\n")
             output.write(' hist_dov2xy = .true., .true., .true., .false., .false., .false.\n')
-            output.write(' hist_empty_htapes = .true.\n')
+            output.write(' hist_empty_htapes = .false.\n')
             h0st = ' hist_fincl1 = '
             h1st = ' hist_fincl2 = '
             h2st = ' hist_fincl3 = ' 

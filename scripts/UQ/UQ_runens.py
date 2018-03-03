@@ -306,6 +306,7 @@ for filename in os.listdir(UQdir+'/'+options.constraints):
                         #  if specified, use h1 file (PFT-specific)
             doy=-1      #default:  annual average
             month=-1    #default:  don't use monthly data
+            season=-1
             depth=-1
             unc = -999
             for h in header:
@@ -316,6 +317,8 @@ for filename in os.listdir(UQdir+'/'+options.constraints):
                     doy = int(s.split()[hnum])
                 if (h.lower() == 'month'):
                     month = int(s.split()[hnum])
+                if (h.lower() == 'season'):
+                    season = int(s.split()[hnum])
                 if (h.lower() == 'pft'):
                     PFT = int(s.split()[hnum])
                 if (h.lower() == 'value'):
@@ -348,7 +351,7 @@ for filename in os.listdir(UQdir+'/'+options.constraints):
                 myvals = getvar(myfile, myvarname)
             if (doy > 0 and value > -900):
                 if (myvarname == 'WTHT'):
-                    unc = 100.0   #no uncertainty given for water table height.
+                    unc = 20.0   #no uncertainty given for water table height.
                 if (PFT > 0):
                     #PFT-specific constraints (daily)
                     if (myvarname == 'AGBIOMASS' and PFT == 3):
@@ -380,6 +383,24 @@ for filename in os.listdir(UQdir+'/'+options.constraints):
                     sse = sse + ((model_val-value) / unc )**2        
                     myoutput.write(str(myvarname)+' '+str(year)+' '+str(doy)+' '+str(PFT)+' '+ \
                                        str(model_val)+' '+str(value)+' '+str(unc)+' '+str(sse)+'\n')
+            elif (season > 0 and value > -900):
+                if (myvarname == 'WTHT'):
+                    unc = 20.0   #no uncertainty given for water table height.
+               #Seasonal constraints.  Only one is AGNPP, moss only.  Need to convert units
+                    #Water table, column-level (no PFT info), use hummock only
+                if (season == 2):
+                    doy_start = 60
+                    doy_end = 151
+                if (season == 3):
+                    doy_start = 152
+                    doy_end = 243
+                if (season == 4):
+                    doy_start = 244
+                    doy_end = 334
+                model_val = sum(myvals[doy_start-1:doy_end,0])/(doy_end-doy_start+1)
+                sse = sse + ((model_val-value) / unc )**2
+                myoutput.write(myvarname+' '+str(year)+' '+str(doy)+' '+str(PFT)+' '+ \
+                                   str(model_val)+' '+str(value)+' '+str(unc)+' '+str(sse)+'\n')
             elif (value > -900):
                 #Annual constraints.  Only one is AGNPP, moss only.  Need to convert units
                 model_val = sum(myvals[0:365,PFT-1]*0.25*0.75)*24*3600 + \

@@ -257,12 +257,9 @@ double precision function feval(parms, nparms, thispop, mymachine, parm_list, &
                        constraints, case_name)
 
 integer nparms, i, thispop
-double precision parms(500), trueparms(4)
-double precision mydata(1000), model(1000), sse(1000)
-double precision temp(1000), par(1000)
+double precision parms(512)
 character(len=6) thispopst
 character(len=100) mymachine, parm_list, constraints, case_name, thisline
-
 
 write(thispopst, '(I6)') 100000+thispop
 

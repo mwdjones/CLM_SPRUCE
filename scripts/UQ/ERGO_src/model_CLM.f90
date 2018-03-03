@@ -112,7 +112,7 @@ SUBROUTINE model_size()
    real input(4)
 
    !get the nubmer of CLM parameters
-   fname = './parm_list_biomass'
+   fname = './parm_list_all'
    open(unit=8, file=fname, status='old')
    !read(8,*) dummy
 
@@ -163,7 +163,7 @@ SUBROUTINE model_init(eval_index, prereq_in)
   !integer lst, npd, mypft, startyr, nyears
 
   !get the nubmer of CLM parameters
-  fname = './parm_list_biomass'
+  fname = './parm_list_all'
   open(unit=8, file=fname)
   !read(8,*) dummy
   n_param=0
@@ -270,8 +270,8 @@ SUBROUTINE model_objf(x,f,g)
     !Call python workflow to set up and launch model simulation
     call system('sleep ' // grouptag(2:6))   !do not start all at once
     call system('python UQ_runens.py --ens_num ' // grouptag(2:6) // &
-         ' --parm_list parm_list_biomass --parm_data ./parm_data_files/' // &
-         'parm_data_' // grouptag(2:6) // ' --constraints constraints_biomass' // &
+         ' --parm_list parm_list_all --parm_data ./parm_data_files/' // &
+         'parm_data_' // grouptag(2:6) // ' --constraints constraints_all' // &
          ' --machine cades  --case BIOM_T0.00_US-SPR_I20TRCLM45CN')
 
     !get the sum of squared errors

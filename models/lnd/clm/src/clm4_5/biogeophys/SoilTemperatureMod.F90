@@ -153,6 +153,7 @@ contains
     real(r8), pointer :: t_building_max(:)  ! maximum internal building temperature (K)
     real(r8), pointer :: t_building_min(:)  ! minimum internal building temperature (K)
     real(r8), pointer :: hc_soi(:)          ! soil heat content (MJ/m2)
+    real(r8), pointer :: deepsoi_heating(:) ! deeep soil heating for warming experiments (W/m2)
     real(r8), pointer :: hc_soisno(:)       ! soil plus snow plus lake heat content (MJ/m2)
     real(r8), pointer :: eflx_fgr12(:)      ! heat flux between soil layer 1 and 2 (W/m2)
     real(r8), pointer :: eflx_fgr(:,:)      ! (rural) soil downward heat flux (W/m2) (1:nlevgrnd)

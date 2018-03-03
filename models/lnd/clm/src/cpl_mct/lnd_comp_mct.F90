@@ -937,7 +937,7 @@ contains
     use clm_varctl      , only: add_co2
     use clm_varcon      , only: rair, o2_molar_const
     use clm_varcon      , only: c13ratio
-    use shr_const_mod   , only: SHR_CONST_TKFRZ
+    use shr_const_mod   , only: SHR_CONST_TKFRZ, SHR_CONST_STEBOL
     use abortutils      , only: endrun
     use mct_mod         , only: mct_aVect
     use clm_cpl_indices
@@ -957,7 +957,7 @@ contains
 ! !LOCAL VARIABLES:
     integer  :: g,i,nstep,ier        ! indices, number of steps, and error code
     real(r8) :: forc_rainc           ! rainxy Atm flux mm/s
-    real(r8) :: e                    ! vapor pressure (Pa)
+    real(r8) :: e, ea                ! vapor pressure (Pa)
     real(r8) :: qsat                 ! saturation specific humidity (kg/kg)
     real(r8) :: forc_rainl           ! rainxy Atm flux mm/s
     real(r8) :: forc_snowc           ! snowfxy Atm flux  mm/s

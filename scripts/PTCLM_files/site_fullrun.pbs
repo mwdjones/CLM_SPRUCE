@@ -6,7 +6,7 @@
 # here.  Use PBS, BSUB, or whatever the local environment supports.
 #===============================================================================
 
-#PBS -N hydro_microbe_US-SPR_fullrun
+#PBS -N FULLOPT_US-SPR_fullrun
 #PBS -q esd08q
 #PBS -l nodes=1:ppn=1
 #PBS -l walltime=48:00:00
@@ -43,8 +43,8 @@
 
 
 #--------------------------ad_spinup------------------------------------
-cd /home/y9s/models/clm45microbe_spruce_2015Jan15/run
-cd hydro_microbe_US-SPR_I1850CLM45CN_ad_spinup/run
+cd /home/dmricciuto/models/CLM_SPRUCE/run
+cd FULLOPT_US-SPR_I1850CLM45CN_ad_spinup/run
 
 setenv OMP_NUM_THREADS 1
 cp ../bld/cesm.exe .
@@ -57,13 +57,13 @@ echo "`date` -- CSM EXECUTION HAS FINISHED"
 #---------------------------end ad_spinup -----------------------------
 
 #copy rpointers and restart file
-cp rpointer.* ../../hydro_microbe_US-SPR_I1850CLM45CN/run
-cp *ad_spinup*.r*.nc    ../../hydro_microbe_US-SPR_I1850CLM45CN/run
-cp *.r*.bin   ../../hydro_microbe_US-SPR_I1850CLM45CN/run
+cp rpointer.* ../../FULLOPT_US-SPR_I1850CLM45CN/run
+cp *ad_spinup*.r*.nc    ../../FULLOPT_US-SPR_I1850CLM45CN/run
+cp *.r*.bin   ../../FULLOPT_US-SPR_I1850CLM45CN/run
 
 #-----------------------------final spinup------------------------------
-cd /home/y9s/models/clm45microbe_spruce_2015Jan15/run
-cd hydro_microbe_US-SPR_I1850CLM45CN/run
+cd /home/dmricciuto/models/CLM_SPRUCE/run
+cd FULLOPT_US-SPR_I1850CLM45CN/run
 
 setenv OMP_NUM_THREADS 1
 cp ../bld/cesm.exe .
@@ -76,13 +76,13 @@ echo "`date` -- CSM EXECUTION HAS FINISHED"
 #--------------------------end final spinup------------------------------
 
 #copy rpointers and restart file
-cp rpointer.* ../../hydro_microbe_US-SPR_I20TRCLM45CN/run
-cp *.r*.nc ../../hydro_microbe_US-SPR_I20TRCLM45CN/run
-cp *.r*.bin ../../hydro_microbe_US-SPR_I20TRCLM45CN/run
+cp rpointer.* ../../FULLOPT_US-SPR_I20TRCLM45CN/run
+cp *.r*.nc ../../FULLOPT_US-SPR_I20TRCLM45CN/run
+cp *.r*.bin ../../FULLOPT_US-SPR_I20TRCLM45CN/run
 
 #---------------------------transient run--------------------------------
-cd /home/y9s/models/clm45microbe_spruce_2015Jan15/run
-cd hydro_microbe_US-SPR_I20TRCLM45CN/run
+cd /home/dmricciuto/models/CLM_SPRUCE/run
+cd FULLOPT_US-SPR_I20TRCLM45CN/run
 
 setenv OMP_NUM_THREADS 1
 cp ../bld/cesm.exe .
