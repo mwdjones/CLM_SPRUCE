@@ -275,5 +275,9 @@ for row in AFdatareader:
         output.close()
 
         #submit
-        os.system('qsub site_fullrun.pbs')
-
+	if (options.machine == 'ubuntu'):
+            os.system('chmod u+x site_fullrun.pbs')
+	    os.system('./site_fullrun.pbs')
+        else:
+	    os.system('qsub site_fullrun.pbs')
+       
