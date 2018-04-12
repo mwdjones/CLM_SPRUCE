@@ -64,8 +64,9 @@ contains
     use shr_kind_mod  , only : r8 => shr_kind_r8
     use clmtype
     use clm_atmlnd    , only : clm_a2l
-    use clm_time_manager  , only : get_step_size
+    use clm_time_manager  , only : get_step_size, get_curr_date
     use clm_varctl    , only : iulog
+    use clm_varctl      ,only : startyear_experiment, endyear_experiment, add_temperature
     use shr_infnan_mod, only : nan => shr_infnan_nan, assignment(=)
     use clm_varcon    , only : sb, capr, cnfac, hvap, isturb, &
                                icol_roof, icol_sunwall, icol_shadewall, &
@@ -153,7 +154,7 @@ contains
     real(r8), pointer :: t_building_max(:)  ! maximum internal building temperature (K)
     real(r8), pointer :: t_building_min(:)  ! minimum internal building temperature (K)
     real(r8), pointer :: hc_soi(:)          ! soil heat content (MJ/m2)
-    real(r8), pointer :: deepsoi_heating(:) ! deeep soil heating for warming experiments (W/m2)
+    real(r8), pointer :: deepsoi_heating(:) ! deep soil heating for warming experiments (W/m2)
     real(r8), pointer :: hc_soisno(:)       ! soil plus snow plus lake heat content (MJ/m2)
     real(r8), pointer :: eflx_fgr12(:)      ! heat flux between soil layer 1 and 2 (W/m2)
     real(r8), pointer :: eflx_fgr(:,:)      ! (rural) soil downward heat flux (W/m2) (1:nlevgrnd)
@@ -236,6 +237,7 @@ contains
     real(r8) :: eflx_gnet_snow
     real(r8) :: eflx_gnet_soil
     real(r8) :: eflx_gnet_h2osfc
+    integer yr, mon, day, tod 
     integer  :: jbot(lbc:ubc)                      ! bottom level at each column
 !-----------------------------------------------------------------------
 
@@ -324,6 +326,9 @@ contains
     ! Get step size
 
     dtime = get_step_size()
+
+    !get the current date
+    call get_curr_date( yr, mon, day, tod )
 
     ! Compute ground surface and soil temperatures
 
@@ -633,7 +638,10 @@ contains
                    
                    rt(c,j) = t_soisno(c,j) + cnfac*fact(c,j)*( fn(c,j) - fn(c,j-1) )
                    if (j < 1) rt(c,j) = rt(c,j) + fact(c,j)*sabg_lyr_col(c,j)
-                   
+                   !SPRUCE soil warming
+                   if (j == 9 .and. yr .ge. startyear_experiment .and. yr .le. endyear_experiment) then 
+                       rt(c,j) = rt(c,j) + fact(c,j)*add_temperature / 3.0_r8    !Deep warming test
+                   end if
                 else if (j == nlevgrnd) then
                    dzm     = (z(c,j)-z(c,j-1))
                    at(c,j) =   - (1._r8-cnfac)*fact(c,j)*tk(c,j-1)/dzm
