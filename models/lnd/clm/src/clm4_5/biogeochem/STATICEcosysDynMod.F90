@@ -146,6 +146,8 @@ contains
     real(r8), pointer :: hbot(:)     ! canopy bottom (m)
     real(r8), pointer :: elai(:)     ! one-sided leaf area index with burying by snow
     real(r8), pointer :: esai(:)     ! one-sided stem area index with burying by snow
+    real(r8), pointer :: zwt(:)
+    real(r8), pointer :: h2osfc(:)
     integer , pointer :: frac_veg_nosno_alb(:) ! frac of vegetation not covered by snow [-]
 !
 !
@@ -154,7 +156,8 @@ contains
 !
     integer  :: fp,p,c   ! indices
     real(r8) :: ol       ! thickness of canopy layer covered by snow (m)
-    real(r8) :: fb       ! fraction of canopy layer covered by snow
+    real(r8) :: fb, fb_wt       ! fraction of canopy layer covered by snow
+    real(r8) :: thiswtht
 !-----------------------------------------------------------------------
 
     if (doalb) then
@@ -173,6 +176,8 @@ contains
        esai    => pps%esai
        htop    => pps%htop
        hbot    => pps%hbot
+       zwt     => cws%zwt
+       h2osfc  => cws%h2osfc
        frac_veg_nosno_alb => pps%frac_veg_nosno_alb
        ivt     =>pft%itype
 
@@ -211,9 +216,24 @@ contains
           if (ivt(p) > noveg .and. ivt(p) <= nbrdlf_dcd_brl_shrub ) then
              ol = min( max(snow_depth(c)-hbot(p), 0._r8), htop(p)-hbot(p))
              fb = 1._r8 - ol / max(1.e-06_r8, htop(p)-hbot(p))
-          else
-             fb = 1._r8 - max(min(snow_depth(c),0.2_r8),0._r8)/0.2_r8   ! 0.2m is assumed
-                  !depth of snow required for complete burial of grasses
+             fb_wt = 1._r8 
+         else
+#if (defined HUM_HOL)
+            if (ivt(p) == 12) then
+              thiswtht = zwt(c)*-1.0_r8+0.075+h2osfc(c)/1000._r8  !height above hollow bottom
+              !calculate submerged LAI
+              fb_wt = 1._r8 - (max(min(thiswtht,0.2_r8),0._r8))/0.2_r8     ! 5cm for Sphagnum
+              !Calculate LAI buried by snow
+              fb = 1._r8 - (max(min(snow_depth(c),0.05_r8),0._r8)+0.05_r8)/0.05_r8
+            else
+              fb_wt = 1._r8
+              fb = 1._r8 - max(min(snow_depth(c),0.2_r8),0._r8)/0.2_r8   ! 0.2m is
+            end if
+#else
+            fb_wt = 1._r8
+            fb = 1._r8 - max(min(snow_depth(c),0.2_r8),0._r8)/0.2_r8   ! 0.2m is assumed
+              !depth of snow required for complete burial of grasses
+#endif
           endif
 
           ! area weight by snow covered fraction
@@ -221,6 +241,10 @@ contains
                +tlai(p)*fb*frac_sno(c), 0.0_r8)
           esai(p) = max(tsai(p)*(1.0_r8 - frac_sno(c)) &
                +tsai(p)*fb*frac_sno(c), 0.0_r8)
+          ! Correct for submergence (HUM_HOL, sphagnum only)
+          elai(p) = max(elai(p)*fb_wt, 0.0_r8)
+          esai(p) = max(esai(p)*fb_wt, 0.0_r8)
+
           if (elai(p) < 0.05_r8) elai(p) = 0._r8
           if (esai(p) < 0.05_r8) esai(p) = 0._r8
 

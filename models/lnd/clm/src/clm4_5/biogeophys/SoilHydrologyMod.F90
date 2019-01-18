@@ -209,7 +209,7 @@ contains
     real(r8) :: top_ice(lbc:ubc)           !temporary, ice len in top VIC layers
     character(len=32) :: subname = 'SurfaceRunoff'  ! subroutine name
 #endif
-
+    real(r8) :: humhol_ht
 !-----------------------------------------------------------------------
 
     ! Assign local pointers to derived subtype components (column-level)
@@ -300,8 +300,9 @@ contains
 #else
        fsat(c) = wtfact(c) * exp(-0.5_r8*fff(c)*zwt(c))
 #if (defined HUM_HOL)
-       if (c .eq. 1) fsat(c) = 1.0 * exp(-3.0_r8/0.3_r8*(zwt(c)))   !at 30cm, hummock saturated at 5%
-       if (c .eq. 2) fsat(c) = min(1.0 * exp(-3.0_r8/0.3_r8*(zwt(c)-h2osfc(c)/1000.+0.15_r8)), 1._r8)
+       humhol_ht = 0.15_r8
+       if (c .eq. 1) fsat(c) = 1.0 * exp(-3.0_r8/humhol_ht*(zwt(c)))   !at 30cm, hummock saturated at 5%
+       if (c .eq. 2) fsat(c) = min(1.0 * exp(-3.0_r8/humhol_ht*(zwt(c)-h2osfc(c)/1000.+humhol_ht/2.0_r8)), 1._r8)
 #endif
 #endif
 
@@ -312,16 +313,16 @@ contains
 #else
           fsat(c) = wtfact(c) * exp(-0.5_r8*fff(c)*zwt(c))
 #if (defined HUM_HOL)
-       if (c .eq. 1) fsat(c) = 1.0 * exp(-3.0_r8/0.3_r8*(zwt(c)))   !at 30cm, hummock saturated at 5%
-       if (c .eq. 2) fsat(c) = min(1.0 * exp(-3.0_r8/0.3_r8*(zwt(c)-h2osfc(c)/1000.+0.15_r8)), 1._r8)
+       if (c .eq. 1) fsat(c) = 1.0 * exp(-3.0_r8/humhol_ht*(zwt(c)))   !at 30cm, hummock saturated at 5%
+       if (c .eq. 2) fsat(c) = min(1.0 * exp(-3.0_r8/humhol_ht*(zwt(c)-h2osfc(c)/1000.+humhol_ht/2.0_r8)), 1._r8)
 #endif
 #endif
        else
           if ( frost_table(c) > zwt_perched(c)) then 
              fsat(c) = wtfact(c) * exp(-0.5_r8*fff(c)*zwt_perched(c))!*( frost_table(c) - zwt_perched(c))/4.0
 #if (defined HUM_HOL)
-          if (c .eq. 1) fsat(c) = 1.0 * exp(-3.0_r8/0.3_r8*(zwt_perched(c)))   !at 30cm, hummock saturated at 5%
-          if (c .eq. 2) fsat(c) = min(1.0 * exp(-3.0_r8/0.3_r8*(zwt_perched(c)-h2osfc(c)/1000.+0.15_r8)), 1._r8)
+          if (c .eq. 1) fsat(c) = 1.0 * exp(-3.0_r8/humhol_ht*(zwt_perched(c)))   !at 30cm, hummock saturated at 5%
+          if (c .eq. 2) fsat(c) = min(1.0 * exp(-3.0_r8/humhol_ht*(zwt_perched(c)-h2osfc(c)/1000.+humhol_ht/2.0_r8)), 1._r8)
 #endif
           endif
        endif
@@ -351,7 +352,15 @@ contains
 #endif
        else
           ! only send fast runoff directly to streams
+#if (defined HUM_HOL)
+          if (c .eq. 1) then 
+            qflx_surf(c) =   fsat(c) * qflx_top_soil(c)
+          else
+            qflx_surf(c) = 0._r8
+          endif
+#else
           qflx_surf(c) =   fsat(c) * qflx_top_soil(c)
+#endif
        endif
     end do
 
@@ -538,7 +547,7 @@ contains
     !real(r8) :: h2osoi_vol                 !
     ! variables for HUM_HOL
      real(r8) :: dzmm(lbc:ubc,1:nlevsoi)   ! layer thickness (mm)
-     real(r8) :: hum_frac, hol_frac
+     real(r8) :: hum_frac, hol_frac, humhol_ht
     real(r8) :: ka_ho
     real(r8) :: ka_hu
     real(r8) :: zwt_ho, zwt_hu
@@ -672,8 +681,8 @@ contains
 
           !1. partition surface inputs between soil and h2osfc
 #if (defined HUM_HOL)
-          hum_frac = 0.75_r8
-          hol_frac = 0.25_r8
+          hum_frac = 0.64_r8
+          hol_frac = 0.36_r8
  
           if (c .eq. 1) then
             qflx_surf_input(1) = 0._r8            !hummock
@@ -815,23 +824,26 @@ contains
 
           if (c.eq.1) then
             zwt_hu = zwt(1)
-            zwt_hu = zwt_hu - h2osfc(1)/1000._r8
+            !zwt_hu = zwt_hu - h2osfc(1)/1000._r8
           endif
           if (c.eq.2) then
             zwt_ho = zwt(2)
             ka_ho = max(ka_ho, 1e-5_r8)
             ka_hu = max(ka_hu, 1e-5_r8)
             !DMR 9/21/15 - only inlcude h2osfc if water table near surfce, use
-            !harmonic mean 
-            zwt_ho = zwt_ho - h2osfc(2)/1000._r8   !DMR 4/29/13
+            !harmonic mean
+            if (zwt_ho < 0.03_r8) then  
+              zwt_ho = zwt_ho - h2osfc(2)/1000._r8   !DMR 4/29/13
+            end if
             !DMR 12/4/2015
-            if (maxval(icefrac(:,:)) .ge. 0.01_r8) then
+            humhol_ht = 0.15_r8
+            if (icefrac(0,jwt(c)+1) .ge. 0.01_r8 .or. icefrac(1,jwt(c)+1) .ge. 0.01_r8) then
               !turn off lateral transport if any ice is present
               qflx_lat_aqu(:) = 0._r8
             else
-              qflx_lat_aqu(1) =  2._r8/(1._r8/ka_hu+1._r8/ka_ho) *  (zwt_hu-zwt_ho-0.3_r8) / 1._r8 * &
+              qflx_lat_aqu(1) =  2._r8/(1._r8/ka_hu+1._r8/ka_ho) *  (zwt_hu-zwt_ho-humhol_ht) / 1._r8 * &
                  sqrt(hol_frac/hum_frac)
-              qflx_lat_aqu(2) = -2._r8/(1._r8/ka_hu+1._r8/ka_ho) *  (zwt_hu-zwt_ho-0.3_r8) / 1._r8 * &
+              qflx_lat_aqu(2) = -2._r8/(1._r8/ka_hu+1._r8/ka_ho) *  (zwt_hu-zwt_ho-humhol_ht) / 1._r8 * &
                  sqrt(hum_frac/hol_frac)
             endif
           endif
@@ -1686,6 +1698,7 @@ contains
     real(r8) :: rel_moist                ! relative moisture, temporary variable
     real(r8) :: wtsub_vic                ! summation of hk*dzmm for layers in the third VIC layer
 #endif
+    real(r8) :: humhol_ht
 !-----------------------------------------------------------------------
 
     ! Assign local pointers to derived subtypes components (column-level)
@@ -2128,28 +2141,29 @@ contains
           rsub_top_max = dsmax_tmp(c)
 #else
           imped=10._r8**(-e_ice*(icefracsum/dzsum))
-          rsub_top_max = 10._r8 * sin((rpi/180.) * topo_slope(c))
+          !rsub_top_max = 10._r8 * sin((rpi/180.) * topo_slope(c))
 #endif
        endif
 
 #if (defined HUM_HOL)
        !changes for hummock hollow topography
+       humhol_ht = 0.15_r8
        if (c .eq. 1) then !hummock
-         if (zwt(c) < 0.7) then
+         if (zwt(c) < (0.4_r8 + humhol_ht)) then
            rsub_top(c)    = imped * rsub_top_max* exp(-fff(c)*zwt(c)) - &
-             imped * rsub_top_max * exp(-fff(c)*0.7_r8)
+             imped * rsub_top_max * exp(-fff(c)*(0.4_r8 + humhol_ht))
          else
            rsub_top(c)    = 0_r8
          endif
        else           !hollow
-         if (zwt(c) < 0.4) then
-           if (zwt(c) .lt. 0.017) then
-             rsub_top(c)    = imped * rsub_top_max* exp(-fff(c)*(zwt(c)+0.3)-h2osfc(c)/1000.) - &
-               imped * rsub_top_max * exp(-fff(c)*0.7_r8)
-           else
-             rsub_top(c)    = imped * rsub_top_max* exp(-fff(c)*(zwt(c)+0.3)) - &
-               imped * rsub_top_max * exp(-fff(c)*0.7_r8)
-           end if
+         if (zwt(c) < 0.4_r8) then
+           !if (zwt(c) .lt. 0.017) then
+           !  rsub_top(c)    = imped * rsub_top_max* exp(-fff(c)*(zwt(c)+0.3)-h2osfc(c)/1000.) - &
+           !    imped * rsub_top_max * exp(-fff(c)*0.7_r8)
+           !else
+             rsub_top(c)    = imped * rsub_top_max* exp(-fff(c)*(zwt(c)+humhol_ht)) - &
+               imped * rsub_top_max * exp(-fff(c)*(0.4_r8 + humhol_ht))
+           !end if
          else
            rsub_top(c)    = 0_r8
          endif

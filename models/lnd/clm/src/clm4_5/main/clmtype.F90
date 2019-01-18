@@ -1450,7 +1450,7 @@ type, public :: column_pstate_type
    ! end new variables for S Lake code
    ! New variables for finundated in methane code
 
-#if (defined LCH4) || (defined MICROBE)
+   !if (defined LCH4) || (defined MICROBE)
    real(r8), pointer :: zwt0(:)             ! coefficient for determining finundated (m)
    real(r8), pointer :: f0(:)               ! maximum inundated fraction for a gridcell (for methane code)
    real(r8), pointer :: p3(:)               ! coefficient for determining finundated (m)
@@ -1463,7 +1463,7 @@ type, public :: column_pstate_type
    real(r8), pointer :: forc_rho(:)           ! surface air density, downscaled to column (kg/m^3)
    real(r8), pointer :: glc_frac(:)           ! ice fractional area
    real(r8), pointer :: glc_topo(:)           ! surface elevation (m)
-#endif
+   !endif
   
 #ifdef MICROBE
    real(r8), pointer :: soilpH_unsat(:,:)		! pH values calculated based on original pH and acid produced

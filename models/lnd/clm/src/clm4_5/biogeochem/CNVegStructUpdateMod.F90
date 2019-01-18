@@ -82,6 +82,7 @@ subroutine CNVegStructUpdate(num_soilp, filter_soilp)
    real(r8), pointer :: forc_hgt_u_pft(:) ! observational height of wind at pft-level [m]
    real(r8), pointer :: dwood(:)      ! density of wood (gC/m^3)
    real(r8), pointer :: farea_burned(:)   !F. Li and S. Levis
+   real(r8), pointer :: zwt(:)
 ! 
 ! local pointers to implicit in/out scalars
 !
@@ -111,6 +112,7 @@ subroutine CNVegStructUpdate(num_soilp, filter_soilp)
    real(r8) :: tsai_min    ! PFT derived minimum tsai
    real(r8) :: tsai_alpha  ! monthly decay rate of tsai
    real(r8) dt             ! radiation time step (sec)
+   real(r8) :: thiswtht
 
    real(r8), parameter :: dtsmonth = 2592000._r8 ! number of seconds in a 30 day month (60x60x24x30)
 !EOP
@@ -138,7 +140,8 @@ subroutine CNVegStructUpdate(num_soilp, filter_soilp)
     pgridcell                      =>pft%gridcell
     leafc                          => pcs%leafc
     deadstemc                      => pcs%deadstemc
-    snow_depth                         => cps%snow_depth
+    snow_depth                     => cps%snow_depth
+    h2osfc                         => cws%h2osfc
     woody                          => pftcon%woody
     slatop                         => pftcon%slatop
     dsladlai                       => pftcon%dsladlai
@@ -146,7 +149,7 @@ subroutine CNVegStructUpdate(num_soilp, filter_soilp)
     displar                        => pftcon%displar
     dwood                          => pftcon%dwood
     farea_burned                   => cps%farea_burned
-
+    zwt                            => cws%zwt
    ! assign local pointers to derived type arrays (out)
     tlai                           => pps%tlai
     tsai                           => pps%tsai
@@ -301,8 +304,26 @@ subroutine CNVegStructUpdate(num_soilp, filter_soilp)
          ol = min( max(snow_depth(c)-hbot(p), 0._r8), htop(p)-hbot(p))
          fb = 1._r8 - ol / max(1.e-06_r8, htop(p)-hbot(p))
       else
+#if (defined HUM_HOL)
+         if (ivt(p) == 12) then 
+           if (c .eq. 2) then 
+             thiswtht = zwt(c)*-1.0_r8+0.075+h2osfc(c)/1000._r8  !height above hollow bottom
+           else
+             thiswtht = zwt(c)*-1.0_r8+0.225+h2osfc(c)/1000._r8  !height above hollow bottom
+           endif
+           !calculate submerged LAI
+           fb = 1._r8 - (max(min(thiswtht,0.2_r8),0._r8))/0.2_r8     ! 5cm for Sphagnum
+           !Calculate LAI buried by snow
+           if (snow_depth(c) .ge. 0 .and. snow_depth(c) .gt. thiswtht) then 
+             fb = 1._r8 - (max(min(snow_depth(c),0.05_r8),0._r8)+0.05_r8)/0.05_r8 
+           end if
+         else
+           fb = 1._r8 - max(min(snow_depth(c),0.2_r8),0._r8)/0.2_r8   ! 0.2m is
+         end if
+#else
          fb = 1._r8 - max(min(snow_depth(c),0.2_r8),0._r8)/0.2_r8   ! 0.2m is assumed
               !depth of snow required for complete burial of grasses
+#endif
       endif
 
       elai(p) = max(tlai(p)*fb, 0.0_r8)

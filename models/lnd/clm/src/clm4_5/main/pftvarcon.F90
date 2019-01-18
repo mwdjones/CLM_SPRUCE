@@ -502,6 +502,7 @@ contains
     if ( .not. readv ) call endrun( trim(subname)//' ERROR: error in reading in pft data' )
     call ncd_io('rsub_top_max', rsub_top_max, 'read', ncid, readvar=readv)
     if ( .not. readv ) call endrun( trim(subname)//' ERROR: error in reading in pft data' )
+    rsub_top_max = rsub_top_max*5.0_r8
     call ncd_io('qflx_h2osfc_surfrate', qflx_h2osfc_surfrate, 'read', ncid,readvar=readv)
     if ( .not. readv ) call endrun( trim(subname)//' ERROR: error in reading in pft data' )  
     !Added by DMR 6/18/14

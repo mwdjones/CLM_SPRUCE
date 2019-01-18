@@ -201,7 +201,9 @@ contains
    real(r8), pointer :: decl(:)        ! declination angle (radians)
    real(r8), pointer :: max_dayl(:)    !maximum daylength for this column (s)
    real(r8), pointer :: londeg(:)      ! longitude (degrees) (for calculation of local time)
-   
+   real(r8), pointer :: slatop(:) 
+   real(r8), pointer :: tlai(:) ! total leaf area index for canopy layer
+
 !
 ! local pointers to implicit inout arguments
 !
@@ -537,6 +539,7 @@ contains
    rssha          => pps%rssha
    rhal           => pps%rhal
    vpdal          => pps%vpdal
+   tlai           => pps%tlai
    psnsun         => pcf%psnsun
    psnsun_wc      => pcf%psnsun_wc
    psnsun_wj      => pcf%psnsun_wj
@@ -611,6 +614,7 @@ contains
    dleaf          => pftcon%dleaf
    smpso          => pftcon%smpso
    smpsc          => pftcon%smpsc
+   slatop         => pftcon%slatop
 
    ! Determine step size
 
@@ -1014,11 +1018,19 @@ contains
                  h2o_moss_inter(p) = -18032 *0.25**4 + 7248.1 * 0.25**3                  &
                                      -591.74 *0.25**2 + 6.9031*0.25 + 0.4954
             endif
+#if (defined CN)
             if (leafc(p).gt. 0._r8) then
               h2o_moss_wc(p) = h2o_moss_inter(p) + h2ocan(p)/(leafc(p)*2.0_r8/1000.0_r8)
             else
                h2o_moss_wc(p) = 0._r8
             endif
+#else
+            if (tlai(p) .gt. 0._r8) then 
+              h2o_moss_wc(p) = h2o_moss_inter(p) + h2ocan(p)/(tlai(p)/slatop(ivt(p))*2.0_r8/1000.0_r8)
+            else
+              h2o_moss_wc(p) = 0._r8
+            endif
+#endif
             !write(iulog,*) 'h2ocan=',h2ocan(12), 'leafc=',leafc(12), &
             !                'h2o/(leafc*2/1000)=',h2ocan(12)/(leafc(12)*2.0_r8/1000._r8)
             !h2o_moss_wc(p) = h2o_moss_inter(p)
@@ -1996,7 +2008,7 @@ contains
       if (ivt(p) == 12)then
        wcscaler = (-0.656_r8 + 1.654_r8 *log10(h2o_moss_wc (p)))
        !DMR 05/11/17 - add scaler for submergence effect
-       wcscaler = wcscaler * (1.0_r8 - min(h2osfc(c),50.0_r8)/50.0_r8)
+       !wcscaler = wcscaler * (1.0_r8 - min(h2osfc(c),50.0_r8)/50.0_r8)
 
        wcscaler = max(0._r8, min(1.0_r8, wcscaler))
       endif
