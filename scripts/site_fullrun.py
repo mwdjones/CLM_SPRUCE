@@ -28,7 +28,11 @@ parser.add_option("--diags", dest="diags", default=False, \
                   action="store_true", help = 'output for SPRUCE diagnostics')
 parser.add_option("--srcmods_loc", dest="srcmods_loc", default='', \
                   help = 'Copy sourcemods from this location')
+parser.add_option("--nyears_ad_spinup", dest="ny_ad", default=600, \
+                  help = 'number of years to run ad_spinup')
 parser.add_option("--nyears_final_spinup", dest="nyears_final_spinup", default='1000', \
+                  help="base no. of years for final spinup")
+parser.add_option("--nyears_transient", dest="nyears_transient", default='-1', \
                   help="base no. of years for final spinup")
 parser.add_option("--clean_build", action="store_true", default=False, \
                   help="Perform a clean build")
@@ -49,8 +53,6 @@ parser.add_option("--tstep", dest="tstep", default=0.5, \
                   help = 'CLM timestep (hours)')
 parser.add_option("--co2_file", dest="co2_file", default="fco2_datm_1765-2007_c100614.nc", \
                   help = 'CLM timestep (hours)')
-parser.add_option("--nyears_ad_spinup", dest="ny_ad", default=600, \
-                  help = 'number of years to run ad_spinup')
 parser.add_option("--metdir", dest="metdir", default="none", \
                   help = 'subdirectory for met data forcing')
 parser.add_option("--C13", dest="C13", default=False, \
@@ -224,6 +226,8 @@ for row in AFdatareader:
         if (options.spinup_vars):
 		cmd_fnsp = cmd_fnsp+' --spinup_vars'
         #transient
+        if (int(options.nyears_transient > 0) and not options.cruncep):
+          translen = int(options.nyears_transient)
         cmd_trns = basecmd+' --finidat_case '+basecase+ \
             ' --finidat_year '+str(fsplen+1)+' --run_units nyears' \
             +' --run_n '+str(translen)+' --align_year '+ \

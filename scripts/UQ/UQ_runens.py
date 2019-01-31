@@ -40,47 +40,28 @@ parser.add_option("--machine", dest="machine", default="cades", \
 
 #================= netcdf manipulation functions ===============================#
 def getvar(fname, varname):
-    usescipy = False
-    try:
-    	import Scientific.IO.NetCDF as netcdf
-    except ImportError:
-        import scipy
-        from scipy.io import netcdf
-        usescipy = True
-    if (usescipy):
-        nffile = netcdf.netcdf_file(fname,"r",mmap=False)
-        var = nffile.variables[varname]
-        varvals = var[:].copy()    #works for vector only?
-        nffile.close()
-    else:    
-    	nffile = netcdf.NetCDFFile(fname,"r")
-    	var = nffile.variables[varname]
-    	varvals = var.getValue()
-    	nffile.close()
+    from netCDF4 import Dataset
+    nffile = Dataset(fname,"r")
+    if varname in nffile.variables:
+      varvals = nffile.variables[varname][:]
+    else:
+      print('Warning: '+varname+' not in '+fname)
+      varvals=[-1]
+    nffile.close()
     return varvals
 
 def putvar(fname, varname, varvals):
-    usescipy = False
-    try:
-        import Scientific.IO.NetCDF as netcdf
-    except ImportError:
-        import scipy
-        from scipy.io import netcdf
-        usescipy = True
-    if (usescipy):
-        nffile = netcdf.netcdf_file(fname,"a",mmap=False)
-        var = nffile.variables[varname]
-        var[:] = varvals
-        nffile.close()
+    from netCDF4 import Dataset
+    import numpy as np
+    nffile = Dataset(fname,"a")
+    if (varname in nffile.variables):
+      nffile.variables[varname][...] = varvals
     else:
-        nffile = netcdf.NetCDFFile(fname,"a")
-        var = nffile.variables[varname]
-        var.assignValue(varvals)
-        nffile.close()
+      print('Warning: '+varname+' not in '+fname)
+    nffile.close()
     ierr = 0
     return ierr
 
-#======================================================================
 UQdir = os.getcwd()
 
 parm_names=[]
@@ -165,7 +146,7 @@ for casename in casenames:
     username = getpass.getuser()
     os.system('cp /home/'+username+'/models/CLM_SPRUCE/inputdata/lnd/clm2/paramdata/'+ \
                'clm_params_spruce_calveg.nc '+ens_dir+'/clm_params_'+ \
-               gst[1:]+".nc")	
+               gst[1:]+".nc")
     os.system('rm '+ens_dir+'/*constraint*.nc')
 
     if (isfullrun):     #Full spinup simulation
@@ -253,10 +234,11 @@ for casename in casenames:
                             moutput.close()
                             os.system('cp '+microbefile+' '+microbefile+'_orig')
                         else:
-                            if (pnum == 0):
-                                stem_leaf = getvar(pftfile, 'stem_leaf')
-                                stem_leaf[2:5]=-1
-                                ierr = putvar(pftfile, 'stem_leaf', stem_leaf)
+                            print(pnum)
+                            #if (pnum == 0):
+                            #    stem_leaf = getvar(pftfile, 'stem_leaf')
+                            #    stem_leaf[2:5]=-1
+                            #    ierr = putvar(pftfile, 'stem_leaf', stem_leaf)
                             param = getvar(pftfile, p)
                             if (parm_indices[pnum] > 0):
                                 param[parm_indices[pnum]-1] = parm_values[pnum]
@@ -286,8 +268,8 @@ sse=0
 myoutput = open('myoutput_sse.txt','w')
 myind = 0
 for p in parm_names:
-        myoutput.write(str(parm_names[myind])+' '+str(parm_indices[myind])+' '+str(parm_values[myind])+'\n')
-	myind = myind+1
+    myoutput.write(str(parm_names[myind])+' '+str(parm_indices[myind])+' '+str(parm_values[myind])+'\n')
+    myind = myind+1
 
 for filename in os.listdir(UQdir+'/'+options.constraints):
   if (not os.path.isdir(filename)):
@@ -340,18 +322,19 @@ for filename in os.listdir(UQdir+'/'+options.constraints):
                 #post processing of model output with nco to match constraining variables
                 if (not os.path.isfile(myfile)):
                     os.system('cp '+myfileo+' '+myfile)
-                    if ('h1' in myfile):	
+                    if ('h1' in myfile):
                         os.system('ncap -3 -s "STEMC=DEADSTEMC+LIVESTEMC" '+myfile+' '+myfile+'.tmp')
                         os.system('mv '+myfile+'.tmp '+myfile)
                         os.system('ncap -3 -s "AGBIOMASS=DEADSTEMC+LIVESTEMC+LEAFC" '+myfile+' '+myfile+'.tmp')
                         os.system('mv '+myfile+'.tmp '+myfile)
                     if ('h0' in myfile):
-                        os.system('ncap -3 -s "WTHT=(ZWT*-1+0.3)*1000 " '+myfile+' '+myfile+'.tmp')
+                        #Water table height relative to hollow bottoms (7.5cm below hollow gridcell mean)
+                        os.system('ncap -3 -s "WTHT=(ZWT*-1+0.225)*1000 " '+myfile+' '+myfile+'.tmp')
                         os.system('mv '+myfile+'.tmp '+myfile)         
                 myvals = getvar(myfile, myvarname)
             if (doy > 0 and value > -900):
                 if (myvarname == 'WTHT'):
-                    unc = 20.0   #no uncertainty given for water table height.
+                    unc = 50.0   #no uncertainty given for water table height.
                 if (PFT > 0):
                     #PFT-specific constraints (daily)
                     if (myvarname == 'AGBIOMASS' and PFT == 3):
@@ -362,7 +345,7 @@ for filename in os.listdir(UQdir+'/'+options.constraints):
                         #use hummock+hollow
                         model_val = myvals[doy,PFT-1]*0.25*0.75 + myvals[doy,PFT+16]*0.25*0.25
                     if (unc < 0):
-    	              unc = value*0.25 #default uncertainty set to 25%
+                        unc = value*0.25 #default uncertainty set to 25%
                     sse = sse + ((model_val-value) /unc)**2
                     myoutput.write(str(myvarname)+' '+str(year)+' '+str(doy)+' '+str(PFT)+' '+ \
                                        str(model_val)+' '+str(value)+' '+str(unc)+' '+str(sse)+'\n')
@@ -385,7 +368,7 @@ for filename in os.listdir(UQdir+'/'+options.constraints):
                                        str(model_val)+' '+str(value)+' '+str(unc)+' '+str(sse)+'\n')
             elif (season > 0 and value > -900):
                 if (myvarname == 'WTHT'):
-                    unc = 20.0   #no uncertainty given for water table height.
+                    unc = 50.0   #no uncertainty given for water table height.
                #Seasonal constraints.  Only one is AGNPP, moss only.  Need to convert units
                     #Water table, column-level (no PFT info), use hummock only
                 if (season == 2):

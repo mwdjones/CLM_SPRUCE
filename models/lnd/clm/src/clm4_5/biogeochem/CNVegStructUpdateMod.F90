@@ -305,23 +305,19 @@ subroutine CNVegStructUpdate(num_soilp, filter_soilp)
          fb = 1._r8 - ol / max(1.e-06_r8, htop(p)-hbot(p))
       else
 #if (defined HUM_HOL)
-         if (ivt(p) == 12) then 
-           if (c .eq. 2) then 
-             thiswtht = zwt(c)*-1.0_r8+0.075+h2osfc(c)/1000._r8  !height above hollow bottom
-           else
-             thiswtht = zwt(c)*-1.0_r8+0.225+h2osfc(c)/1000._r8  !height above hollow bottom
-           endif
-           !calculate submerged LAI
-           fb = 1._r8 - (max(min(thiswtht,0.2_r8),0._r8))/0.2_r8     ! 5cm for Sphagnum
-           !Calculate LAI buried by snow
-           if (snow_depth(c) .ge. 0 .and. snow_depth(c) .gt. thiswtht) then 
-             fb = 1._r8 - (max(min(snow_depth(c),0.05_r8),0._r8)+0.05_r8)/0.05_r8 
-           end if
-         else
-           fb = 1._r8 - max(min(snow_depth(c),0.2_r8),0._r8)/0.2_r8   ! 0.2m is
-         end if
+            if (ivt(p) == 12) then
+              thiswtht = zwt(c)*-1.0_r8+0.075+h2osfc(c)/1000._r8  !height above hollow bottom
+              !calculate submerged LAI
+              fb_wt = 1._r8 - (max(min(thiswtht,0.2_r8),0._r8))/0.2_r8     ! 5cm for Sphagnum
+              !Calculate LAI buried by snow
+              fb = 1._r8 - (max(min(snow_depth(c),0.05_r8),0._r8)+0.05_r8)/0.05_r8
+            else
+              fb_wt = 1._r8
+              fb = 1._r8 - max(min(snow_depth(c),0.2_r8),0._r8)/0.2_r8   ! 0.2m is
+            end if
 #else
-         fb = 1._r8 - max(min(snow_depth(c),0.2_r8),0._r8)/0.2_r8   ! 0.2m is assumed
+            fb_wt = 1._r8
+            fb = 1._r8 - max(min(snow_depth(c),0.2_r8),0._r8)/0.2_r8   ! 0.2m is assumed
               !depth of snow required for complete burial of grasses
 #endif
       endif
