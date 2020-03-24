@@ -265,7 +265,7 @@ for row in AFdatareader:
         output = open('./site_fullrun.pbs','w')
         input = open(ad_case+'/'+ad_case+'.run')
         for s in input:
-            if ("#!" in s or '#PBS' in s):
+            if ("#!" in s or '#SBATCH' in s):
                 output.write(s)
         input.close()
         output.write("\n")
@@ -283,5 +283,5 @@ for row in AFdatareader:
             os.system('chmod u+x site_fullrun.pbs')
 	    os.system('./site_fullrun.pbs')
         else:
-	    os.system('qsub site_fullrun.pbs')
+	    os.system('sbatch site_fullrun.pbs')
        
