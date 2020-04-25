@@ -22,6 +22,7 @@ module CNCIsoFluxMod
     public:: CIsoFlux2
     public:: CIsoFlux2h
     public:: CIsoFlux3
+    public:: CIsoFlux4
     private:: CNCIsoLitterToColumn
     private:: CNCIsoGapPftToColumn
     private:: CNCIsoHarvestPftToColumn
@@ -868,6 +869,123 @@ subroutine CIsoFlux3(num_soilc, filter_soilc, num_soilp, filter_soilp, isotope)
                     
 end subroutine CIsoFlux3
 !-----------------------------------------------------------------------
+
+!-----------------------------------------------------------------------
+!BOP
+!
+! !IROUTINE: CIsoFlux4
+!
+! !INTERFACE:
+subroutine CIsoFlux4(num_soilc, filter_soilc, isotope)
+!
+! !DESCRIPTION:
+! On the radiation time step, set the carbon isotopic fluxes for methane module
+!
+! !USES:
+   use clmtype
+   use microbevarcon
+!   use clm_varpar, only : max_pft_per_col
+
+!
+! !ARGUMENTS:
+   implicit none
+   integer, intent(in) :: num_soilc         ! number of soil columns filter
+   integer, intent(in) :: filter_soilc(:)   ! filter for soil columns
+   character(len=*), intent(in) :: isotope  ! 'c13' or 'c14'
+!
+! !CALLED FROM:
+! subroutine CNEcosystemDyn
+!
+! !REVISION HISTORY:
+!
+! !LOCAL VARIABLES:
+! !OTHER LOCAL VARIABLES:
+!   type(pft_type), pointer :: p
+   type(column_type), pointer :: c
+!   type(pft_cflux_type), pointer :: pcisof
+ !  type(pft_cstate_type), pointer :: pcisos
+!   type(column_cflux_type), pointer :: ccisof
+!   type(column_cstate_type), pointer :: ccisos
+
+#if(defined MICROBE)
+   type(column_microbe_type), pointer :: ccisos
+#endif
+!   integer :: fp,pi,l,pp
+   integer :: fc,cc,j
+!   real(r8), pointer :: ptrp(:)         ! pointer to input pft array
+!   real(r8), pointer :: ptrc(:)         ! pointer to output column array
+
+!   real(r8), pointer :: croot_prof(:,:) ! (1/m) profile of coarse roots
+!   real(r8), pointer :: stem_prof(:,:)  ! (1/m) profile of stems
+!   integer , pointer :: npfts(:)        ! number of pfts for each column
+!   integer , pointer :: pfti(:)         ! beginning pft index for each column
+!   real(r8), pointer :: wtcol(:)        ! weight (relative to column) for this pft (0-1)
+!   logical , pointer :: pactive(:)      ! true=>do computations on this pft (see reweightMod for details)
+
+#if(defined MICROBE)
+
+!
+!EOP
+!-----------------------------------------------------------------------
+	! set local pointers
+   p => pft
+   c => col
+   select case (isotope)
+   case ('c14')
+!      pcisof =>  pc14f
+!      pcisos =>  pc14s
+!      ccisof =>  cc14f
+!      ccisos =>  cc14s
+     ccisos => cmicc14
+   case ('c13')
+!      pcisof =>  pc13f
+!      pcisos =>  pc13s
+!      ccisof =>  cc13f
+!      ccisos =>  cc13s
+      ccisos => cmicc13
+
+   case default
+      call endrun('CNCIsoFluxMod: iso must be either c13 or c14')
+   end select
+   !croot_prof                     => pps%croot_prof
+   !stem_prof                      => pps%stem_prof
+   !npfts                          =>col%npfts
+   !pfti                           =>col%pfti
+   !wtcol                          =>pft%wtcol
+   !pactive                        => pft%active
+  
+!   call CIsoFluxCalc(ccisos%caces_prod, cmic%caces_prod, &
+!                     ccisos%cdocs, cmic%cdocs, &
+!                     num_soilc, filter_soilc, 1._r8, 0, isotope)
+
+   call CIsoFluxCalc(ccisos%caces_prod, cmic%caces_prod, &
+                     ccisos%cdocs, cmic%cdocs, &
+                     num_soilc, filter_soilc, frac_ace, 0, isotope)
+		     
+   call CIsoFluxCalc(ccisos%ch4_prod_ace_depth, cmic%ch4_prod_ace_depth, &
+                     ccisos%caces, cmic%caces, &
+                     num_soilc, filter_soilc, frac_acch4, 0, isotope)
+
+   call CIsoFluxCalc(ccisos%ch4_prod_co2_depth, cmic%ch4_prod_co2_depth, &
+                     ccisos%ccon_co2s, cmic%ccon_co2s, &
+                     num_soilc, filter_soilc, frac_hych4, 0, isotope)
+		     
+   call CIsoFluxCalc(ccisos%caces_prod_h2, cmic%caces_prod_h2, &
+                     ccisos%caces, cmic%caces, &
+                     num_soilc, filter_soilc, frac_acetogenesis, 0, isotope)
+
+   call CIsoFluxCalc(ccisos%ch4_oxid_o2_depth, cmic%ch4_oxid_o2_depth, &
+                     ccisos%ccon_ch4s, cmic%ccon_ch4s, &
+                     num_soilc, filter_soilc, frac_ch4ox, 0, isotope)
+
+   call CIsoFluxCalc(ccisos%ch4_oxid_aom_depth, cmic%ch4_oxid_aom_depth, &
+                     ccisos%ccon_ch4s, cmic%ccon_ch4s, &
+                     num_soilc, filter_soilc, frac_ch4aom, 0, isotope)
+#endif
+
+end subroutine CIsoFlux4
+!-----------------------------------------------------------------------
+
 
 !-----------------------------------------------------------------------
 !BOP
