@@ -64,9 +64,8 @@ contains
     use shr_kind_mod  , only : r8 => shr_kind_r8
     use clmtype
     use clm_atmlnd    , only : clm_a2l
-    use clm_time_manager  , only : get_step_size, get_curr_date
+    use clm_time_manager  , only : get_step_size
     use clm_varctl    , only : iulog
-    use clm_varctl      ,only : startyear_experiment, endyear_experiment, add_temperature
     use shr_infnan_mod, only : nan => shr_infnan_nan, assignment(=)
     use clm_varcon    , only : sb, capr, cnfac, hvap, isturb, &
                                icol_roof, icol_sunwall, icol_shadewall, &
@@ -154,7 +153,6 @@ contains
     real(r8), pointer :: t_building_max(:)  ! maximum internal building temperature (K)
     real(r8), pointer :: t_building_min(:)  ! minimum internal building temperature (K)
     real(r8), pointer :: hc_soi(:)          ! soil heat content (MJ/m2)
-    real(r8), pointer :: deepsoi_heating(:) ! deep soil heating for warming experiments (W/m2)
     real(r8), pointer :: hc_soisno(:)       ! soil plus snow plus lake heat content (MJ/m2)
     real(r8), pointer :: eflx_fgr12(:)      ! heat flux between soil layer 1 and 2 (W/m2)
     real(r8), pointer :: eflx_fgr(:,:)      ! (rural) soil downward heat flux (W/m2) (1:nlevgrnd)

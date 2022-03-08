@@ -85,10 +85,8 @@ module clm_varpar
   integer, parameter :: i_fungi = 10
   integer, parameter :: i_dom = 11
   integer, parameter :: ndecomp_pools = 11
-  integer, parameter :: ndecomp_cascade_transitions = 41
+  integer, parameter :: ndecomp_cascade_transitions = 47
 
-  real(r8), parameter :: cn_bacteria = 5
-  real(r8), parameter :: cn_fungi = 15
   real(r8), parameter :: cn_dom = 10
   
   real(r8), parameter :: CUEmax = 0.8

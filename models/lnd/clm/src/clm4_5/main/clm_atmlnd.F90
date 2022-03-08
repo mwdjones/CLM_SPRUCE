@@ -164,7 +164,9 @@ contains
 ! !LOCAL VARIABLES:
 !EOP
   real(r8) :: ival   ! initial value
-  integer :: ival_int
+  integer  :: ival_int
+  real     :: ival_float  = 0.0
+  !integer*2 :: ival_short = 0
 !------------------------------------------------------------------------
   !DMR - variables added for CPL_BYPASS option 
   allocate(a2l%atm_input(8,1,1,200000))

@@ -624,10 +624,10 @@ end subroutine initmicrobe
 	if(caces_sat_prod_h2(c,j) == spval .or. arbinit) 			caces_sat_prod_h2(c,j) = 0._r8
 	if(cacebios(c,j) == spval .or. arbinit) 					cacebios(c,j) = 1e-15_r8
 	if(cacebios_unsat(c,j) == spval .or. arbinit) 				cacebios_unsat(c,j) = 1e-15_r8
-	if(cacebios_sat(c,j) == spval .or. arbinit) 					cacebios_sat(c,j) = 1e-15_r8
+	if(cacebios_sat(c,j) == spval .or. arbinit) 				cacebios_sat(c,j) = 1e-15_r8
 	if(cco2bios(c,j) == spval .or. arbinit) 					cco2bios(c,j) = 1e-15_r8
 	if(cco2bios_unsat(c,j) == spval .or. arbinit) 				cco2bios_unsat(c,j) = 1e-15_r8
-	if(cco2bios_sat(c,j) == spval .or. arbinit) 					cco2bios_sat(c,j) = 1e-15_r8
+	if(cco2bios_sat(c,j) == spval .or. arbinit) 				cco2bios_sat(c,j) = 1e-15_r8
 	if(caerch4bios(c,j) == spval .or. arbinit) 					caerch4bios(c,j) = 1e-15_r8
 	if(caerch4bios_unsat(c,j) == spval .or. arbinit) 				caerch4bios_unsat(c,j) = 1e-15_r8
 	if(caerch4bios_sat(c,j) == spval .or. arbinit) 				caerch4bios(c,j) = 1e-15_r8  

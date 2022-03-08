@@ -363,6 +363,33 @@ type, public :: pft_epc_type
    real(r8), pointer :: fleafcn(:)      ! C:N during grain fill; leaf
    real(r8), pointer :: ffrootcn(:)     ! C:N during grain fill; froot
    real(r8), pointer :: fstemcn(:)      ! C:N during grain fill; stem
+
+   real(r8), pointer :: m_bdom_f(:)     ! bacterial C -> DOM
+   real(r8), pointer :: m_bs1_f(:)     ! bacterial C -> SOM1
+   real(r8), pointer :: m_bs2_f(:)     ! bacterial C -> SOM2
+   real(r8), pointer :: m_bs3_f(:)     ! bacterial C -> SOM3
+   real(r8), pointer :: m_fdom_f(:)     ! fungal C -> DOM
+   real(r8), pointer :: m_fs1_f(:)     ! fungal C -> SOM1
+   real(r8), pointer :: m_fs2_f(:)     ! fungal C -> SOM2
+   real(r8), pointer :: m_fs3_f(:)     ! fungal C -> SOM3
+   real(r8), pointer :: m_rf_s1m(:)     ! SOM1 -> microbes
+   real(r8), pointer :: m_rf_s2m(:)     ! SOM2 -> microbes
+   real(r8), pointer :: m_rf_s3m(:)     ! SOM3 -> microbes
+   real(r8), pointer :: m_rf_s4m(:)     ! SOM4 -> microbes
+   real(r8), pointer :: m_batm_f(:)     ! bacteria -> atmosphere
+   real(r8), pointer :: m_fatm_f(:)     ! fungi -> atmosphere
+   real(r8), pointer :: m_domb_f(:)     ! DOM -> bacteria
+   real(r8), pointer :: m_domf_f(:)     ! DOM -> fungi
+   real(r8), pointer :: m_doms1_f(:)     ! DOM -> SOM1
+   real(r8), pointer :: m_doms2_f(:)     ! DOM -> SOM2
+   real(r8), pointer :: m_doms3_f(:)     ! DOM -> SOM3
+   real(r8), pointer :: cn_bacteria(:)     ! C:N ratio of bacteria
+   real(r8), pointer :: cn_fungi(:)     ! C:N ratio of fungi
+   real(r8), pointer :: k_dom(:)     ! turnover rate of DOM
+   real(r8), pointer :: k_bacteria(:)     ! turnover rate of bacteria
+   real(r8), pointer :: k_fungi(:)     ! turnover rate of fungi
+   real(r8), pointer :: decomp_depth_efolding(:)     ! (meters) e-folding depth for reduction in decomposition [set to large number for depth-independance]
+
 end type pft_epc_type
 
 type(pft_epc_type), public, target, save :: pftcon
@@ -1605,9 +1632,9 @@ type, public :: column_cstate_type
 
 end type column_cstate_type
 
-type(column_cstate_type), target :: ccs      	!column carbon state
-type(column_cstate_type), target :: cc13s    	!column carbon-13 state
-type(column_cstate_type), target :: cc14s   	!column carbon-14 state
+type(column_cstate_type), target :: ccs      !column carbon state
+type(column_cstate_type), target :: cc13s    !column carbon-13 state
+type(column_cstate_type), target :: cc14s    !column carbon-14 state
 
 !----------------------------------------------------
 ! column methane variables structure
