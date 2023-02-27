@@ -858,4 +858,23 @@ for mct, etc.
   <TRILINOS_PATH>$(TRILINOS_PATH)</TRILINOS_PATH>
 </compiler>
 
+<compiler COMPILER="gnu" MACH="mesabi">
+  <SFC>/panfs/roc/msisoft/gcc/8.2.0/bin/gfortran</SFC>
+  <SCC>/panfs/roc/msisoft/gcc/8.2.0/bin/gcc</SCC>
+  <SCXX>/panfs/roc/msisoft/gcc/8.2.0/bin/g++</SCXX>
+  <NETCDF_PATH>/panfs/roc/msisoft/netcdf/4.6.1-intel-2018-release-serial</NETCDF_PATH>
+  <INC_NETCDF>/panfs/roc/msisoft/netcdf/4.6.1-intel-2018-release-serial/include</INC_NETCDF>
+  <LIB_NETCDF>/panfs/roc/msisoft/netcdf/4.6.1-intel-2018-release-serial/lib</LIB_NETCDF>
+  <HDF5_ROOT>/panfs/roc/msisoft/hdf5/hdf5-1.10.5-intel2018release-parallel-ompi</HDF5_ROOT>
+  <LAPACK_LIBDIR>/usr/lib64</LAPACK_LIBDIR>
+  <BLAS_LIBDIR>/usr/lib64</BLAS_LIBDIR>
+  <MPIFC>/panfs/roc/msisoft/mpich/3.3/bin/mpif90</MPIFC>
+  <MPICC>/panfs/roc/msisoft/mpich/3.3/bin/mpicc</MPICC>
+  <MPICXX>/panfs/roc/msisoft/mpich/3.3/bin/mpic++</MPICXX>
+  <MPI_LIB_NAME> mpich </MPI_LIB_NAME>
+  <FC_AUTO_R8> -fdefault-real-8 </FC_AUTO_R8>
+  <CXX_LINKER>FORTRAN</CXX_LINKER>
+  <SUPPORTS_CXX>TRUE</SUPPORTS_CXX>
+</compiler>
+
 </config_compilers>
