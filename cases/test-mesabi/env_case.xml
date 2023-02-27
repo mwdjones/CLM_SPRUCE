@@ -16,16 +16,16 @@
 <entry id="SCIENCE_SUPPORT"   value="NO"  />    
 
 <!--"case name (char*256) " -->
-<entry id="CASE"   value="test001"  />    
+<entry id="CASE"   value="test-mesabi"  />    
 
 <!--"full pathname of case (char) " -->
-<entry id="CASEROOT"   value="/home/feng/jone3247/CLM_SPRUCE/cases/test001"  />    
+<entry id="CASEROOT"   value="/home/feng/jone3247/CLM_SPRUCE/cases/test-mesabi"  />    
 
 <!--"full pathname of CESM source root directory (char) " -->
 <entry id="CCSMROOT"   value="/panfs/jay/groups/8/feng/jone3247/CLM_SPRUCE"  />    
 
 <!--"Machine name (char) " -->
-<entry id="MACH"   value="userdefined"  />    
+<entry id="MACH"   value="mesabi"  />    
 
 <!--"Machines directory location (char) " -->
 <entry id="CCSM_MACHDIR"   value="/panfs/jay/groups/8/feng/jone3247/CLM_SPRUCE/scripts/ccsm_utils/Machines"  />    
@@ -83,10 +83,10 @@
 <!-- ====================================== -->
 
 <!--"CESM component set (for documentation only - DO NOT EDIT) (char) " -->
-<entry id="CCSM_COMPSET"   value="2000_DATM%CRU_CLM45%BGC_SICE_SOCN_RTM_SGLC_SWAV"  />    
+<entry id="CCSM_COMPSET"   value="1850_DATM%QIA_CLM45%SP_SICE_SOCN_RTM_SGLC_SWAV"  />    
 
 <!--"CESM component set, longname (for documentation only - DO NOT EDIT) (char) " -->
-<entry id="CCSM_LCOMPSET"   value="2000_DATM%CRU_CLM45%BGC_SICE_SOCN_RTM_SGLC_SWAV"  />    
+<entry id="CCSM_LCOMPSET"   value="1850_DATM%QIA_CLM45%SP_SICE_SOCN_RTM_SGLC_SWAV"  />    
 
 <!--"CESM component set, shortname (for documentation only - DO NOT EDIT) (char) " -->
 <entry id="CCSM_SCOMPSET"   value="UNSET"  />    

@@ -16,7 +16,7 @@
 
 
 <!--"case run directory (by default will be set to $EXEROOT/../run) (char) " -->
-<entry id="RUNDIR"   value="USERDEFINED_required_build"  />    
+<entry id="RUNDIR"   value="/home/feng/$CCSMUSER/CLM_SPRUCE/cases/$CASE/run"  />    
 
 <!--"CCSM tag (char) " -->
 <entry id="CCSM_REPOTAG"   value=""  />    
@@ -277,18 +277,18 @@
 <!-- ====================================== -->
 
 <!--"command used to query batch system (char) " -->
-<entry id="BATCHQUERY"   value="USERDEFINED_optional_run"  />    
+<entry id="BATCHQUERY"   value="qstat -u"  />    
 
 <!--"command used to submit to batch system (char) " -->
-<entry id="BATCHSUBMIT"   value="USERDEFINED_optional_run"  />    
+<entry id="BATCHSUBMIT"   value="qsub -q"  />    
 
 <!-- ====================================== -->
 
 <!--"local inputdata directory for CCSM prestaged data (char) " -->
-<entry id="DIN_LOC_ROOT"   value="USERDEFINED_required_build"  />    
+<entry id="DIN_LOC_ROOT"   value="/home/feng/$CCSMUSER/CLM_SPRUCE/inputdata"  />    
 
 <!--"general ccsm inputdata directory for CLM datm forcing (char) " -->
-<entry id="DIN_LOC_ROOT_CLMFORC"   value="USERDEFINED_optional_build"  />    
+<entry id="DIN_LOC_ROOT_CLMFORC"   value="/home/feng/$CCSMUSER/CLM_SPRUCE/inputdata/atm/datm7"  />    
 
 <!-- ====================================== -->
 
@@ -296,10 +296,10 @@
 <entry id="LOGDIR"   value="$CASEROOT/logs"  />    
 
 <!--"logical to turn on short term archiving, valid values: TRUE,FALSE (logical) " -->
-<entry id="DOUT_S"   value="FALSE"  />    
+<entry id="DOUT_S"   value="TRUE"  />    
 
 <!--"local short term archiving root directory (char) " -->
-<entry id="DOUT_S_ROOT"   value="USERDEFINED_optional_run"  />    
+<entry id="DOUT_S_ROOT"   value="/home/feng/$CCSMUSER/CLM_SPRUCE/archives/$CASE"  />    
 
 <!--"logical to archive all interim restart files, not just those at eor, valid values: TRUE,FALSE (logical) " -->
 <entry id="DOUT_S_SAVE_INT_REST_FILES"   value="FALSE"  />    
@@ -308,7 +308,7 @@
 <entry id="DOUT_L_MS"   value="FALSE"  />    
 
 <!--"local long term archiving root directory (char) " -->
-<entry id="DOUT_L_MSROOT"   value="USERDEFINED_optional_run"  />    
+<entry id="DOUT_L_MSROOT"   value="/home/feng/$CCSMUSER/CLM_SPRUCE/csm/$CASE"  />    
 
 <!--"hpss account number (char) " -->
 <entry id="DOUT_L_HPSS_ACCNT"   value="00000000"  />    
@@ -317,27 +317,27 @@
 <entry id="DOUT_L_HTAR"   value="FALSE"  />    
 
 <!--"standard ccsm baselines directory for testing (char) " -->
-<entry id="CCSM_BASELINE"   value="USERDEFINED_optional_run"  />    
+<entry id="CCSM_BASELINE"   value="/lustre/or-hydra/cades-ccsi/proj-shared/project_acme/baselines"  />    
 
 <!--"standard location of the cprnc tool (char) " -->
-<entry id="CCSM_CPRNC"   value="USERDEFINED_optional_test"  />    
+<entry id="CCSM_CPRNC"   value="/UNSET"  />    
 
 <!-- ====================================== -->
 
 <!--"DATM mode, valid values: CORE2_NYF,CORE2_IAF,TN460,CLM_QIAN,CLM1PT,CLMCRUNCEP,CPLHIST3HrWx,COPYALL_NPS_v1,COPYALL_NPS_CORE2_v1,WRF,WW3 (char) " -->
-<entry id="DATM_MODE"   value="CLMCRUNCEP"  />    
+<entry id="DATM_MODE"   value="CLM_QIAN"  />    
 
 <!--"DATM prescribed aerosol forcing, valid values: none,clim_1850,clim_2000,trans_1850-2000,rcp2.6,rcp4.5,rcp6.0,rcp8.5,pt1_pt1 (char) " -->
-<entry id="DATM_PRESAERO"   value="clim_2000"  />    
+<entry id="DATM_PRESAERO"   value="clim_1850"  />    
 
 <!--"year align (only used for CLM_QIAN mode) (integer) " -->
 <entry id="DATM_CLMNCEP_YR_ALIGN"   value="1"  />    
 
 <!--"starting year to loop data over (only used for CLM_QIAN mode) (integer) " -->
-<entry id="DATM_CLMNCEP_YR_START"   value="1991"  />    
+<entry id="DATM_CLMNCEP_YR_START"   value="1948"  />    
 
 <!--"ending year to loop data over (only used for CLM_QIAN mode) (integer) " -->
-<entry id="DATM_CLMNCEP_YR_END"   value="2010"  />    
+<entry id="DATM_CLMNCEP_YR_END"   value="1972"  />    
 
 <!--"case name for coupler history data mode (only used for CPLHIST3HrWx mode) (char*256) " -->
 <entry id="DATM_CPLHIST_CASE"   value="UNSET"  />    
@@ -357,7 +357,7 @@
 <entry id="CLM_BLDNML_OPTS"   value=""  />    
 
 <!--"CLM namelist use_case (char) " -->
-<entry id="CLM_NML_USE_CASE"   value="2000_control"  />    
+<entry id="CLM_NML_USE_CASE"   value="1850_control"  />    
 
 <!--"CLM specific namelist settings (char) " -->
 <entry id="CLM_NAMELIST_OPTS"   value=""  />    
@@ -380,7 +380,7 @@
 <!-- ====================================== -->
 
 <!--"RTM build-namelist options (char) " -->
-<entry id="RTM_BLDNML_OPTS"   value="-simyr 2000"  />    
+<entry id="RTM_BLDNML_OPTS"   value="-simyr 1850"  />    
 
 <!--"RTM specific namelist settings (char) " -->
 <entry id="RTM_NAMELIST_OPTS"   value="rtm_effvel=&apos;ACTIVE&apos;"  />    
@@ -422,21 +422,21 @@
 <entry id="GLC_NEC"   value="0"  />    
 
 <!--"CO2 ppmv (real) " -->
-<entry id="CCSM_CO2_PPMV"   value="367.0"  />    
+<entry id="CCSM_CO2_PPMV"   value="284.7"  />    
 
 <!-- ====================================== -->
 
 <!--"atm domain file (char) " -->
-<entry id="ATM_DOMAIN_FILE"   value="domain.lnd.${CLM_USRDAT_NAME}_navy.nc"  />    
+<entry id="ATM_DOMAIN_FILE"   value="domain.lnd.fv1.9x2.5_gx1v6.090206.nc"  />    
 
 <!--"path of atm domain file (char) " -->
-<entry id="ATM_DOMAIN_PATH"   value="$DIN_LOC_ROOT/share/domains/domain.clm"  />    
+<entry id="ATM_DOMAIN_PATH"   value="$DIN_LOC_ROOT/share/domains"  />    
 
 <!--"lnd domain file (char) " -->
-<entry id="LND_DOMAIN_FILE"   value="domain.lnd.${CLM_USRDAT_NAME}_navy.nc"  />    
+<entry id="LND_DOMAIN_FILE"   value="domain.lnd.fv1.9x2.5_gx1v6.090206.nc"  />    
 
 <!--"path of lnd domain file (char) " -->
-<entry id="LND_DOMAIN_PATH"   value="$DIN_LOC_ROOT/share/domains/domain.clm"  />    
+<entry id="LND_DOMAIN_PATH"   value="$DIN_LOC_ROOT/share/domains"  />    
 
 <!--"rof domain file (char) " -->
 <entry id="ROF_DOMAIN_FILE"   value="UNSET"  />    
@@ -451,13 +451,13 @@
 <entry id="WAV_DOMAIN_PATH"   value="$DIN_LOC_ROOT/share/domains"  />    
 
 <!--"ice domain file (char) " -->
-<entry id="ICE_DOMAIN_FILE"   value="UNSET"  />    
+<entry id="ICE_DOMAIN_FILE"   value="domain.ocn.gx1v6.090206.nc"  />    
 
 <!--"path of ice domain file (char) " -->
 <entry id="ICE_DOMAIN_PATH"   value="$DIN_LOC_ROOT/share/domains"  />    
 
 <!--"ocn domain file (char) " -->
-<entry id="OCN_DOMAIN_FILE"   value="UNSET"  />    
+<entry id="OCN_DOMAIN_FILE"   value="domain.ocn.gx1v6.090206.nc"  />    
 
 <!--"path of ocn domain file (char) " -->
 <entry id="OCN_DOMAIN_PATH"   value="$DIN_LOC_ROOT/share/domains"  />    
@@ -469,19 +469,19 @@
 <entry id="GLC_DOMAIN_PATH"   value="$DIN_LOC_ROOT/share/domains"  />    
 
 <!--"atm2ocn flux mapping file (char) " -->
-<entry id="ATM2OCN_FMAPNAME"   value="idmap"  />    
+<entry id="ATM2OCN_FMAPNAME"   value="cpl/gridmaps/fv1.9x2.5/map_fv1.9x2.5_TO_gx1v6_aave.130322.nc"  />    
 
 <!--"atm2ocn state mapping file (char) " -->
-<entry id="ATM2OCN_SMAPNAME"   value="idmap"  />    
+<entry id="ATM2OCN_SMAPNAME"   value="cpl/gridmaps/fv1.9x2.5/map_fv1.9x2.5_TO_gx1v6_blin.130322.nc"  />    
 
 <!--"atm2ocn vector mapping file (char) " -->
-<entry id="ATM2OCN_VMAPNAME"   value="idmap"  />    
+<entry id="ATM2OCN_VMAPNAME"   value="cpl/gridmaps/fv1.9x2.5/map_fv1.9x2.5_TO_gx1v6_patc.130322.nc"  />    
 
 <!--"ocn2atm flux mapping file (char) " -->
-<entry id="OCN2ATM_FMAPNAME"   value="idmap"  />    
+<entry id="OCN2ATM_FMAPNAME"   value="cpl/gridmaps/gx1v6/map_gx1v6_TO_fv1.9x2.5_aave.130322.nc"  />    
 
 <!--"ocn2atm state mapping file (char) " -->
-<entry id="OCN2ATM_SMAPNAME"   value="idmap"  />    
+<entry id="OCN2ATM_SMAPNAME"   value="cpl/gridmaps/gx1v6/map_gx1v6_TO_fv1.9x2.5_aave.130322.nc"  />    
 
 <!--"atm2lnd flux mapping file (char) " -->
 <entry id="ATM2LND_FMAPNAME"   value="idmap"  />    
@@ -496,19 +496,19 @@
 <entry id="LND2ATM_SMAPNAME"   value="idmap"  />    
 
 <!--"rof2lnd flux mapping file (char) " -->
-<entry id="ROF2LND_FMAPNAME"   value="idmap"  />    
+<entry id="ROF2LND_FMAPNAME"   value="lnd/clm2/mappingdata/maps/1.9x2.5/map_0.5x0.5_nomask_to_1.9x2.5_nomask_aave_da_c120709.nc"  />    
 
 <!--"rof2lnd state mapping file (char) " -->
-<entry id="ROF2LND_SMAPNAME"   value="idmap"  />    
+<entry id="ROF2LND_SMAPNAME"   value="lnd/clm2/mappingdata/maps/1.9x2.5/map_0.5x0.5_nomask_to_1.9x2.5_nomask_aave_da_c120709.nc"  />    
 
 <!--"lnd2rof flux mapping file (char) " -->
-<entry id="LND2ROF_FMAPNAME"   value="idmap"  />    
+<entry id="LND2ROF_FMAPNAME"   value="lnd/clm2/mappingdata/maps/1.9x2.5/map_1.9x2.5_nomask_to_0.5x0.5_nomask_aave_da_c120522.nc"  />    
 
 <!--"rof2ocn flux mapping file (char) " -->
-<entry id="ROF2OCN_FMAPNAME"   value="idmap"  />    
+<entry id="ROF2OCN_FMAPNAME"   value="cpl/cpl6/map_r05_TO_g16_aave.120920.nc"  />    
 
 <!--"rof2ocn runoff mapping file (char) " -->
-<entry id="ROF2OCN_RMAPNAME"   value="idmap"  />    
+<entry id="ROF2OCN_RMAPNAME"   value="cpl/cpl6/map_r05_to_gx1v6_e1000r300_090226.nc"  />    
 
 <!--"atm2wav state mapping file (char) " -->
 <entry id="ATM2WAV_SMAPNAME"   value="idmap"  />    

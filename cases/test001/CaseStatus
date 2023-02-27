@@ -1,2 +1,0 @@
-create_newcase -case /home/feng/jone3247/CLM_SPRUCE/cases/test001 -res CLM_USRDAT --compset ICRUCLM45BGC -mach userdefined
-case created 2023-02-22 14:47:28

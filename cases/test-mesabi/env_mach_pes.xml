@@ -59,47 +59,47 @@
 
 
 
-<entry id="NTASKS_ATM"   value="1"  />    
+<entry id="NTASKS_ATM"   value="64"  />    
 <entry id="NTHRDS_ATM"   value="1"  />    
 <entry id="ROOTPE_ATM"   value="0"  />    
 <entry id="NINST_ATM"   value="1"  />    
 <entry id="NINST_ATM_LAYOUT"   value="concurrent"  />    
 
-<entry id="NTASKS_LND"   value="1"  />    
+<entry id="NTASKS_LND"   value="64"  />    
 <entry id="NTHRDS_LND"   value="1"  />    
 <entry id="ROOTPE_LND"   value="0"  />    
 <entry id="NINST_LND"   value="1"  />    
 <entry id="NINST_LND_LAYOUT"   value="concurrent"  />    
 
-<entry id="NTASKS_ICE"   value="1"  />    
+<entry id="NTASKS_ICE"   value="64"  />    
 <entry id="NTHRDS_ICE"   value="1"  />    
 <entry id="ROOTPE_ICE"   value="0"  />    
 <entry id="NINST_ICE"   value="1"  />    
 <entry id="NINST_ICE_LAYOUT"   value="concurrent"  />    
 
-<entry id="NTASKS_OCN"   value="1"  />    
+<entry id="NTASKS_OCN"   value="64"  />    
 <entry id="NTHRDS_OCN"   value="1"  />    
 <entry id="ROOTPE_OCN"   value="0"  />    
 <entry id="NINST_OCN"   value="1"  />    
 <entry id="NINST_OCN_LAYOUT"   value="concurrent"  />    
 
-<entry id="NTASKS_CPL"   value="1"  />    
+<entry id="NTASKS_CPL"   value="64"  />    
 <entry id="NTHRDS_CPL"   value="1"  />    
 <entry id="ROOTPE_CPL"   value="0"  />    
 
-<entry id="NTASKS_GLC"   value="1"  />    
+<entry id="NTASKS_GLC"   value="64"  />    
 <entry id="NTHRDS_GLC"   value="1"  />    
 <entry id="ROOTPE_GLC"   value="0"  />    
 <entry id="NINST_GLC"   value="1"  />    
 <entry id="NINST_GLC_LAYOUT"   value="concurrent"  />    
 
-<entry id="NTASKS_ROF"   value="1"  />    
+<entry id="NTASKS_ROF"   value="64"  />    
 <entry id="NTHRDS_ROF"   value="1"  />    
 <entry id="ROOTPE_ROF"   value="0"  />    
 <entry id="NINST_ROF"   value="1"  />    
 <entry id="NINST_ROF_LAYOUT"   value="concurrent"  />    
 
-<entry id="NTASKS_WAV"   value="1"  />    
+<entry id="NTASKS_WAV"   value="64"  />    
 <entry id="NTHRDS_WAV"   value="1"  />    
 <entry id="ROOTPE_WAV"   value="0"  />    
 <entry id="NINST_WAV"   value="1"  />    
@@ -116,7 +116,7 @@
 
 <entry id="TOTALPES"   value="0"  />    
 <entry id="PES_LEVEL"   value="1r"  />    
-<entry id="MAX_TASKS_PER_NODE"   value="USERDEFINED_required_build"  />    
+<entry id="MAX_TASKS_PER_NODE"   value="24"  />    
 <entry id="PES_PER_NODE"   value="$MAX_TASKS_PER_NODE"  />    
 <entry id="COST_PES"   value="0"  />    
 <entry id="CCSM_PCOST"   value="0"  />    

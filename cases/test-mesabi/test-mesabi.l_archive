@@ -1,0 +1,18 @@
+#! /bin/csh -f
+#PBS -N test-mesabi.l_archive
+#PBS -q batch
+#PBS -l nodes=1:ppn=24 
+#PBS -l walltime=02:00:00
+#PBS -l mem=10gb
+#PBS -j oe
+#PBS -m abe
+#PBS -M jone3247@umn.edu
+#PBS -S /bin/csh -V
+#PBS -W group_list=feng
+#PBS -A ccsi
+#PBS -l qos=std
+cd /home/feng/jone3247/CLM_SPRUCE/cases/test-mesabi 
+source ./Tools/ccsm_getenv || exit -1
+cd $DOUT_S_ROOT
+/home/feng/jone3247/CLM_SPRUCE/cases/test-mesabi/Tools/lt_archive.sh -m copy_dirs_hsi
+exit 0
